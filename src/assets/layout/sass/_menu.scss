@@ -1,0 +1,159 @@
+:root {
+    --sidebar-bgone     : #1cb4b5;
+    --sidebar-text-color: #c3ebeb;
+    --Topbar-bg         : #fdfdfd;
+    --Content-bg        : #fefdfb;
+    --input-brdr        : #bee9e9;
+    --tab-0             : #0db2c5;
+    --tab-one           : #6ec753;
+    --tab-Two           : #e4c048;
+    --tab-Thre          : #b66fef;
+    --heading-text      : #395864;
+    --text-color        : #a6a6a6;
+    --red-clr           : #ed1b24;
+    --tab-Index         : #153947;
+    --table-header      : #eef8f9;
+    --modal-header      : #1bb4b4;
+    --modal-bg          : #f9ffff;
+    --tab-text-color    : #187e84;
+    --tab-0-iconbg      : #21bcd0;
+    --tab-1-iconbg      : #9adc84;
+    --tab-2-iconbg      : #e6cc74;
+    --tab-3-iconbg      : #c088ed;
+
+
+
+}
+
+.layout-sidebar {
+    position                  : fixed;
+    width                     : 235px;
+    height                    : calc(100vh - 3.4rem);
+    z-index                   : 999;
+    overflow-y                : auto;
+    -webkit-user-select       : none;
+    user-select               : none;
+    top                       : 3.6rem;
+    left                      : 0rem;
+    transition                : left 0.2s, -webkit-transform 0.2s;
+    transition                : transform 0.2s, left 0.2s;
+    transition                : transform 0.2s, left 0.2s, -webkit-transform 0.2s;
+    background-color          : var(--sidebar-bgone);
+    border-top-right-radius   : 3px;
+    border-bottom-right-radius: 3px;
+    padding                   : .5rem 0rem;
+    box-shadow                : 0px 3px 5px rgb(0 0 0 / 2%), 0px 0px 2px rgb(0 0 0 / 5%), 0px 1px 4px rgb(0 0 0 / 8%);
+}
+
+// .layout-sidebar
+.layout-menu {
+    list-style-type: none;
+    margin         : 0;
+    padding        : 0;
+
+    li {
+        &.layout-menuitem-category {
+            margin-top: .75rem;
+
+            &:first-child {
+                margin-top: 0;
+            }
+        }
+
+        .layout-menuitem-root-text {
+            text-transform: uppercase;
+            color         : var(--surface-900);
+            font-weight   : 600;
+            margin-bottom : .5rem;
+            font-size     : .875rem;
+        }
+
+        a {
+            cursor          : pointer;
+            text-decoration : none;
+            display         : flex;
+            align-items     : center;
+            color           : var(--Content-bg);
+            transition      : color $transitionDuration;
+            // border-radius: $borderRadius;
+            padding         : .75rem 1rem;
+            transition      : background-color .15s;
+            font-size       : 12px;
+            font-weight     : 300;
+
+            span {
+                margin-left: 0.5rem;
+            }
+
+            .menuitem-toggle-icon {
+                margin-left: auto;
+            }
+
+            // &:focus {
+            //     @include focused-inset();
+            // }
+
+            &:hover {
+                font-weight     : 600;
+                color           : var(--sidebar-bgone);
+                background-color: var(--table-header);
+                border-left     : 5px solid var(--tab-Index);
+            }
+
+            &.router-link-exact-active {
+                font-weight     : 600;
+                color           : var(--sidebar-bgone);
+                background-color: var(--table-header);
+                border-left     : 5px solid var(--tab-Index);
+            }
+
+            .p-badge {
+                margin-left: auto;
+            }
+        }
+
+        &.active-menuitem {
+            >a {
+                .menuitem-toggle-icon {
+                    &:before {
+                        content: '\e933';
+                    }
+                }
+            }
+        }
+
+        ul {
+            list-style-type: none;
+            margin         : 0;
+            padding        : 0;
+
+            &.layout-submenu-wrapper-enter {
+                max-height: 0;
+            }
+
+            &.layout-submenu-wrapper-enter-active {
+                overflow  : hidden;
+                max-height: 1000px;
+                transition: max-height 1s ease-in-out;
+            }
+
+            &.layout-submenu-wrapper-enter-done {
+                transform: none;
+            }
+
+            &.layout-submenu-wrapper-exit {
+                max-height: 1000px;
+            }
+
+            &.layout-submenu-wrapper-exit-active {
+                overflow  : hidden;
+                max-height: 0;
+                transition: max-height 0.45s cubic-bezier(0.86, 0, 0.07, 1);
+            }
+
+            ul {
+                padding-left: 1rem;
+            }
+        }
+    }
+}

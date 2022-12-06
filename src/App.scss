@@ -1,0 +1,768 @@
+:root {
+    --sidebar-bgone     : #1cb4b5;
+    --sidebar-text-color: #c3ebeb;
+    --Topbar-bg         : #fdfdfd;
+    --Content-bg        : #fefdfb;
+    --input-brdr        : #bee9e9;
+    --tab-0             : #0db2c5;
+    --tab-one           : #6ec753;
+    --tab-Two           : #e4c048;
+    --tab-Thre          : #b66fef;
+    --heading-text      : #395864;
+    --text-color        : #a6a6a6;
+    --red-clr           : #ed1b24;
+    --tab-Index         : #153947;
+    --table-header      : #eef8f9;
+    --modal-header      : #1bb4b4;
+    --modal-bg          : #f9ffff;
+    --tab-text-color    : #187e84;
+    --tab-0-iconbg      : #21bcd0;
+    --tab-1-iconbg      : #9adc84;
+    --tab-2-iconbg      : #e6cc74;
+    --tab-3-iconbg      : #c088ed;
+}
+
+.pi-eye {
+    color: #1CB4B4;
+}
+
+.label_text {
+    font-weight: 600 !important;
+    color      : var(--heading-text) !important;
+}
+
+.text-center {
+    text-align: -webkit-center !important;
+}
+
+.card {
+    background-color: var(--surface-card);
+    padding         : 1.5rem;
+    margin-bottom   : 1rem;
+    border-radius   : 7px !important;
+    box-shadow      : 0px 1px 8px 5px #ccc !important;
+    color           : #343a40;
+    ;
+}
+
+.tab_text {
+    font-size: 17px;
+    color    : var(--Topbar-bg) !important;
+}
+
+.numbr_size {
+    font-size: 24px !important;
+    color    : var(--Content-bg) !important;
+}
+
+.tab_ {
+    background-color: var(--tab-0);
+}
+
+.tab_1 {
+    background-color: var(--tab-one);
+}
+
+.tab_2 {
+    background-color: var(--tab-Two);
+}
+
+.tab_3 {
+    background-color: var(--tab-Thre);
+}
+
+.icon_style {
+    background: var(--tab-0-iconbg) !important;
+}
+
+.text-white-500 {
+    color: var(--Content-bg) !important;
+}
+
+.icon_style1 {
+
+    background: var(--tab-1-iconbg) !important;
+}
+
+.icon_style2 {
+    background: var(--tab-2-iconbg) !important;
+}
+
+.icon_style3 {
+    background: var(--tab-3-iconbg) !important;
+}
+
+.icon_size {
+    border-radius: 25px !important;
+    width        : 3.5rem;
+    height       : 3.5rem;
+
+}
+
+.Dropdown_class {
+    background-color: var(--Content-bg);
+    border          : 1px solid var(--input-brdr);
+    width           : 100% !important;
+}
+
+.Dropdown_class:hover,
+.Dropdown_class:focus {
+    background-color: var(--Content-bg);
+    border          : 1px solid var(--input-brdr) !important;
+}
+
+.p-inputtext {
+    font-size         : 0.91rem;
+    color             : var(--heading-text);
+    background        : var(--Content-bg);
+    padding           : 0.55rem 0.5rem;
+    border            : 0;
+    transition        : background-color 0.2s, color 0.2s, border-color 0.2s, box-shadow 0.2s;
+    -webkit-appearance: none;
+    appearance        : none;
+    border-radius     : 6px;
+    width             : 190px;
+}
+
+.p-dialog .p-dialog-header,
+.p-dialog .p-dialog-footer {
+    background-color: transparent !important;
+}
+
+.p-dialog {
+    background-color: var(--modal-bg);
+}
+
+.p-dialog .p-dialog-content {
+    background-color: var(--Content-bg) !important;
+    margin          : 0px 40px;
+}
+
+.inputClass,
+.inputClass:hover,
+.inputClass:active,
+.inputClass:focus {
+    background-color: var(--modal-bg) !important;
+    border          : 1px solid var(--input-brdr) !important;
+    width           : 97% !important;
+}
+
+.Cancelbtn {
+    color           : var(--sidebar-bgone) !important;
+    border          : 1px solid var(--sidebar-bgone) !important;
+    width           : 120px !important;
+    outline         : none;
+    background-color: var(--Content-bg) !important;
+    padding         : .41rem 1rem !important;
+    margin-right    : 16px;
+}
+
+.Cancelbtn:hover,
+.Cancelbtn:focus,
+.Cancelbtn:active {
+    color           : var(--sidebar-bgone) !important;
+    border          : 1px solid var(--sidebar-bgone) !important;
+    width           : 120px !important;
+    outline         : none;
+    padding         : .41rem 1rem !important;
+    background-color: var(--Content-bg) !important;
+}
+
+.Savebtn {
+    color           : var(--Content-bg) !important;
+    border          : 1px solid var(--sidebar-bgone) !important;
+    width           : 120px !important;
+    outline         : none;
+    padding         : .41rem 1rem !important;
+    background-color: var(--sidebar-bgone) !important;
+}
+
+.Savebtn:hover,
+.Savebtn:focus,
+.Savebtn:active {
+    padding         : .41rem 1rem !important;
+    color           : var(--Content-bg) !important;
+    border          : 1px solid var(--sidebar-bgone) !important;
+    width           : 120px !important;
+    outline         : none;
+    background-color: var(--sidebar-bgone) !important;
+}
+
+.p-button-primary {
+    color           : var(--Content-bg) !important;
+    border          : 1px solid var(--sidebar-bgone) !important;
+    width           : 135px !important;
+    outline         : none;
+    padding         : .41rem 1rem !important;
+    background-color: var(--sidebar-bgone) !important;
+}
+
+.p-button-primary:hover,
+.p-button-primary:focus,
+.p-button-primary:active {
+    color           : var(--Content-bg) !important;
+    border          : 1px solid var(--sidebar-bgone) !important;
+    width           : 135px !important;
+    outline         : none;
+    padding         : .41rem 1rem !important;
+    background-color: var(--sidebar-bgone) !important;
+}
+
+.edit,
+.delete {
+    background: transparent !important;
+    border    : 0 !important;
+    outline   : none;
+}
+
+.pi-pencil {
+    color: var(--tab-one) !important;
+}
+
+.pi-trash {
+    color: var(--red-clr) !important;
+
+}
+
+.p-dialog .p-dialog-content {
+    padding: 2rem 1.5rem 2rem 1.5rem;
+}
+
+.p-dialog .p-dialog-header .p-dialog-title {
+    font-weight: 700;
+    font-size  : 1.2rem;
+    color      : var(--sidebar-bgone) !important;
+    text-align : center;
+}
+
+.p-dialog .p-dialog-footer {
+    border-top                : 0 none;
+    background                : #ffffff;
+    color                     : #495057;
+    padding                   : 0 1.5rem 1.5rem 1.5rem;
+    text-align                : center;
+    border-bottom-right-radius: 6px;
+    border-bottom-left-radius : 6px;
+    margin-top                : 1.5rem;
+}
+
+.p-tabview .p-tabview-nav li {
+    margin-right : 0;
+    margin-left  : 1.5rem;
+    border       : 0;
+    margin-bottom: 1.5rem;
+    margin-top   : 1.5rem;
+    width        : 230px;
+}
+
+.p-tabview .p-tabview-nav li.p-highlight .p-tabview-nav-link {
+    // background   : transparent !important;
+    border-color : var(--sidebar-bgone);
+    color        : var(--sidebar-bgone);
+    width        : 230px;
+    height       : 75px;
+    border-bottom: 5px solid #1CB4B4 !important;
+}
+
+.p-highlight {
+    // width           : 230px;
+    background-color: var(--tab-Index);
+    border-radius   : 15px;
+}
+
+.p-tabview .p-tabview-nav .p-tabview-ink-bar {
+    z-index         : 1;
+    display         : none;
+    position        : absolute;
+    bottom          : 0;
+    height          : 2px;
+    background-color: var(--sidebar-bgone);
+    transition      : 500ms cubic-bezier(0.35, 0, 0.25, 1);
+}
+
+.p-tabview .p-tabview-nav li .p-tabview-nav-link {
+    background   : transparent !important;
+    border       : 1px solid var(--sidebar-bgone) !important;
+    height       : 75px;
+    border-radius: 15px;
+}
+
+.p-tabview-title {
+    text-align : center;
+    white-space: break-spaces;
+    line-height: 18px;
+    padding-top: 35px;
+}
+
+.p-tabview .p-tabview-nav li .p-tabview-nav-link:not(.p-disabled):focus {
+    outline       : 0 none;
+    outline-offset: 0;
+    box-shadow    : none;
+}
+
+.p-tabview-nav-link {
+    justify-content: center;
+}
+
+/* width */
+.layout-sidebar::-webkit-scrollbar {
+    width: 10px;
+}
+
+/* Track */
+.layout-sidebar::-webkit-scrollbar-track {
+
+    background: var(--surface-card);
+}
+
+/* Handle */
+.layout-sidebar::-webkit-scrollbar-thumb {
+    background   : var(--yelow-color);
+    border-radius: 20px;
+}
+
+/* Handle on hover */
+.layout-sidebar::-webkit-scrollbar-thumb:hover {
+    background: var(--yelow-color);
+}
+
+.p-pl-2 {
+    padding-left: 1.3rem;
+    padding-top : .3rem;
+}
+
+.innr_padding {
+    margin-top      : .5rem;
+    padding         : 1.2rem;
+    border          : 1px solid var(--sidebar-bgone);
+    background-color: var(--modal-bg);
+    border-radius   : 10px;
+}
+
+.headr_bg {
+    background-color: var(--table-header) !important;
+}
+
+.card-header {
+    color      : var(--sidebar-bgone);
+    font-weight: bold;
+    text-align : center;
+}
+
+.headr_bg {
+    padding: 0;
+}
+
+.card-header {
+    background-color       : var(--table-header) !important;
+    color                  : var(--sidebar-bgone);
+    font-weight            : bold;
+    text-align             : center;
+    padding                : 1.5rem 1rem;
+    border-top-right-radius: 10px;
+    border-top-left-radius : 10px;
+    font-size              : 16px;
+}
+
+.headr_bg .card-body {
+    background-color: var(--Content-bg) !important;
+    padding         : 2rem 4rem !important;
+}
+
+.pb-3 .p-button.p-button-icon-only {
+    width           : 2rem;
+    padding         : 0.1rem 0;
+    background-color: var(--sidebar-bgone);
+    border          : 1px solid var(--sidebar-bgone) !important;
+}
+
+
+.float_right {
+    float: right;
+}
+
+.Drop_down {
+    background-color: var(--tab-Index) !important;
+    text-align      : left;
+    color           : var(--Content-bg) !important;
+    text-align      : left;
+
+}
+
+.Drop_down:hover,
+.Drop_down:active,
+.Drop_down:focus {
+    background-color: var(--tab-Index) !important;
+    text-align      : left;
+
+}
+
+.Drop_down .p-dropdown-label {
+    color: var(--sidebar-bgone) !important;
+}
+
+.pb-3 .p-button:enabled:hover,
+.pb-3 .p-button:not(button):not(a):not(.p-disabled):hover {
+    background-color: var(--sidebar-bgone);
+    border          : 1px solid var(--sidebar-bgone) !important;
+    box-shadow      : none;
+}
+
+.p-button:focus {
+    box-shadow: none;
+}
+
+
+.pb-3 .pi-plus {
+    font-size: 10px;
+}
+
+.feedback {
+    font-size: 2rem !important;
+    // color: var(--Content-bg) !important;
+}
+
+.pi-ban {
+    display: none;
+}
+
+.p-rating .p-rating-icon.pi-star-fill {
+    color: gold !important;
+}
+
+.DoghnutChart_class {
+    position: relative;
+    width   : 75%;
+    height  : 375px;
+
+}
+
+.green {
+    color: green;
+}
+
+.red {
+    color: red;
+}
+
+@media (max-width:768px) {
+    .p-tabview .p-tabview-nav li {
+        width: 130px !important;
+    }
+
+    .p-tabview .p-tabview-nav li.p-highlight .p-tabview-nav-link {
+        width: 130px !important;
+    }
+
+    .p-dialog {
+        width: 90vw !important;
+    }
+
+    .p-dialog .p-dialog-content {
+        margin: 0px 10px !important;
+    }
+
+    .p-inputtext {
+        margin-bottom: 7px !important;
+    }
+
+    .p-tabview-nav {
+        width: 130vw !important;
+    }
+}
+
+@media(min-width:1920px) {
+    .DoghnutChart_class {
+        position: relative;
+        width   : 38% !important;
+        height  : 375px;
+    }
+}
+
+.Pending {
+    color: #f1b042;
+}
+
+.Confirmed {
+    color: #0db2c5;
+}
+
+.Dispached {
+    color: greenyellow;
+}
+
+.Delivered {
+    color: rgb(16, 179, 16);
+}
+
+.Cancelled,
+.Rejected {
+    color: #e12929;
+}
+
+.Active {
+    color: #25a5dc;
+}
+
+.Closed {
+    color: #e12929;
+}
+
+
+.p-panel .p-panel-header {
+
+    // width: 514px;
+    width: 257px;
+
+}
+
+.p-panel .p-panel-content {
+
+    width   : 258px;
+    // width: 514px;
+
+}
+
+.p-button:enabled:hover {
+
+    background-color: #1cb4b5;
+
+    border-color: #1cb4b5;
+    ;
+
+}
+
+.Variants {
+    margin-bottom: 7px !important;
+}
+
+.p-button.p-button-danger.p-button-outlined,
+
+.p-buttonset.p-button-danger>.p-button.p-button-outlined,
+
+.p-splitbutton.p-button-danger>.p-button.p-button-outlined,
+
+.p-fileupload-choose.p-button-danger.p-button-outlined {
+
+    top: 5%;
+
+}
+
+.Datatable_colorss .p-datatable-thead>tr>th {
+
+    background: #eef2ff;
+
+
+
+}
+
+.mt-4 {
+    .button-style {
+        margin-top: 25px;
+    }
+
+    .DateField-Wrapper {
+        height: 60px;
+    }
+}
+
+.p-checkbox .p-checkbox-box .p-checkbox-icon {
+
+    background-color: var(--sidebar-bgone) !important;
+    border          : 1px solid var(--sidebar-bgone) !important;
+    outline         : none;
+
+}
+
+// .p-datatable .p-datatable-thead>tr>th {
+
+//     width: 21%;
+
+// }
+
+
+// .choose_button-p-buttonss{
+
+//     background-color: #1cb4b5;
+
+//     border: #1cb4b5;
+
+// }
+
+// .p-badge {
+
+//     background : #1cb4b5;
+
+// }
+
+.p-button.p-button-danger.p-button-outlined,
+
+.p-buttonset.p-button-danger>.p-button.p-button-outlined,
+
+.p-splitbutton.p-button-danger>.p-button.p-button-outlined,
+
+.p-fileupload-choose.p-button-danger.p-button-outlined {
+
+    right: 33px !important;
+
+
+}
+
+// p-button{
+
+//     background   :  #1cb4b5;
+
+//     border       : 1px solid #1cb4b5;
+
+// }
+.p-panel .p-panel-header {
+    width: 463px;
+}
+
+.p-panel .p-panel-content {
+    width: 463px;
+}
+
+.p-multiselect-label {
+    white-space: normal;
+}
+
+.p-multiselect-token {
+    margin: 2px;
+}
+
+.p-multiselect.p-multiselect-chip .p-multiselect-token {
+    background-color: var(--sidebar-bgone);
+    color           : var(----Content-bg) // color: #474649;
+
+}
+
+.p-checkbox .p-checkbox-box.p-highlight {
+
+    border-color: #1CB4B5;
+
+    background: #1CB4B5;
+
+}
+
+.p-checkbox .p-checkbox-box .p-checkbox-icon {
+
+
+
+    background-color: var(--sidebar-bgone) !important;
+
+    // border          : 1px solid var(--sidebar-bgone) !important;
+
+    outline: none;
+
+
+
+}
+
+.p-button.p-button-danger.p-button-outlined {
+
+    background: rgba(239, 68, 68, 0.04);
+
+    color: lightsteelblue;
+
+    border: 1px solid;
+
+    margin-left: 99%;
+
+    bottom: 55px;
+
+
+}
+
+.close {
+    color           : #fff;
+    background-color: #c7d2fe;
+    position        : absolute;
+    top             : 70px;
+    right           : 28px;
+    font-size       : 15px;
+    border-radius   : 50%;
+    border          : 2px solid #c7d2fe;
+}
+
+/* Chrome, Safari, Edge, Opera */
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin            : 0;
+}
+
+/* Firefox */
+input[type=number] {
+    -moz-appearance: textfield;
+}
+
+.p-tabview .p-tabview-nav .createusersIcon a {
+    background-image   : url(../src/assets/ICONS/createuser.svg) !important;
+    background-repeat  : no-repeat !important;
+    background-position: 50% 5px !important;
+    background-size: 30px !important;
+    
+  
+     
+
+}
+ 
+.p-tabview .p-tabview-nav .rolesIcon  {
+    background-image: url(../src/assets/ICONS/Role.svg) !important;
+    background-repeat: no-repeat !important;
+    background-position: 50% 5px !important;
+    background-size: 30px !important;
+       
+    
+
+}
+
+.p-tabview .p-tabview-nav .categoryIcon {
+    background-image   : url(../src/assets/ICONS/Category.svg) !important;
+    background-repeat  : no-repeat !important;
+    background-position: 50% 5px !important;
+    background-size: 30px !important;
+
+}
+
+.p-tabview .p-tabview-nav .subCategoryIcon {
+ background-image: url(../src/assets/ICONS/subcategory2.svg) !important;
+ background-repeat: no-repeat !important;
+ background-position: 50% 5px !important;
+ background-size: 30px !important;
+    
+}
+
+.p-tabview .p-tabview-nav .productIcon{
+    background-image: url(../src/assets/ICONS/product4.svg) !important;
+    background-repeat: no-repeat !important;
+    background-position: 50% 5px !important;
+    background-size: 30px !important;
+}
+.p-tabview .p-tabview-nav .membershipManagement{
+    background-image: url(../src/assets/ICONS/membership.svg) !important;
+    background-repeat: no-repeat !important;
+    background-position: 50% 5px !important;
+    background-size: 30px !important;
+}
+.p-tabview .p-tabview-nav .pointManagement{
+    background-image: url(../src/assets/ICONS/pointsmanagement.svg) !important;
+    background-repeat: no-repeat !important;
+    background-position: 50% 5px !important;
+    background-size: 30px !important;
+}
+ .p-tabview .p-tabview-nav .coupanManagement{
+    background-image: url(../src/assets/ICONS/couponmanagement.svg) !important;
+    background-repeat: no-repeat !important;
+    background-position:  50% 10px !important;
+    background-size: 38px !important;
+    
+ }
+
+ .Delivery_imgtbl{
+    width: 50px;
+ }
+ .tbl__coupanImage{
+    width: 100px;
+}
