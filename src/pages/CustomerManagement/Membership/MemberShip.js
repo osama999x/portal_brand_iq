@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { DataTable } from 'primereact/datatable';
 import { Button } from 'primereact/button';
 import { Column } from 'primereact/column';
@@ -18,7 +18,7 @@ const MemberShip = () => {
   const [addEditMember, setaddEditMember] = useState(null);
   const [MemberRowData, setMemberRowData] = useState("");
   const [visibleDelete, setVisibleDelete] = useState(false);
-
+  var selectedDeleteId;
   const onHide = (name) => {
     setDisplayBasic(false);
   }
@@ -51,7 +51,7 @@ const MemberShip = () => {
 
   const RequestToDel = async () => {
     const data = {};
-    data["membershipId"] = MemberRowData;
+    data["membershipId"] = selectedDeleteId;
 
     const res = await dispatch(handleDeleteRequest(data, `api/v1/membership/`, false, false));
     if (res.status === 200) {
@@ -59,17 +59,18 @@ const MemberShip = () => {
     }
 
   }
-  useEffect(() => {
-    if (visibleDelete === true) {
-      RequestToDel();
-    }
+  // useEffect(() => {
+  //   if (visibleDelete === true) {
+  //     RequestToDel();
+  //   }
 
-  }, [visibleDelete]);
+  // }, [visibleDelete]);
 
   const confirm2 = (rowData) => {
-    setMemberRowData(rowData._id);
+    // setMemberRowData(rowData._id);
+    selectedDeleteId = rowData._id;
     confirmDialog({
-      message: 'Do you want to delete this record?',
+      message: 'Are you sure you want to delete this item?',
       header: 'Delete Confirmation',
       icon: 'pi pi-trash',
       acceptClassName: 'Savebtn',
@@ -79,6 +80,7 @@ const MemberShip = () => {
     });
   };
   const accept = () => {
+    RequestToDel();
     setVisibleDelete(true);
     // toast.current.show({ severity: 'info', summary: 'Confirmed', detail: 'You have accepted', life: 3000 });
   }
@@ -103,7 +105,9 @@ const MemberShip = () => {
               <input type="text" placeholder="Search" class="p-inputtext p-component p-filled" onInput={(e) => setGlobalFilter(e.target.value)} />
               <i class="pi pi-search"></i>
             </span>
-            <button className="p-button p-button-primary p-component" onClick={() => setDisplayBasic(true)}>
+            <button className="p-button p-button-primary p-component" onClick={() => {setDisplayBasic(true)
+            setaddEditMember(false);
+            }}>
               <span className="p-button-icon p-c p-button-icon-left pi pi-plus"></span>
               <span className="p-button-label p-c">Add New</span>
               <span className="p-ink"></span>

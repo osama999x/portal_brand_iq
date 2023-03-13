@@ -4,7 +4,7 @@ import { InputText } from 'primereact/inputtext';
 // import { Password } from 'primereact/password';
 import { useFormik } from 'formik';
 import "./login.css";
-import logo from "../../assets/Logo.svg";
+//import logo from "../../assets/Logo.svg";
 import { useHistory } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { handlePostRequest } from '../../service/PostTemplate';
@@ -17,11 +17,12 @@ const ForgetPassword = ({setStoredEmail}) => {
     const [loadingIcon, setloadingIcon] = useState("");
 
 
-    const aplhaNumericSRegex = /^[a-zA-Z0-9]+@+[a-zA-Z0-9]+.+[A-z]/
+    // const aplhaNumericSRegex = /^[a-zA-Z0-9]+@+[a-zA-Z0-9]+.+[A-z]/
 
 
     const validationSchema = Yup.object().shape({
-        email: Yup.string().email("Invalid email address format").required("This field is required.").matches(aplhaNumericSRegex, "Invalid email address format"),
+        email: Yup.string().email("Invalid email address format").required("This field is required.")
+        // .matches(aplhaNumericSRegex, "Invalid email address format"),
         // password: Yup.string().required("This field is required."),
     })
 
@@ -45,12 +46,14 @@ const ForgetPassword = ({setStoredEmail}) => {
             // setShowMessage(true);
             setloadingIcon("pi pi-spin pi-spinner");
             const response = await dispatch(handlePostRequest(data, "api/v1/user/resetpassword/otp", true, true));
-            if (response?.data?.data?.email === data["email"]) {
+             if (response?.data?.data?.email === data["email"]) 
+            //if(response?.status === 200)
+            {
                 // localStorage.setItem("login", true);
                
             }
             setStoredEmail(data.email);
-            history.push("/otpview");
+            history.push("/otpview/"+data.email);
             setloading(false);
             setloadingIcon("");
             // formik.resetForm();
@@ -90,20 +93,21 @@ const ForgetPassword = ({setStoredEmail}) => {
     return (
 
 
-        <div className="bg_body">
+        <div className="forgotbg_body">
 
-            <div className="header__login">
+            {/* <div className="header__login">
                 <h2>Welcome to</h2>
                 <h3>Z-Store</h3>
-            </div>
+            </div> */}
 
             <div className="login_container">
                 <div className="row d-flex justify-content-center">
 
                     <div className="col-md-4">
                         <form className="form-group" onSubmit={formik.handleSubmit} >
-                            <div className="form_logo">
-                                <img src={logo} alt="Zindigi" />
+                            <div className="heading">
+                                {/* <img src={logo} alt="Zindigi" /> */}
+                                <h1>Forgot Password</h1>
                             </div>
                             <div className="Form-inputfield">
                                 <div>
@@ -163,7 +167,7 @@ const ForgetPassword = ({setStoredEmail}) => {
                                 <div className="p-mt-2">
                                     <Button type="submit"
                                         className="Login_button"
-                                        label="Send Link"
+                                        label="Submit"
                                         icon={loadingIcon || ""}
                                         iconPos="right"
                                         disabled={loading}

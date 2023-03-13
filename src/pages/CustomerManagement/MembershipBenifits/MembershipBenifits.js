@@ -9,6 +9,7 @@ import AddEdit from './AddEdit';
 import { useDispatch } from 'react-redux';
 import { handleGetRequest } from '../../../service/GetTemplate';
 import { handleDeleteRequest } from '../../../service/DeleteTemplete';
+import { baseURL } from '../../../utilities/Config';
 
 const MembershipBenifits = () => {
     const [displayBasic, setDisplayBasic] = useState(false);
@@ -17,7 +18,7 @@ const MembershipBenifits = () => {
     const [globalFilter, setGlobalFilter] = useState(null);
     const [memberbenifitdata, setMemberBenifitdata] = useState([]);
     const [visibleDelete, setVisibleDelete] = useState(false);
-
+    var selectedDeleteId;
     const dispatch = useDispatch();
 
     const getMemberBenifitdata = async () => {
@@ -53,23 +54,24 @@ const MembershipBenifits = () => {
     };
     const RequestResetPassword = async () => {
         const data = {};
-        data["membershipBenifitId"] = benifitRowData;
+        data["membershipBenifitId"] =  selectedDeleteId;;
         const res = await dispatch(handleDeleteRequest(data, `api/v1/membershipBenifit`, true, true));
         if (res?.status === 200) {
-            getMemberBenifitdata();
+          await  getMemberBenifitdata();
         }
     }
-    useEffect(() => {
-        RequestResetPassword();
-        if (visibleDelete === true) {
-            RequestResetPassword();
-        }
-    }, [visibleDelete]);
+    // useEffect(() => {
+    //     RequestResetPassword();
+    //     if (visibleDelete === true) {
+    //         RequestResetPassword();
+    //     }
+    // }, [visibleDelete]);
 
     const confirm2 = (rowData) => {
-        setBenifitRowData(rowData._id);
+        // setBenifitRowData(rowData._id);
+        selectedDeleteId = rowData._id;
         confirmDialog({
-            message: 'Do you want to delete this record?',
+            message: 'Are you sure you want to delete this item?',
             header: 'Delete Confirmation',
             icon: 'pi pi-trash',
             acceptClassName: 'Savebtn',
@@ -79,6 +81,7 @@ const MembershipBenifits = () => {
         });
     };
     const accept = () => {
+        RequestResetPassword();
         setVisibleDelete(true);
     }
 
@@ -92,7 +95,7 @@ const MembershipBenifits = () => {
         return (
             <React.Fragment>
                 {/* {rowData?.image} */}
-                <img className='tbl__coupanImage' src={`http://20.212.227.60:3007/${rowData.image}`} alt="" />
+                <img className='tbl__coupanImage' src={`${baseURL}${rowData.image}`} alt="" />
             </React.Fragment>
         );
     };
@@ -112,7 +115,7 @@ const MembershipBenifits = () => {
     return (
         <>
             <Toast ref={toast} />
-            <Dialog header={addeditable ? "EDIT" : "CREATE NEW BENIFITS"} visible={displayBasic} style={{ width: '40vw' }} onHide={onHide}>
+            <Dialog header={addeditable ? "Edit" : "Create New Benefit"} visible={displayBasic} style={{ width: '40vw' }} onHide={onHide}>
                 <AddEdit
                     onHide={onHide}
                     getMemberBenifitdata={getMemberBenifitdata}

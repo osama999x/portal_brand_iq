@@ -9,7 +9,7 @@ import { handlePostRequest } from "../../../service/PostTemplate";
 import { handlePatchRequest } from "../../../service/PatchTemplete";
 import { classNames } from 'primereact/utils';
 import { Button } from 'primereact/button';
-
+import { Dropdown } from "primereact/dropdown";
 const addedit = ({ addEditMember, getMembershipData, MemberRowData, onHide }) => {
     const [loading, setloading] = useState(false);
     const dispatch = useDispatch();
@@ -67,6 +67,14 @@ const addedit = ({ addEditMember, getMembershipData, MemberRowData, onHide }) =>
         });
     }
 
+
+    const statusOption = [
+        { name: 'Gold', membershipCategory: "Gold" },
+        { name: 'Silver', membershipCategory: "Silver" },
+        { name: 'Platinum', membershipCategory: "Platinum" },
+        { name: 'Diamond', membershipCategory: "Diamond" }
+    ];
+
     return (
         <div>
             <form onSubmit={formik.handleSubmit}>
@@ -74,7 +82,18 @@ const addedit = ({ addEditMember, getMembershipData, MemberRowData, onHide }) =>
                     <div className="col-12 md:col-12 xl:col-12 lg:col-12">
                         <div className="flex flex-column">
                             <label className="mb-2">Membership Category</label>
-                            <InputText
+                            <Dropdown
+                                id="membershipCategory"
+                                name="membershipCategory"
+                                value={formik.values.membershipCategory}
+                                onChange={formik.handleChange}
+                                className={classNames({ "p-invalid": isFormFieldValid("membershipCategory") }, "w-full md:w-10 inputClass")}
+                                options={statusOption}
+                                optionLabel="name"
+                                optionValue="membershipCategory"
+                            />
+
+                            {/* <InputText
                                 name='membershipCategory'
                                 id='membershipCategory'
                                 type="text"
@@ -82,7 +101,7 @@ const addedit = ({ addEditMember, getMembershipData, MemberRowData, onHide }) =>
                                 placeholder=""
                                 value={formik.values.membershipCategory}
                                 onChange={formik.handleChange}
-                            />
+                            /> */}
                         </div>
                         {getFormErrorMessage("membershipCategory")}
                     </div>

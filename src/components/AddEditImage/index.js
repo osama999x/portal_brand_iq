@@ -5,6 +5,7 @@ import { Toast } from "primereact/toast";
 import { Panel } from "primereact/panel";
 import { Image } from 'primereact/image';
 import "./ImageUpload.css";
+import { baseURL } from "../../utilities/Config";
 
 function AddEditImage({ handleImages, editable, EditIconImage }) {
     // const picture = EditIconImage;
@@ -12,8 +13,9 @@ function AddEditImage({ handleImages, editable, EditIconImage }) {
     const upload = React.useRef(null);
     const [files, setfiles] = useState();
     const [icon, setIcon] = useState(editable);
-    const [imgBase64, setImgBase64] = useState([]);
+    const [imgBase64, setImgBase64] = useState("");
     const [loading, setloading] = useState(false);
+    console.log("image",EditIconImage, '    ',icon,'    ',files);
     const header = () => {
         return (
             <>
@@ -82,12 +84,12 @@ function AddEditImage({ handleImages, editable, EditIconImage }) {
             <Toast ref={toastBC} position="bottom-center" />
 
             <div className="formgrid grid ">
-                {icon && !files ? (
+                {icon && !files  ? (
 
                     <>
                         <div className="field col-12 md:col-3" >
                             {
-                                <Image src={`${process.env.REACT_APP_BASE_URL_LIVE}${EditIconImage}`} width="60px" alt="img" preview />
+                                <Image src={`${baseURL}${EditIconImage}`} width="60px" alt="img" preview />
                             }
                         </div>
                         <div className="field col-12 md:col-5 mt-2">

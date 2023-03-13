@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, } from 'react';
 import { DataTable } from 'primereact/datatable';
 import { Button } from 'primereact/button';
 import { Column } from 'primereact/column';
@@ -8,6 +8,7 @@ import ApproveReject from './ApproveReject';
 import { confirmDialog } from 'primereact/confirmdialog';
 import { handleDeleteRequest } from '../../service/DeleteTemplete';
 import { useDispatch } from "react-redux";
+import { FilterMatchMode } from "primereact/api";
 
 const Index = () => {
     // const [selectedCateg, setSelectedCateg] = useState();
@@ -19,6 +20,18 @@ const Index = () => {
     const [apprejdata, setAppRejData] = useState([]);
     const [visibleDelete, setVisibleDelete] = useState(false);
     const dispatch = useDispatch();
+  
+    const [globalFilterValue, setGlobalFilterValue] = useState("");
+    const [filters, setFilters] = useState({
+        global: { value: null, matchMode: FilterMatchMode.CONTAINS },
+    });
+    const onGlobalFilterChange = (e) => {
+        const value = e.target.value;
+        let _filters = { ...filters };
+        _filters["global"].value = value;
+        setFilters(_filters);
+        setGlobalFilterValue(value);
+    };
 
     const onHide = (name) => {
         setDisplayBasic(false);
@@ -39,27 +52,37 @@ const Index = () => {
         setReviewsRowData(rowData._id);
     };
 
-    const customerTemplate = (rowData) => {
-        let customerName = "";
-        if (rowData?.customerId?.firstName) {
-            customerName = rowData?.customerId?.firstName + " " + rowData?.customerId?.lastName;
-            return (<div>{customerName}</div>)
-        }
-    };
-    const membershipTemplate = (rowData) => {
-        return (
-            <div>
-                {rowData?.customerId?.membershipCategory}
-            </div>
-        );
-    };
-    const contactTemplate = (rowData) => {
-        return (
-            <div>
-                {rowData?.customerId?.contact}
-            </div>
-        );
-    };
+    // const customerTemplate = (rowData) => {
+    //     let customerName = "";
+    //     if (rowData?.customerId?.firstName) {
+    //         customerName = rowData?.customerId?.firstName + " " + rowData?.customerId?.lastName;
+    //         return (<div>{customerName}</div>)
+    //     }
+    // };
+    
+    // const productTemplate = (rowData) => {
+    //     return (
+    //         <div>
+    //             {rowData?.productId?.name}
+    //         </div>
+    //     );
+            
+        
+    // };
+    // const membershipTemplate = (rowData) => {
+    //     return (
+    //         <div>
+    //             {rowData?.customerId?.membershipCategory}
+    //         </div>
+    //     );
+    // };
+    // const contactTemplate = (rowData) => {
+    //     return (
+    //         <div>
+    //             {rowData?.customerId?.contact}
+    //         </div>
+    //     );
+    // };
     const approveTemp = (rowData) => {
         return (<div>{rowData?.isApproved === true ? "Approved" : "Reject"}</div>
         );
@@ -82,7 +105,7 @@ const Index = () => {
         const res = await dispatch(handleDeleteRequest(data, `api/v1/review/`, false, false));
         if (res.status === 200) {
             getReviewsData();
-            
+
         }
         setVisibleDelete(false);
 
@@ -99,7 +122,7 @@ const Index = () => {
     const confirm2 = (rowData) => {
         setReviewsRowData(rowData._id);
         confirmDialog({
-            message: 'Do you want to delete this record?',
+            message: 'Are you sure you want to delete this item?',
             header: 'Delete Confirmation',
             icon: 'pi pi-trash',
             acceptClassName: 'Savebtn',
@@ -125,7 +148,7 @@ const Index = () => {
                     getReviewsData={getReviewsData}
                     reviewsRowData={reviewsRowData}
                     apprejdata={apprejdata}
-
+                    globalFilterValue={globalFilterValue}
                 />
             </Dialog>
             <div className="grid">
@@ -133,7 +156,9 @@ const Index = () => {
                     <div className="text-right flex float_right">
                         <div className="">
                             <span class="p-input-icon-right mr-3">
-                                <input type="text" placeholder="Search" class="p-inputtext p-component p-filled" onInput={(e) => setGlobalFilter(e.target.value)} />
+                                <input type="text" placeholder="Search" onChange={onGlobalFilterChange} class="p-inputtext p-component p-filled"
+                                  onInput={(e) => setGlobalFilter(e.target.value)}
+                                  />
                                 <i class="pi pi-search"></i>
                             </span>
                         </div>
@@ -147,10 +172,13 @@ const Index = () => {
                             paginator
                             responsiveLayout="scroll"
                             value={reviewData}
+                            globalFilterFields={["customerId.contact","channel"]}
+
                         >
-                            <Column body={customerTemplate} header="Customer's Name" />
-                            <Column body={membershipTemplate} header="Membership Category" />
-                            <Column body={contactTemplate} header="Contact Number" />
+                            <Column field="customer.name" header="Customer's Name" />
+                            <Column field="customer.membershipCategory" header="Membership Category" />
+                            <Column field="product.name" header="Product"/>
+                            <Column field="customer.contact" header="Contact Number" />
                             <Column field="channel" header="Channel" />
                             <Column body={approveTemp} header="Approved Status" />
                             <Column body={actionTemplate} header="Action" />

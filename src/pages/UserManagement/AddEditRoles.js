@@ -17,6 +17,8 @@ import { useDispatch } from "react-redux";
 // import { Dialog } from "primereact/dialog";
 // import moment from "moment";
 import { ProgressSpinner } from "primereact/progressspinner";
+import { InputTextarea } from 'primereact/inputtextarea';
+import { Dropdown } from "primereact/dropdown";
 
 
     const AddEditRoles = ({ getRoleData, onHide, editable, UsersRowData }) => {
@@ -70,7 +72,7 @@ import { ProgressSpinner } from "primereact/progressspinner";
         if (UsersRowData !== undefined && UsersRowData !== null && editable === true) {
              getUsersByID();
         }
-    }, []);
+    },[]);
     useEffect(() => {
          getUsersRole();
     }, []);
@@ -78,7 +80,7 @@ import { ProgressSpinner } from "primereact/progressspinner";
     const validationSchema = Yup.object().shape({
         name: Yup.string()?.required("This field is required."),
         // matches(onlyalphabetSRegex, "This field should contain alphabets only"),
-        permissionsId:Yup.mixed().required("This field is required."),
+        //permissionsId:Yup.mixed().required("This field is required."),
         description: Yup.string()
             .required("This field is required.")
             .nullable(),
@@ -97,6 +99,9 @@ import { ProgressSpinner } from "primereact/progressspinner";
             
             // setLoading(true);
             // setloadingIcon("pi pi-spin pi-spinner");
+            if(data['permissionsId'].length===0){
+                data['permissionsId']="";
+            }
             if (editable === true) {
                 data["roleId"] = UsersRowData;
                 const res = await dispatch(handlePatchRequest(data, "api/v1/role/", true, true));
@@ -138,8 +143,8 @@ import { ProgressSpinner } from "primereact/progressspinner";
                     <div className="grid p-p-3">
                         <div className="col-12 md:col-12 lg:col-12 xl:col-12">
                             <div className="flex flex-column">
-                                <label className="mb-2">Name</label>
-                                <InputText keyfilter="alpha" maxLength={25} placeholder="Enter Name" id="name" name="name" value={formik?.values?.name?.replace(/\s\s+/g, " ")} onChange={formik.handleChange} className={classNames({ "p-invalid": isFormFieldValid("name") }, "w-full md:w-10 inputClass")} />
+                                <label className="mb-2">Role</label>
+                                <InputText keyfilter="alpha" maxLength={25} placeholder="Enter Role" id="name" name="name" value={formik?.values?.name?.replace(/\s\s+/g, " ")} onChange={formik.handleChange} className={classNames({ "p-invalid": isFormFieldValid("name") }, "w-full md:w-10 inputClass")} />
                                 {getFormErrorMessage("name")}
                             </div>
                         </div>
@@ -162,7 +167,7 @@ import { ProgressSpinner } from "primereact/progressspinner";
                                             }}
                                        
                                             className={classNames({ "p-invalid": isFormFieldValid("permissionsId") },"w-full md:w-10 inputClass" )}
-                                            filter
+                                            
                                         
                                         />
                                     {getFormErrorMessage("permissionsId")}
@@ -171,14 +176,14 @@ import { ProgressSpinner } from "primereact/progressspinner";
                         <div className="col-12 md:col-12 lg:col-12 xl:col-12">
                             <div className="flex flex-column">
                                 <label className="mb-2">Description</label>
-                                <InputText placeholder="Enter Description" id="description" name="description" value={formik?.values?.description?.replace(/\s\s+/g, " ")} onChange={formik.handleChange} className={classNames({ "p-invalid": isFormFieldValid("description") }, "w-full md:w-10 inputClass")} />
+                                <InputTextarea placeholder="Enter Description" id="description" name="description" value={formik?.values?.description?.replace(/\s\s+/g, " ")} onChange={formik.handleChange} className={classNames({ "p-invalid": isFormFieldValid("description") }, "w-full md:w-10 inputClass")} />
                                 {getFormErrorMessage("description")}
                             </div>
                         </div>
                         
                             <div className="col-12 text-center">
                                 <Button label="Cancel" onClick={(e) => handleCancel(e)}  className="Cancelbtn p-mr-3" />
-                                <Button disabled={loading} iconPos="right" label={editable ? "UPDATE" : "SAVE"} autoFocus className="Savebtn p-mr-3" />
+                                <Button disabled={loading} iconPos="right" label={editable ? "Update" : "Save"} autoFocus className="Savebtn p-mr-3" />
                             </div>
                        
                     </div>

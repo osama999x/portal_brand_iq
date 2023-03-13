@@ -19,7 +19,7 @@ const CustomerDetails = () => {
     let { search ,state} = useLocation();
     const query = new URLSearchParams(search);
     const customerRowData = query.get("orderid");
-    console.log("customerRowData",customerRowData)
+    
     const editable = customerRowData?true:false;
 
     const [loading, setLoading] = useState(false);
@@ -44,7 +44,7 @@ const CustomerDetails = () => {
             {
               return el._id == customerRowData;
             })
-            console.log("customerById",customerById[0].customerName);
+            
             formik.setFieldValue("customerName",customerById[0].customerName);
             formik.setFieldValue("address",customerById[0].address);
             formik.setFieldValue("contact",customerById[0].contact);
@@ -55,7 +55,7 @@ const CustomerDetails = () => {
         setLoading(true);
         const res = await handleGetRequest(`api/v1/order/customerOrderHistory?customerId=${customerRowData}`, false);
         if (res) {
-            console.log("res",res)
+        
             setOrderHistory(res);
         }
         setLoading(false);

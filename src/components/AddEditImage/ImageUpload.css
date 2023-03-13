@@ -16,3 +16,12 @@
 .image-placeholder {
     opacity: 0.4;
 }
+
+
+.p-panel .p-panel-header {
+    width: 100%!important;
+}
+
+.p-panel .p-panel-content {
+    width: 100%!important;
+}

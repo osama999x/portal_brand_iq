@@ -9,11 +9,45 @@ import { handlePatchRequest } from '../../service/PatchTemplete';
 import { handlePostRequest } from '../../service/PostTemplate';
 import { useDispatch } from "react-redux";
 import { handleGetRequest } from '../../service/GetTemplate';
-
+import { InputTextarea } from 'primereact/inputtextarea';
 
 const AddEdit = ({ addEditTax, getTaxpData, TaxRowData, onHide }) => {
-    const [loading, setloading] = useState(false);
-    const [taxTypee, setTaxType] = useState();
+    // const [loading, setloading] = useState(false);
+    const [taxTypeData, setTaxTypeData] = useState()
+    //const [taxType, setTaxType] = useState("");
+    const [selectedTaxType, setSelectedTaxType] = useState("")
+    const [taxHead, setTaxHead] = useState("")
+    const [description, setDescription] = useState("")
+
+    useEffect(() => {
+        getTaxList();
+        if (addEditTax == true) {
+            getHeadByID();
+
+        }
+
+    }, []);
+    const getTaxList = async () => {
+        const res = await handleGetRequest("api/v1/tax/type", false);
+        if (res) {
+            setTaxTypeData(res);
+        }
+    }
+    const getHeadByID = async () => {
+        //const data = {};
+        //data["_id"] = TaxRowData;
+        const res = await handleGetRequest(`api/v1/tax/head/getOne?taxHeadId=${TaxRowData}`, true);
+    
+        setTaxHead(res.taxHead)
+        setSelectedTaxType(res.taxType._id)
+        setDescription(res?.description)
+
+    
+    }
+
+
+
+
     const dispatch = useDispatch();
     const validationSchema = Yup.object().shape({
         taxTypeId: Yup.mixed().required("This field is required."),
@@ -23,28 +57,29 @@ const AddEdit = ({ addEditTax, getTaxpData, TaxRowData, onHide }) => {
     const formik = useFormik({
         validationSchema: validationSchema,
         initialValues: {
-            taxTypeId: "",
-            taxHead: "",
-            description: "",
+            taxTypeId: selectedTaxType,
+            taxHead: taxHead,
+            description: description,
         },
+        enableReinitialize: true,
         onSubmit: async (data) => {
             //setloading(true);
             if (addEditTax === true) {
-                data["taxTypeId"] = TaxRowData;
-                data["taxHeadId"] = TaxRowData;
-                data["taxHead"] = TaxRowData;
-                const res = await dispatch(handlePatchRequest(data, "api/v1/tax/type", true, true));
+
                 
+                data["taxHeadId"] = TaxRowData;
+                //data["taxHeadId"] = TaxRowData;
+                //data["taxHead"] = TaxRowData;
+                const res = await dispatch(handlePatchRequest(data, "api/v1/tax/head", true, true));
+
                 if (res.status === 200) {
                     await getTaxpData();
                 }
                 onHide();
             } else {
-            
-                
-               
+
                 const res = await dispatch(handlePostRequest(data, "api/v1/tax/head", true, true));
-            
+
                 if (res?.status === 200 || res?.status === 201) {
                     await getTaxpData();
                 }
@@ -54,57 +89,16 @@ const AddEdit = ({ addEditTax, getTaxpData, TaxRowData, onHide }) => {
 
     });
 
-    const getTaxList = async () => {
-        const res = await handleGetRequest("api/v1/tax/type", false);
-        if (res) {
-            setTaxType(res);
-        }
-    }
-    useEffect(() => {
-        getTaxList();
-    }, []);
+
 
     const isFormFieldValid = (name) => !!(formik.touched[name] && formik.errors[name]);
     const getFormErrorMessage = (name) => {
         return isFormFieldValid(name) && <small className="p-error">{formik.errors[name]}</small>;
     };
 
-    useEffect(() => {
-        if (TaxRowData !== undefined && TaxRowData !== null && addEditTax === true) {
-            //getTaxByID();
-            getHeadByID();
-        }
 
-    }, []);
 
-    // const getTaxByID = async () => {
-    //     //const data = {};
-    //     //data["taxType"] = TaxRowData;
-    //     const res = await handleGetRequest(`api/v1/tax/type/getOne?taxTypeId=${TaxRowData}`, true);
-    //     setloading(false);
-    //     if(res){
-    //     const keyData = res;
-    //     Object.keys(keyData).forEach((key) => {
-    //         if (formik.initialValues.hasOwnProperty(key)) {
-    //             formik.setFieldValue(key, keyData[key]);
-    //         }
-    //     });
-    // }
-    // }
-    const getHeadByID = async () => {
-        //const data = {};
-        //data["_Id"] = TaxRowData;
-        const res = await handleGetRequest(`api/v1/tax/head/getOne?taxHeadId=${TaxRowData}`, true);
-        setloading(false);
-        if (res) {
-            const keyData = res;
-            Object.keys(keyData).forEach((key) => {
-                if (formik.initialValues.hasOwnProperty(key)) {
-                    formik.setFieldValue(key, keyData[key]);
-                }
-            });
-        }
-    }
+
 
     return (
         <div>
@@ -117,7 +111,7 @@ const AddEdit = ({ addEditTax, getTaxpData, TaxRowData, onHide }) => {
                                 id="taxTypeId"
                                 className={classNames({ "p-invalid": isFormFieldValid("taxTypeId") }, "w-full md:w-10 inputClass")}
                                 value={formik.values.taxTypeId}
-                                options={taxTypee}
+                                options={taxTypeData}
                                 optionLabel="taxType"
                                 optionValue="_id"
                                 onChange={formik.handleChange} />
@@ -128,6 +122,7 @@ const AddEdit = ({ addEditTax, getTaxpData, TaxRowData, onHide }) => {
                         <div className="flex flex-column">
                             <label className="mb-2">Tax Head</label>
                             <InputText name='taxHead'
+                            keyfilter={/^[0-9!@#$%^&*]+$/}
                                 id='taxHead'
                                 type="text"
                                 className={classNames({ "p-invalid": isFormFieldValid("taxHead") }, "w-full md:w-10 inputClass")}
@@ -139,7 +134,7 @@ const AddEdit = ({ addEditTax, getTaxpData, TaxRowData, onHide }) => {
                     <div className="col-12 md:col-12 lg:col-12 xs:col-12">
                         <div className="flex flex-column">
                             <label className="mb-2">Description</label>
-                            <InputText name='description'
+                            <InputTextarea name='description'
                                 id='description'
                                 type="text"
                                 className={classNames({ "p-invalid": isFormFieldValid("description") }, "w-full md:w-10 inputClass")}

@@ -19,7 +19,7 @@ const ApproveReject = ({ onHide, getReviewsData, reviewsRowData, apprejdata }) =
 
         if (res) {
             const keyData = res;
-            console.log("keydat status", keyData);
+            
             Object.keys(keyData).forEach((key) => {
                 if (formik.initialValues.hasOwnProperty(key)) {
                     formik.setFieldValue(key, keyData[key]);
@@ -49,7 +49,7 @@ const ApproveReject = ({ onHide, getReviewsData, reviewsRowData, apprejdata }) =
         },
         onSubmit: async (data) => {
             if (apprejdata === true) {
-                console.log("Show status", data);
+                
                 data["reviewId"] = reviewsRowData;
                 setLoading(true);
                 const res = await dispatch(handlePatchRequest(data, "api/v1/review/approvedReview", true, true));

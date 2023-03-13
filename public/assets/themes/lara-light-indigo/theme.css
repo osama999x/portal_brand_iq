@@ -1250,6 +1250,7 @@
 
 .p-input-icon-right>.p-inputtext {
   padding-right: 2.5rem;
+  background-color: aliceblue;
 }
 
 ::-webkit-input-placeholder {

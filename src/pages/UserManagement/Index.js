@@ -11,9 +11,11 @@ function Index() {
     return (
         <>
             <div className="grid">
+            
                 <div className="col-12 md:col-12 xs:col-12 lg:col-12" >
-
+                   
                     <TabView >
+                        
                         <TabPanel header="Create User"  className="createusersIcon">
                         
                             <Users />

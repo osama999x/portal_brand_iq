@@ -11,33 +11,37 @@ import { handleDeleteRequest } from '../../service/DeleteTemplete';
 import { useDispatch } from 'react-redux';
 import AddTaxType from './AddTaxType';
 
+
+
 const ManageTax = () => {
     const dispatch = useDispatch();
     const [displayBasic, setDisplayBasic] = useState(false);
     const [displayBasic3, setDisplayBasic3] = useState(false);
     const [taxdata, setTaxdata] = useState([]);
-    const [TaxTypeData, setTaxTypeData] = useState([]);
-    const [TaxRowData, setTaxRowData] = useState("");
-    const [TaxTypeRowData, setTaxTypeRowData] = useState("");
+    // const [TaxTypeData, setTaxTypeData] = useState([]);
+    const [TaxRowData, setTaxRowData] = useState(null);
+    const [TaxTypeRowData, setTaxTypeRowData] = useState([]);
     const [visibleDelete, setVisibleDelete] = useState(false);
     const [globalFilter, setGlobalFilter] = useState(null);
     const [addEditTax, setaddEditTax] = useState(null);
+    const [taxHeadId, setTaxHeadId] = useState();
+    const [selectedDeleteId, setSelectedDeleteId] = useState('')
 
-    const [displayBasic2, setDisplayBasic2] = useState(false);
-    const [deleteModal, setDeleteModal] = useState(false);
-    const [position, setPosition] = useState('center');
+    // const [displayBasic2, setDisplayBasic2] = useState(false);
+    // const [deleteModal, setDeleteModal] = useState(false);
+    // const [position, setPosition] = useState('center');
     const dialogFuncMap = {
         'displayBasic': setDisplayBasic,
-        'displayBasic2': setDisplayBasic2,
-        'deleteModal': setDeleteModal,
+        // 'displayBasic2': setDisplayBasic2,
+        // 'deleteModal': setDeleteModal,
         'displayBasic3':setDisplayBasic3,
     }
     const onClick = (name, position) => {
         dialogFuncMap[`${name}`](true);
 
-        if (position) {
-            setPosition(position);
-        }
+        // if (position) {
+        //     setPosition(position);
+        // }
     }
 
     const getTaxData = async () => {
@@ -50,19 +54,26 @@ const ManageTax = () => {
         getTaxData();
     }, []);
 
-    const RequestToDel = async () => {
-        const data = {};
-        data["taxHeadId"] = TaxRowData;
+    const TaxHeadDelete = async () => {
+        const data = {};    
+        console.log("in box")
+        data["taxHeadId"] = selectedDeleteId;
+        // const data = {
+        //     "taxHeadId" : selectedDeleteId
+        // };
 
         const res = await dispatch(handleDeleteRequest(data, `api/v1/tax/head`, false, false));
         if (res.status === 200) {
             getTaxData();
+
         }
+        setSelectedDeleteId('')
+        setVisibleDelete(false);
 
     }
     useEffect(() => {
-        if (visibleDelete === true) {
-            RequestToDel();
+        if (visibleDelete === true && selectedDeleteId !=="") {
+            TaxHeadDelete();
         }
 
     }, [visibleDelete]);
@@ -91,10 +102,13 @@ const ManageTax = () => {
        
     };
     const confirm2 = (rowData) => {
-        setTaxRowData(rowData._id);
-        setTaxTypeRowData(rowData._id);
+        setSelectedDeleteId(rowData._id)
+        //selectedDeleteId = rowData._id;
+        //setTaxHeadId(rowData._id)
+        // setTaxRowData(rowData._id);
+        // setTaxTypeRowData(rowData._id);
         confirmDialog({
-            message: 'Do you want to delete this record?',
+            message: 'Are you sure you want to delete this item?',
             header: 'Delete Confirmation',
             icon: 'pi pi-trash',
             acceptClassName: 'Savebtn',
@@ -104,20 +118,20 @@ const ManageTax = () => {
         });
     };
     const accept = () => {
-        setVisibleDelete(true);
-
+        setVisibleDelete(true)
+       // RequestToDel();
         //toast.current.show({ severity: 'info', summary: 'Confirmed', detail: 'You have accepted', life: 3000 });
     }
 
     const reject = () => {
-        setVisibleDelete(false);
+        setVisibleDelete(false)
         // toast.current.show({ severity: 'info', summary: 'Rejected', detail: 'You have rejected', life: 3000 });
     }
     const toast = useRef(null);
 
 
     const TaxTypeTemplate = (rowData) => {
-        return <div>{rowData.taxType.taxType}</div>
+        return <div>{rowData?.taxType?.taxType}</div>
     }
 
     return (
@@ -131,9 +145,6 @@ const ManageTax = () => {
                 
                 <AddTaxType onHide={onHide} getTaxData={getTaxData}  TaxTypeRowData={TaxTypeRowData} />
             </Dialog>
-            {/* <Dialog header="EDIT" visible={displayBasic2} style={{ width: '40vw' }} footer={renderFooter('displayBasic2')} onHide={() => onHide('displayBasic2')}>
-                <Edit />
-            </Dialog> */}
 
             <div className="grid">
                 <div className="col-12 md:col-12 lg:col-12 xs:col-12">
@@ -142,12 +153,14 @@ const ManageTax = () => {
                             <input type="text" placeholder="Search" class="p-inputtext p-component p-filled" onInput={(e) => setGlobalFilter(e.target.value)} />
                             <i class="pi pi-search"></i>
                         </span>
-                        <button className="p-button p-button-primary p-component" onClick={() => onClick('displayBasic')}>
+                        <button className="p-button p-button-primary p-component mr-2" onClick={() =>{
+                            setaddEditTax(false)
+                            onClick('displayBasic')}}>
                             <span className="p-button-icon p-c p-button-icon-left pi pi-plus"></span>
                             <span className="p-button-label p-c">Add New</span>
                             <span className="p-ink"></span>
                         </button>
-                    {' '}
+                    
                         <button className="p-button p-button-primary p-component" onClick={() => onClick('displayBasic3')}>
                             <span className="p-button-icon p-c p-button-icon-left pi pi-plus"></span>
                             <span className="p-button-label p-c">Add TaxType</span>

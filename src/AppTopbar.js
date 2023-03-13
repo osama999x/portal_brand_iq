@@ -1,5 +1,5 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
+import React, { useEffect, useRef, useState } from 'react';
+import { Link, NavLink } from 'react-router-dom';
 import classNames from 'classnames';
 import { Avatar } from 'primereact/avatar';
 
@@ -15,13 +15,31 @@ export const AppTopbar = (props) => {
         // }
         
     };
+
+        //Custom Dropdown
+    const [open, setOpen] = useState(false);
+    let menuRef = useRef();
+    useEffect(() => {
+        let handler = (e) => {
+            if (!menuRef.current.contains(e.target)) {
+                setOpen(false);
+                //console.log(menuRef.current);
+            }
+        };
+        document.addEventListener("mousedown", handler);
+        return () => {
+            document.removeEventListener("mousedown", handler);
+        }
+
+    });
+
     return (
         <div className="layout-topbar">
             <Link to="/" className="layout-topbar-logo">
-                {/* <img src={props.layoutColorMode === 'light' ? 'assets/layout/images/logo-dark.svg' : 'assets/layout/images/logo-white.svg'} alt="logo" /> */}
-                <img src={props.layoutColorMode === 'light' ? 'assets/layout/images/logo-wt.svg' : 'assets/layout/images/logo-wt.svg'} alt="logo" />
+                <img src={props.layoutColorMode === 'light' ? 'assets/Logo.svg' : 'assets/Logo.svg'} alt="logo" />
+                {/* <img src={props.layoutColorMode === 'light' ? 'assets/Logo.svg' : 'assets/Logo.svg'} alt="logo" /> */}
 
-                <span>Z-Store</span>
+                {/* <span>M-Safa</span> */}
             </Link>
 
             <button type="button" className="p-link  layout-menu-button layout-topbar-button" onClick={props.onToggleMenuClick}>
@@ -42,21 +60,26 @@ export const AppTopbar = (props) => {
                         <span>Profile</span>
                     </button>
                 </li> */}
-                <li>
-                    <button className="p-link layout-topbar-button" 
-                    onClick={ handleLogout
-                        
-                        // localStorage.setItem("login", false)
-                        // props.onMobileSubTopbarMenuClick
-                        
-                        }>
-                        <span>Logout</span>
-                        <i className="pi pi-power-off" />
+            <div className='menu-container' ref={menuRef}>
+                        <div className='menu-trigger' onClick={() => { setOpen(!open) }}>
+                        <div className='flex align-items-center'>
+                            <h5 className='mb-0 mr-2'>Admin</h5>
+                        <Avatar image="images/avatar/amyelsner.png" size="large" className="p-mr-2 mr-2" shape="circle" style={{position: "unset"}}/>
+                            <i className='pi pi-angle-down'></i>
+                        </div>
+                        </div>
 
-                    </button>
-                </li>
-
+                        <div className={`dropdown-menu ${open ? 'active' : 'inactive'}`} >
+                            <ul>
+                                <li className='dropdownItem' onClick={handleLogout}>
+                                    
+                                    <a className="color"> <i className='pi pi-sign-out'></i> Logout </a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
             </ul>
+            
         </div>
     );
 }

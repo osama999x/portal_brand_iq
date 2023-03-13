@@ -4,7 +4,7 @@ import { Button } from "primereact/button";
 import { Column } from "primereact/column";
 import { Link } from "react-router-dom";
 import { Dialog } from "primereact/dialog";
-import { ConfirmDialog, confirmDialog } from "primereact/confirmdialog";
+import {  confirmDialog } from "primereact/confirmdialog";
 import { Toast } from "primereact/toast";
 import { handleGetRequest } from "../../service/GetTemplate";
 import { handleDeleteRequest } from "../../service/DeleteTemplete";
@@ -13,6 +13,8 @@ import Moment from "moment";
 import { Sidebar } from "primereact/sidebar";
 import { useHistory } from "react-router-dom";
 import AddEditOrderManagement from "./AddEditOrderManagement";
+import { FilterMatchMode } from "primereact/api";
+
 // import AddEditProduct from "./AddEditProduct"
 
 
@@ -24,9 +26,20 @@ const OrderManagement = () => {
     const [editable, setEditable] = useState(false);
     const [orderRowData, setOrderRowData] = useState("");
     const [orderData, setOrderData] = useState([]);
-    const [loading, setloading] = useState(false);
+    const [loading, setloading] = useState(false);                              
     const [orderid, setOrderid] = useState();
+    const [globalFilterValue, setGlobalFilterValue] = useState("");
+    const [filters, setFilters] = useState({
+        global: { value: null, matchMode: FilterMatchMode.CONTAINS },
+    });
 
+    const onGlobalFilterChange = (e) => {
+        const value = e.target.value;
+        let _filters = { ...filters };
+        _filters["global"].value = value;
+        setFilters(_filters);
+        setGlobalFilterValue(value);
+    };
 
 
 
@@ -52,6 +65,7 @@ const OrderManagement = () => {
         data["productId"] = orderRowData;
 
         const res = await dispatch(handleDeleteRequest(data, `api/v1/products/`, true, true));
+        
         setloading(false);
         if (res?.status === 200) {
             getOrderData();
@@ -73,14 +87,17 @@ const OrderManagement = () => {
     const actionTemplate = (rowData) => {
         return (
             <div className="Edit_Icon">
-                <Button tooltip="Edit" icon="pi pi-pencil" tooltipOptions={{ position: "top" }}
-                    className="edit p-mr-2"
+                <Button tooltip="Detail"
+                //  icon="pi pi-pencil"
+                label="Detail"
+                  tooltipOptions={{ position: "top" }}
+                    className="btn btn-info ml-auto"
                     onClick={() => history.push({
                         // id:rowData._id},'',`/detailordermanagement?orderid=${rowData._id}`
 
                         pathname: '/detailordermanagement',
                         search: `?orderid=${rowData._id}`,
-                        state: { id: rowData.orderId }
+                        state: { id: rowData.orderId, data: rowData }
                     }
                     )} />
                 {/* <Button tooltip="Delete" icon="pi pi-trash" tooltipOptions={{ position: "top" }} className="delete p-mr-2 p-ml-3" onClick={() => confirm2(rowData)} /> */}
@@ -186,7 +203,9 @@ const OrderManagement = () => {
                             rows={10} paginator
                             responsiveLayout="scroll"
                             value={orderData}
-                            globalFilter={globalFilter}>
+                            globalFilter={globalFilter}
+                            globalFilterFields={["orderId"]}
+                            >
                             <Column body={OrderIdClickable} header="Order ID" />
                             <Column body={customerNameTemplete} header="Customer's Name" />
                             <Column body={orderDateTemplete} header="Placed On" />

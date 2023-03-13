@@ -22,7 +22,7 @@ export const handleGetRequest = async (url, isShowToast) => {
         // if (error?.response?.status === 404) 
         // {
         toast.clearWaitingQueue();
-        toast.warn(error?.response?.data?.msg, { isLoading: false, autoClose: 1500 } || "Something went wrong !!", { isLoading: false, autoClose: 1500 });
+        toast.warn(error?.response?.data?.msg, { isLoading: true, autoClose: 1500 } || "Something went wrong !!", { isLoading: false, autoClose: 1500 });
         // };
         // else 
         // {

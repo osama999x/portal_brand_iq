@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect} from 'react';
 import { DataTable } from 'primereact/datatable';
 import { Button } from 'primereact/button';
 import { Column } from 'primereact/column';
@@ -8,6 +8,8 @@ import Addedit from './Addedit';
 import { handleGetRequest } from '../../../service/GetTemplate';
 import { handleDeleteRequest } from '../../../service/DeleteTemplete';
 import { useDispatch } from 'react-redux';
+import moment from 'moment';
+import { baseURL } from '../../../utilities/Config';
 
 const CoupanPolicy = () => {
   const [displayBasic, setDisplayBasic] = useState(false);
@@ -16,11 +18,12 @@ const CoupanPolicy = () => {
   const [addEditCoupan, setAddEditCoupan] = useState(null);
   const [coupanRowData, setCoupanRowData] = useState("");
   const [visibleDelete, setVisibleDelete] = useState(false);
-
+  var selectedDeleteId;
   const dispatch = useDispatch();
 
   const getCoupandata = async () => {
-    const res = await handleGetRequest("api/v1/coupan/all", false);
+    const res = await handleGetRequest("api/v1/coupon/all", false);
+    
     if (res) {
       setCoupandata(res);
     }
@@ -45,29 +48,31 @@ const CoupanPolicy = () => {
   //================= Table body data=========//
   const RequestResetPassword = async () => {
     const data = {};
-    data["coupanId"] = coupanRowData;
-    const res = await dispatch(handleDeleteRequest(data, `api/v1/coupan`, true, true));
+    data["couponId"] = selectedDeleteId;
+    const res = await dispatch(handleDeleteRequest(data, `api/v1/coupon`, true, true));
     if (res?.status === 200) {
-      getCoupandata();
+     getCoupandata();
     }
+    
   }
-  useEffect(() => {
-    if (visibleDelete === true) {
-      RequestResetPassword();
-    }
-  }, [visibleDelete]);
+  // useEffect(() => {
+  //   if (visibleDelete === true) {
+  //     RequestResetPassword();
+  //   }
+  // }, [visibleDelete]);
 
 
   const editcoupan = (rowData) => {
     setDisplayBasic(true);
     setAddEditCoupan(true);
     setCoupanRowData(rowData._id);
+    
   };
-
   const confirm2 = (rowData) => {
-    setCoupanRowData(rowData._id);
+    // setCoupanRowData(rowData._id);
+    selectedDeleteId = rowData._id;
     confirmDialog({
-      message: 'Do you want to delete this record?',
+      message: 'Are you sure you want to delete this item?',
       header: 'Delete Confirmation',
       icon: 'pi pi-trash',
       acceptClassName: 'Savebtn',
@@ -77,42 +82,37 @@ const CoupanPolicy = () => {
     });
   };
   const accept = () => {
+    RequestResetPassword();
     setVisibleDelete(true);
   }
 
   const reject = () => {
     setVisibleDelete(false);
   }
-  const statusTemplate = (rowData) => {
+  const statusTemplate = (rowData) => { 
     return <div className={rowData?.isActive === true ? "green" : "red"}>{rowData?.isActive === true ? "Active" : "InActive"}</div>;
   };
 
   const fromDateTemplate = (rowData) => {
     return (
       <React.Fragment>
-        {rowData?.activeFrom?.split('T')[0]}
+       {moment(rowData?.expireDate).format("YYYY-MM-DD")}
       </React.Fragment>
     );
   };
-  const toDateTemplate = (rowData) => {
-    return (
-      <React.Fragment>
-        {rowData?.activeTo?.split('T')[0]}
-      </React.Fragment>
-    );
-  };
+  
   const imageTemplate = (rowData) => {
     return (
       <React.Fragment>
         {/* {rowData?.image} */}
-        <img className='tbl__coupanImage' src={`http://20.212.227.60:3007/${rowData.image}`} alt="" />
+        <img className='tbl__coupanImage' src={`${baseURL}${rowData.image}`} alt="" />
       </React.Fragment>
     );
   };
   return (
     <>
       {/* <Toast ref={toast} /> */}
-      <Dialog header={addEditCoupan ? "Edit" :  "CREATE COUPAN POLICY"} visible={displayBasic} style={{ width: '40vw' }} onHide={onHide}>
+      <Dialog header={addEditCoupan ? "Edit" :  "Create Coupon Policy"} visible={displayBasic} style={{ width: '40vw' }} onHide={onHide}>
         <Addedit
           onHide={onHide}
           getCoupandata={getCoupandata}
@@ -144,13 +144,12 @@ const CoupanPolicy = () => {
               responsiveLayout="scroll"
               value={coupandata}
             >
-              <Column field="coupanCode" header="Coupan Code" />
-              <Column body={fromDateTemplate} header="From Date" />
-              <Column body={toDateTemplate} header="To Date" />
-              {/* <Column field="isPercentage" header="Percentage" /> */}
-              <Column field="coupanValue" header="Coupan Value" />
+              <Column field="couponCode" header="Coupon Code" />
               <Column body={imageTemplate} header="Voucher" />
-              <Column body={statusTemplate} header="Status" />
+              <Column body={fromDateTemplate} header="Expire Data" />
+              <Column field="orderPriceLimit" header="Order Price Limit"/>
+              <Column field="couponValue" header="Coupon Value" />
+              {/* <Column body={statusTemplate} header="Status" /> */}
               <Column body={actionTemplate} header="Action" />
             </DataTable>
           </div>

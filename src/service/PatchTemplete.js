@@ -20,7 +20,8 @@ export const handlePatchRequest =
                 },
             });
 
-            if (isShowToast) toast.success(response?.data?.msg);
+            if (isShowToast) toast.success(response?.msg);
+            console.log("result",response)
             if (isShowLoad) dispatch(loadingAction(false));
             return response;
         } catch (error) {

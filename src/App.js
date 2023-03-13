@@ -16,9 +16,10 @@ import UserMangement from "./pages/UserManagement/Index";
 import TaxesManagement from "./pages/TaxesManagement/ManageTax";
 import SaleManagement from "./pages/SaleManagement/Index";
 import DiscountManage from "./pages/DiscountManage/Index";
+//import PromotionManagement from "./pages/PromotionManagement/CampaignManagement"
 // import PromotionManagement from "./pages/PromotionManagement/Index";
-import PromotionManagement from "./pages/PromotionManagement/PromotionManagement"
-import AddEditPromtions from "./pages/PromotionManagement/AddEditPromtion";
+//import ProductManagement from "./pages/SaleManagement/ProductManagement/ProductManagement";
+import AddEditCampaign from "./pages/PromotionManagement/AddEditCampaign";
 import CustomerManagement from "./pages/CustomerManagement/Index";
 import InventoryStatus from "./pages/InventoryStatus/Index";
 import CustomerMangement from "./pages/RegisteredUsers/CustomerManagement";
@@ -31,11 +32,12 @@ import CreateDeliveryManagement from "./pages/DeliveryManagement/DeliverySubmenu
 import EditDeliveryManagement from "./pages/DeliveryManagement/DeliverySubmenu/Edit";
 import OrderManagement from "./pages/OrderManagement/OrderManagement";
 import AddEditOrderManagement from "./pages/OrderManagement/AddEditOrderManagement";
+import AddEditReturn from "./pages/ReturnPolicy/AddEditReturn";
 import UploadBulkProducts from "./pages/UploadBulkProducts/UploadBulkProducts";
 import "react-toastify/dist/ReactToastify.css";
 import PrimeReact from "primereact/api";
 import { Tooltip } from "primereact/tooltip";
-// import { ToastContainer, toast } from "react-toastify";
+import { ToastContainer, toast } from "react-toastify";
 //import GlobalLoader from "./utilities/loader";
 // import LoadingOverlay from "react-loading-overlay";
 // import { useSelector } from "react-redux";
@@ -48,9 +50,14 @@ import "./assets/demo/Demos.scss";
 import "./assets/layout/layout.scss";
 import "./App.scss";
 import Login from "./pages/Login/Login";
+import ManageDeal from "./pages/ToDayDeal/ManageDeal";
+import PromotionManagment from "./pages/PromotionManagement/PromotionManagement";
+//import AddEditManagePromtions from "./pages/PromotionManagement/AddEditPromotionManagement";
+import AddEditPromtionManagement from "./pages/PromotionManagement/AddEditPromotionManagement";
 // import Forgot from "./pages/ForgotPassword/ForgotPassword"
 // import ResetPassword from "./pages/ResetPassword/ResetPassword"
-
+import CampaignManagement from "./pages/PromotionManagement/CampaignManagement";
+import ReturnManage from "./pages/ReturnPolicy/ManageReturn";
 const App = () => {
     const [storedEmail, setStoredEmail] = useState("");
     const [layoutMode, setLayoutMode] = useState("static");
@@ -163,7 +170,8 @@ const App = () => {
     const isDesktop = () => {
         return window.innerWidth >= 992;
     };
-
+     
+   
     const menu = [
         {
             items: [
@@ -190,32 +198,38 @@ const App = () => {
             items: [{ label: "Promotions Management", icon: "pi pi-fw pi-volume-up", to: "/promotionmanagement" }],
         },
         {
-            items: [{ label: "Customer Loyalty Program", icon: "pi pi-fw pi-id-card", to: "/customermanagement" }],
+            items: [{ label: "Customer Loyalty Program", icon: "pi pi-fw pi-star-fill", to: "/customermanagement" }],
         },
         // {
         //     items: [{ label: "Shipment Free Management", icon: "pi pi-fw pi-id-card", to: "/shipmentmanagement" }],
         // },
-        {
-            items: [{ label: "Delivery Partners Management", icon: "pi pi-fw pi-id-card", to: "/deliverymanagement" }],
-        },
+        // {
+        //     items: [{ label: "Delivery Partners Management", icon: "pi pi-fw pi-id-card", to: "/deliverymanagement" }],
+        // },
         {
             items: [{ label: "Orders Management", icon: "pi pi-fw pi-shopping-cart", to: "/ordermanagement" }],
         },
         {
-            items: [{ label: "Inventory Status", icon: "pi pi-fw pi-id-card", to: "/inventorystatus" }],
+            items: [{ label: "Dispute Policy", icon: "pi pi-fw pi-backward", to: "/returnmanage" }],
         },
         {
-            items: [{ label: "Registered Users", icon: "pi pi-fw pi-id-card", to: "/registeredusers" }],
+            items: [{ label: "Inventory Status", icon: "pi pi-fw pi-folder-open", to: "/inventorystatus" }],
         },
         {
-            items: [{ label: "Upload Products", icon: "pi pi-fw pi-upload", to: "/productsupload" }],
+            items: [{ label: "Registered Users", icon: "pi pi-fw pi-table", to: "/registeredusers" }],
         },
+        // {
+        //     items: [{ label: "Upload Products", icon: "pi pi-fw pi-upload", to: "/productsupload" }],
+        // },
         {
-            items: [{ label: "Reviews Management", icon: "pi pi-fw pi-id-card", to: "/reviewsmanagement" }],
+            items: [{ label: "Reviews Management", icon: "pi pi-fw pi-camera", to: "/reviewsmanagement" }],
         },
          {
-             items: [{ label: "Feedback", icon: "pi pi-fw pi-id-card", to: "/feedback" }],
+             items: [{ label: "Feedback", icon: "pi pi-fw pi-chevron-left", to: "/feedback" }],
          },
+        // {
+        //     items: [{ label: "To Day Deal", icon: "pi pi-fw pi-tags", to: "/dealmanagement" }],
+        // },
     ];
 
     const addClass = (element, className) => {
@@ -243,7 +257,7 @@ const App = () => {
     return (
         <div className={wrapperClass} onClick={onWrapperClick}>
             {/* <GlobalLoader isShow={isLoading} /> */}
-            {/* <ToastContainer/> */}
+            <ToastContainer/>
             <Tooltip ref={copyTooltipRef} target=".block-action-copy" position="bottom" content="Copied to clipboard" event="focus" />
             {!localStorage.getItem("login") === true ? (
                 <div>
@@ -251,8 +265,8 @@ const App = () => {
                     <Switch>
                         <Route exact path="/" render={() => <Login />} />
                         <Route exact path="/forgetpassword" render={() => <Forget setStoredEmail={setStoredEmail} />} />
-                        <Route exact path="/OTPView" render={() => <OTP storedEmail={storedEmail} />} />
-                        <Route exact path="/resetpass" render={() => <ResetPass storedEmail={storedEmail} />} />
+                        <Route exact path="/OTPView/:email" render={() => <OTP storedEmail={storedEmail} />} />
+                        <Route exact path="/resetpass/:email" render={() => <ResetPass storedEmail={storedEmail} />} />
                         <Redirect to="/" />
                     </Switch>
                 </div>
@@ -263,30 +277,36 @@ const App = () => {
                     <div className="layout-sidebar" onClick={onSidebarClick}>
                         <AppMenu model={menu} onMenuItemClick={onMenuItemClick} layoutColorMode={layoutColorMode} />
                     </div>
+                        
 
                     <div className="layout-main-container">
                         <div className="layout-main">
                             <Switch>
                                 <Route exact path="/" render={() => <Dashboard />} />
                                 {/* <Route exact path="/login" render={() => <Login />} /> */}
-                                <Route exact path="/usermangement" render={() => <UserMangement />} />
+                                <Route exact path="/usermangement" element={<UserMangement/>} render={() => <UserMangement />} />
                                 <Route exact path="/taxesmanagement" render={() => <TaxesManagement />} />
                                 <Route exact path="/salemanagement" render={() => <SaleManagement />} />
                                 <Route exact path="/discountmanage" render={() => <DiscountManage />} />
-                                <Route exact path="/promotionmanagement" render={() => <PromotionManagement />} />
-                                <Route exact path="/promotiondetail" render={() => <AddEditPromtions />} />
+                                <Route exact path="/promotionmanagement" render={() => <CampaignManagement/>} />
+                                <Route exact path="/promotiondetail" render={() => <AddEditCampaign />} />
+                                <Route exact path="/managepromotion/:id" render={() => <PromotionManagment />} />
+                                <Route exact path="/managepromotiondetail" render={() => <AddEditPromtionManagement />} />
                                 <Route exact path="/customermanagement" render={() => <CustomerManagement />} />
                                 <Route exact path="/customerdetails" render={() => <CustomerDetails />} />
                                 <Route exact path="/shipmentmanagement" render={() => <ShipmentManagement />} />
-                                <Route exact path="/deliverymanagement" render={() => <DeliveryManagement />} />
+                                {/* <Route exact path="/deliverymanagement" render={() => <DeliveryManagement />} /> */}
                                 <Route exact path="/createdeliverymanagement" render={() => <CreateDeliveryManagement />} />
                                 <Route exact path="/editdeliverymanagement" render={() => <EditDeliveryManagement />} />
                                 <Route exact path="/ordermanagement" render={() => <OrderManagement />} />
+                                <Route exact path="/returnmanage" render={() => <ReturnManage />} />
+                                <Route exact path="/detailreturnordermanagement" render={() => <AddEditReturn />} />
                                 <Route exact path="/detailordermanagement" render={() => <AddEditOrderManagement />} />
                                 <Route exact path="/inventorystatus" render={() => <InventoryStatus />} />
                                 <Route exact path="/registeredusers" render={() => <CustomerMangement />} />
                                 <Route exact path="/reviewsmanagement" render={() => <ReviewsManagement />} />
-                                <Route exact path="/productsupload" render={() => <UploadBulkProducts />} />
+                                {/* <Route exact path="/dealmanagement" render={() => <ManageDeal/>} /> */}
+                                {/* <Route exact path="/productsupload" render={() => <UploadBulkProducts />} /> */}
                                 <Route exact path="/feedback" render={() => <Feedback />} />
                             </Switch>
                         </div>

@@ -4,7 +4,7 @@ import { Button } from 'primereact/button';
 import { Column } from 'primereact/column';
 import { Dialog } from 'primereact/dialog';
 import { confirmDialog } from 'primereact/confirmdialog';
-import { Toast } from 'primereact/toast';
+//import { Toast } from 'primereact/toast';
 import { handleGetRequest } from '../../service/GetTemplate';
 // import { handlePostRequest } from '../../service/PostTemplate';
 import { handleDeleteRequest } from '../../service/DeleteTemplete';
@@ -21,6 +21,8 @@ const Tab1 = () => {
     const [editable, setEditable] = useState(false);
     const [usersRowData, setUsersRowData] = useState("");
     const [userData, setUserData] = useState([]);
+    var selectedDeleteId;
+
 
     const onHide = () => {
         setEditable(false);
@@ -46,7 +48,7 @@ const Tab1 = () => {
     const RequestResetPassword = async () => {
         //  setloading(true);
         const data = {};
-        data["userId"] = usersRowData;
+        data["userId"] = selectedDeleteId;
 
         const res = await dispatch(handleDeleteRequest(data, `api/v1/user/`, false, false));
         // setloading(false);
@@ -58,12 +60,12 @@ const Tab1 = () => {
         }
 
     }
-    useEffect(() => {
-        if (visibleDelete === true) {
-            RequestResetPassword();
-        }
+    // useEffect(() => {
+    //     if (visibleDelete === true) {
+    //         RequestResetPassword();
+    //     }
 
-    }, [visibleDelete]);
+    // }, [visibleDelete]);
 
 
     const actionTemplate = (rowData) => {
@@ -82,9 +84,10 @@ const Tab1 = () => {
         setUsersRowData(rowData._id);
     };
     const confirm2 = (rowData) => {
-        setUsersRowData(rowData._id);
+        // setUsersRowData(rowData._id);
+        selectedDeleteId=rowData._id;
         confirmDialog({
-            message: 'Do you want to delete this record?',
+            message: 'Are you sure you want to delete this item?',
             header: 'Delete Confirmation',
             icon: 'pi pi-trash',
             acceptClassName: 'Savebtn',
@@ -94,6 +97,7 @@ const Tab1 = () => {
         });
     };
     const accept = () => {
+        RequestResetPassword();
         setVisibleDelete(true);
         // toast.current.show({ severity: 'info', summary: 'Confirmed', detail: 'You have accepted', life: 3000 });
     }
@@ -102,10 +106,10 @@ const Tab1 = () => {
         setVisibleDelete(false);
         // toast.current.show({ severity: 'info', summary: 'Rejected', detail: 'You have rejected', life: 3000 });
     }
-    const toast = useRef(null);
+    //const toast = useRef(null);
     return (
         <>
-            <Toast ref={toast} />
+            {/* <Toast ref={toast} /> */}
             <Dialog header={editable ? "EDIT" : "ADD NEW USER"} visible={visibleEdit} style={{ width: '40vw' }} onHide={() => onHide('displayBasic')}>
                 <AddEditUsers getUserData={getUserData} editable={editable} onHide={onHide} UsersRowData={usersRowData} />
             </Dialog>
@@ -114,7 +118,7 @@ const Tab1 = () => {
                 <div className="col-12  md:col-12 lg:col-12 xl:col-12">
                     <div className="text-right">
                         <span className="p-input-icon-right mr-3">
-                            <input type="text" placeholder="Search" onInput={(e) => setGlobalFilter(e.target.value)} className="p-inputtext p-component p-filled" />
+                            <input type="text" placeholder="Search" onInput={(e) => setGlobalFilter(e.target.value)} className="p-inputtext p-component p-filled    " />
                             <i className="pi pi-search"></i>
                         </span>
                         <button className="p-button p-button-primary p-component" onClick={() => setVisibleEdit(true)}>

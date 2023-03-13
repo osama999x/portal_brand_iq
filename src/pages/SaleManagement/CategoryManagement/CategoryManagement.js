@@ -9,65 +9,138 @@ import { handleGetRequest } from '../../../service/GetTemplate';
 import { handleDeleteRequest } from '../../../service/DeleteTemplete';
 import { useDispatch } from "react-redux";
 import AddEditCategory from './AddEditCategory';
+import { Image } from 'primereact/image';
+import AddEditSubCategory from '../subCategoryManagement/AddEditSubCategory';
+import { baseURL } from '../../../utilities/Config';
 // import { FileUpload } from 'primereact/fileupload';
 // import AddEditUsers from './AddEditUsers';
+
 
 const CategoryManagement = () => {
     const dispatch = useDispatch();
     const [visibleEdit, setVisibleEdit] = useState(false);
+    const [subVisibleEdit,setSubVisibleEdit] = useState(false);
     const [globalFilter, setGlobalFilter] = useState(null);
     const [visibleDelete, setVisibleDelete] = useState(false);
     const [editable, setEditable] = useState(false);
+    const [subEditable, setSubEditable] = useState(false);
+    const [expandedRows, setExpandedRows] = useState(null);
     const [categoryRowData, setCategoryRowData] = useState("");
-    const [categoryData, setCategoryData] = useState([]);
+    const [subCatRowData, setSubCatRowData] = useState("");
+    const [data, setdata] = useState([]);
+    const [expandedCatId, setExpandedCatId] = useState("");
+    const [subcategorydata, setSubcategorydata] = useState([]);
+    
+    
+        useEffect(() => {
+            getCategoryData();
+        }, []);
 
+    var selectedDeleteId;
     const onHide = () => {
         setEditable(false);
         setVisibleEdit(false);
+        setSubEditable(false);
+        setSubVisibleEdit(false);
     }
+    // const onSubHide = () => {
+    //     setSubEditable(false);
+    //     setSubVisibleEdit(false);
+    // }
     const getCategoryData = async () => {
         const res = await handleGetRequest("api/v1/category/all", false);
+        
         if (res) {
-            setCategoryData(res);
+            setdata(res);
         }
     };
-    useEffect(() => {
-        getCategoryData();
+
+
+    const getSubcategorydata = async () => {
+        //setloading(true);
+        const res = await handleGetRequest("api/v1/subcategory/all", false);
+        
+        if (res) {
+            await setSubcategorydata(res);
+
+        }
+        //setloading(false);
+    };
+    useEffect(async () => {
+        getSubcategorydata();
+
     }, []);
-    const RequestResetPassword = async () => {
+
+
+    const deleteCategory = async () => {
+
+        
         const data = {};
-        data["categoryId"] = categoryRowData;
+        data["categoryId"] = selectedDeleteId;
         const res = await dispatch(handleDeleteRequest(data, `api/v1/category/`, true, true));
+        
         // setloading(false);
         if (res?.status === 200) {
+        
             getCategoryData();
+            //window.location.reload();
         }
+        //getcategorydata();
     }
-    useEffect(() => {
-        if (visibleDelete === true) {
-            RequestResetPassword();
+    // useEffect(() => {
+    //     if (visibleDelete === true) {
+    //         RequestResetPassword();
+    //     }
+    // }, [visibleDelete]);
+
+
+
+    const deleteSubCategory = async () => {
+
+        
+        const data = {};
+        data["subcategoryId"] = selectedDeleteId;
+    
+        const res = await dispatch(handleDeleteRequest(data, `api/v1/subcategory/`, true, true));
+    
+        // setloading(false);
+        if (res?.status === 200) {
+        
+            getSubcategorydata();
+            //window.location.reload();
         }
-    }, [visibleDelete]);
-
-
-    const actionTemplate = (rowData) => {
-        return (
-            <div className="Edit_Icon">
-                <Button tooltip="Edit" icon="pi pi-pencil" tooltipOptions={{ position: "top" }} className="edit p-mr-2" onClick={() => editUsers(rowData)} />
-                <Button tooltip="Delete" icon="pi pi-trash" tooltipOptions={{ position: "top" }} className="delete p-mr-2 p-ml-3" onClick={() => confirm2(rowData)} />
-            </div>
-        );
-    };
+        //getcategorydata();
+    }
+    // useEffect(() => {
+    //     if (visibleDelete === true) {
+    //         RequestResetPassword();
+    //     }
+    // }, [visibleDelete]);
 
     const editUsers = (rowData) => {
-        setVisibleEdit(true);
+        setVisibleEdit(true); 
         setEditable(true);
         setCategoryRowData(rowData._id);
+                
     };
+
+    const subEditUsers = (rowData) =>{
+        setSubEditable(true);
+        setSubVisibleEdit(true);
+        setSubCatRowData(rowData._id);
+    }
+
+    // Accept Reject Dialog
+    
+    // Subcategory
+    var count = 0;
+
     const confirm2 = (rowData) => {
-        setCategoryRowData(rowData._id);
+        
+        count = count + 1;
+        selectedDeleteId = rowData._id;
         confirmDialog({
-            message: 'Do you want to delete this record?',
+            message: 'Are you sure you want to delete this item?',
             header: 'Delete Confirmation',
             icon: 'pi pi-trash',
             acceptClassName: 'Savebtn',
@@ -76,21 +149,182 @@ const CategoryManagement = () => {
             reject
         });
     };
+
+    //Category
+    const confirm = (rowData) => {
+        
+        count = count + 2;
+        selectedDeleteId =  rowData._id;
+        confirmDialog({
+            message: 'Are you sure you want to delete this item?',
+            header: 'Delete Confirmation',
+            icon: 'pi pi-trash',
+            acceptClassName: 'Savebtn',
+            rejectClassName: 'Cancelbtn',
+            accept,
+            reject
+        });
+      };
+   
+      
     const accept = () => {
-        setVisibleDelete(true);
-        // toast.current.show({ severity: 'info', summary: 'Confirmed', detail: 'You have accepted', life: 3000 });
+
+        if(count === 2)
+        {
+            
+            deleteCategory();
+            setVisibleDelete(true);
+        }
+        else if(count === 1)
+        {
+            
+            // RequestResetPassword();
+            deleteSubCategory();
+            setVisibleDelete(true);
+            // toast.current.show({ severity: 'info', summary: 'Confirmed', detail: 'You have accepted', life: 3000 });
+        }
     }
 
     const reject = () => {
-        setVisibleEdit(false);
-        // toast.current.show({ severity: 'info', summary: 'Rejected', detail: 'You have rejected', life: 3000 });
+
+        if(count === 2)
+        {
+            
+            setVisibleEdit(false);
+            setSubVisibleEdit(false);
+        }
+
+        else if(count === 1)
+        {
+            
+            setVisibleEdit(false);
+            setSubVisibleEdit(false);
+            // toast.current.show({ severity: 'info', summary: 'Rejected', detail: 'You have rejected', life: 3000 });
+        }
+
     }
     const toast = useRef(null);
+
+    // Expanded Data Table
+   
+
+    const actionTemplateCategory = (rowData) => {
+        return (
+            <div className="Edit_Icon">
+                <Button tooltip="Edit" icon="pi pi-pencil" tooltipOptions={{ position: "top" }} className="edit p-mr-2" onClick={() => editUsers(rowData)} />
+                <Button tooltip="Delete" icon="pi pi-trash" tooltipOptions={{ position: "top" }} className="delete p-mr-2 p-ml-3" onClick={() => confirm(rowData)} />
+            </div>
+        );
+    };
+
+    const serialTemplate = (rowData, props) => {
+        return (
+            <div>
+                {props.rowIndex + 1}
+            </div>
+        )
+    };
+    const allowExpansion = (rowData) => {
+
+        return <>
+            {rowData.length > 0};
+        </>
+
+    };
+
+    const imageTemplate = (rowData) => {
+        
+        return (
+            <React.Fragment>
+                {/* {rowData?.image} */}
+                {/* <img className='tbl__coupanImage' src={`http://20.212.227.60:3007/${rowData.image}`} alt="" /> */}
+                <Image src={`${baseURL}${rowData.icon}`} zoomSrc={`http://20.212.227.60:3007/${rowData.icon}`} alt="Image" width="80" height="60" preview />
+            </React.Fragment>
+        );
+    };
+    const subImageTemplate = (rowData) => {
+        return (
+            <React.Fragment>
+                {/* {rowData?.image} */}
+                {/* <img className='tbl__coupanImage' src={`http://20.212.227.60:3007/${rowData.image}`} alt="" /> */}
+                <Image src={`${baseURL}${rowData.icon}`} zoomSrc={`http://20.212.227.60:3007/${rowData.icon}`} alt="Image" width="80" height="60" preview />
+            </React.Fragment>
+        );
+    };
+
+    const actionTemplateSubcategory = (rowData) => {
+        
+        return (
+            <div className="Edit_Icon">
+                <Button tooltip="Edit" icon="pi pi-pencil" tooltipOptions={{ position: "top" }} className="edit p-mr-2" onClick={() => subEditUsers(rowData)} />
+                <Button tooltip="Delete" icon="pi pi-trash" tooltipOptions={{ position: "top" }} className="delete p-mr-2 p-ml-3" onClick={() => confirm2(rowData)} />
+                {/* <Button tooltip="Delete" icon="pi pi-trash" tooltipOptions={{ position: "top" }} className="delete p-mr-2 p-ml-3" onClick={confirm2} /> */}
+            </div>
+        );
+    };
+    const rowExpansionTemplate = (data) => {
+        return (
+            <div className="grid">
+            <div className="orders-subtable card col-12">
+                <h5>Sub-Categories for {data.name}</h5>
+                    <div className="col-12  md:col-12 lg:col-12 xl:col-12">
+                        <div className="text-right">
+                            <span className="p-input-icon-right mr-3">
+                                <input type="text" placeholder="Search" onInput={(e) => setGlobalFilter(e.target.value)} className="p-inputtext p-component p-filled" />
+                                <i className="pi pi-search"></i>
+                            </span>
+                        
+                            <button className="p-button p-button-primary p-component ml-3" onClick={() => setSubVisibleEdit(true)}>
+                                <span className="p-button-icon p-c p-button-icon-left pi pi-plus"></span>
+                                <span className="p-button-label p-c">Add New</span>
+                                <span className="p-ink"></span>
+                            </button>
+                        </div>
+                    </div>
+                    <div className="col-12 md:col-12 lg:col-12 xl:col-12">
+                        <div className="innr-Body">
+                <DataTable value={subcategorydata?.filter((item) => item.category?._id === data._id)} responsiveLayout="scroll">
+                    <Column body={(data, props) => {
+                        return <div>{props.rowIndex + 1}</div>
+                    }} header="Serial" />
+                    <Column body={subImageTemplate} header="Image" />
+                    <Column field="name" header="Sub-Category Name" sortable />
+                    <Column field="description" header="Description" sortable />
+                    <Column body={actionTemplateSubcategory} header="Action" />
+                </DataTable>
+                </div>
+            </div>
+            </div>
+            </div>
+        );
+    }
+
+    // const headerBtn = (
+    //     <div className="table-header-container">
+    //         <Button icon="pi pi-plus" label="Expand All" onClick={expandAll} className="mr-2" />
+    //         <Button icon="pi pi-minus" label="Collapse All" onClick={collapseAll} />
+    //     </div>
+    // );
+
+
+    const onRowExpand = (event) => {
+        setExpandedCatId(event.data._id);
+
+
+    }
     return (
         <>
+
+
             <Toast ref={toast} />
             <Dialog header={editable ? "EDIT" : "ADD NEW CATEGORY"} visible={visibleEdit} style={{ width: '40vw' }} onHide={onHide}>
-                <AddEditCategory getCategoryData={getCategoryData} editable={editable} onHide={onHide} categoryRowData={categoryRowData} />
+                <AddEditCategory getCategoryData={getCategoryData} editable={editable} onHide={()=>{
+                    onHide();
+                }} categoryRowData={categoryRowData} 
+                 />
+            </Dialog> 
+            <Dialog header={subEditable ? "EDIT" : "ADD NEW SUB-CATEGORY"} visible={subVisibleEdit} style={{ width: '40vw' }} onHide={onHide}>
+                <AddEditSubCategory getSubcategorydata={getSubcategorydata} subEditable={subEditable} onHide={()=>{onHide();}} subCatRowData={subCatRowData} />
             </Dialog>
 
             <div className="grid">
@@ -105,19 +339,27 @@ const CategoryManagement = () => {
                             <span className="p-button-label p-c">Add New</span>
                             <span className="p-ink"></span>
                         </button>
-
+                        {/* <button className="p-button p-button-primary p-component ml-3" onClick={() => setSubVisibleEdit(true)}>
+                            <span className="p-button-icon p-c p-button-icon-left pi pi-plus"></span>
+                            <span className="p-button-label p-c">Add Subcategory</span>
+                            <span className="p-ink"></span>
+                        </button> */}
                     </div>
                 </div>
                 <div className="col-12 md:col-12 lg:col-12 xl:col-12">
                     <div className="innr-Body">
-                        <DataTable rows={7} paginator responsiveLayout="scroll" value={categoryData} globalFilter={globalFilter}>
-                            {/* loading={loading}  */}
+                        <DataTable rows={7} paginator responsiveLayout="scroll" onRowExpand={onRowExpand} globalFilter={globalFilter} value={data} expandedRows={expandedRows} onRowToggle={(e) => {
+                            setExpandedRows(e.data);
+                        }}
 
-                            <Column field="_id" header="Category ID" sortable />
+                            rowExpansionTemplate={rowExpansionTemplate}
+                        >
+                            <Column expander={allowExpansion} style={{ width: '3em' }} />
+                            <Column body={serialTemplate} header="Serial no" />
+                            <Column body={imageTemplate} header="Product" />
                             <Column field="name" header="Category Name" sortable />
-                            {/* <Column body={RolesTemplate}  header="Category Name" /> */}
                             <Column field="description" header="Description" sortable />
-                            <Column body={actionTemplate} header="Action" />
+                            <Column body={actionTemplateCategory} header="Action" />
                         </DataTable>
                     </div>
                 </div>

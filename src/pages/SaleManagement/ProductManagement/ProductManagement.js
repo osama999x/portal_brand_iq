@@ -21,7 +21,7 @@ const ProductManagement = () => {
     const [productData, setProductData] = useState([]);
     
     const [loading,setloading] = useState(false);
-  
+    var selectedDeleteId;
 
     const onHide = () => {
         setEditable(false);
@@ -32,6 +32,7 @@ const ProductManagement = () => {
     const getProductData = async () => {   
         setloading(true);
         const res = await handleGetRequest("api/v1/products/all",false);
+        
         if (res) {
             setProductData(res);
         }
@@ -43,7 +44,7 @@ const ProductManagement = () => {
     const RequestResetPassword = async () => {
          setloading(true);
         let data = {};
-        data["productId"] = productRowData;
+        data["productId"] = selectedDeleteId;
        
         const res = await dispatch(handleDeleteRequest(data, `api/v1/products/`,true ,true));
         setloading(false);
@@ -62,12 +63,12 @@ const ProductManagement = () => {
         }
     
     }
-    useEffect(() => {
-        if (visibleDelete === true) {
-            RequestResetPassword();
-        }
+    // useEffect(() => {
+    //     if (visibleDelete === true) {
+    //         RequestResetPassword();
+    //     }
         
-    }, [visibleDelete]);
+    // }, [visibleDelete]);
 
   
     const actionTemplate = (rowData) => {
@@ -86,9 +87,10 @@ const ProductManagement = () => {
         setProductRowData(rowData._id);
     };
     const confirm2 = (rowData) => {
-        setProductRowData(rowData._id);
+        // setProductRowData(rowData._id);
+        selectedDeleteId = rowData._id;
         confirmDialog({
-            message: 'Do you want to delete this record?',
+            message: 'Are you sure you want to delete this item?',
             header: 'Delete Confirmation',
             icon: 'pi pi-trash',
             acceptClassName: 'Savebtn',
@@ -98,6 +100,7 @@ const ProductManagement = () => {
         });
     };
     const accept = () => {
+        RequestResetPassword();
         setVisibleDelete(true);
         // toast.current.show({ severity: 'info', summary: 'Confirmed', detail: 'You have accepted', life: 3000 });
     }
@@ -121,6 +124,15 @@ const ProductManagement = () => {
         const variantPrice = rowData?.variant[0]?.actualPrice;
         return <React.Fragment>{variantPrice}</React.Fragment>;
     }
+
+    const serialTemplate = (rowData, props) => {
+        return (
+            <div>
+                {props.rowIndex + 1}
+            </div>
+        )
+    };
+   
     const toast = useRef(null);
     return (
         <>
@@ -146,11 +158,13 @@ const ProductManagement = () => {
                     </div>
                 </div>
                 <div className="col-12 md:col-12 lg:col-12 xl:col-12">
+                
                     <div className="innr-Body">
-                        <DataTable globalFilter={globalFilter} rows={5} paginator responsiveLayout="scroll" value={productData}>
+                        <DataTable globalFilter={globalFilter} rows={7} paginator responsiveLayout="scroll" value={productData}>
                          {/* loading={loading}  */}
                          
-                            <Column field="_id" header="Product ID"  sortable/>
+                            {/* <Column field="_id" header="Product ID"  sortable/> */}
+                            <Column body={serialTemplate} header="Product ID" />
                             <Column field="name"  header="Product Name" sortable/>
                             <Column body={CategoryTemplete}  header="Category" sortable />
                             <Column body={SubCategoryTemplete}  header="Sub-Category" sortable />

@@ -10,9 +10,13 @@ import { handlePostRequest } from "../../../service/PostTemplate";
 import { handlePatchRequest } from "../../../service/PatchTemplete";
 import { useDispatch } from "react-redux";
 import { ProgressSpinner } from "primereact/progressspinner";
+//import { toast } from "react-toastify";
+//import MultiImage from "../../../components/MultiImage";
+import { InputTextarea } from 'primereact/inputtextarea';
 
 
-const AddEditCategory = ({ getCategoryData, onHide, editable, categoryRowData }) => {
+
+const AddEditCategory = ({ getCategoryData, onHide, editable, categoryRowData, }) => {
     const [loading, setLoading] = useState(false);
     const [fileUploadData, setfileUploadData] = useState("");
 
@@ -27,6 +31,7 @@ const AddEditCategory = ({ getCategoryData, onHide, editable, categoryRowData })
         data["roleId"] = categoryRowData;
         setLoading(true);
         const res = await handleGetRequest(`api/v1/category/getOne?categoryId=${categoryRowData}`, true);
+        
         setLoading(false);
         if (res) {
             const keyData = res;
@@ -42,7 +47,9 @@ const AddEditCategory = ({ getCategoryData, onHide, editable, categoryRowData })
         if (categoryRowData !== undefined && categoryRowData !== null && editable === true) {
             getUsersByID();
         }
+        
     }, []);
+    
 
     const validationSchema = Yup.object().shape({
         name: Yup.string()?.required("This field is required.")?.matches(onlyalphabetSRegex, "This field should contain alphabets only"),
@@ -58,23 +65,39 @@ const AddEditCategory = ({ getCategoryData, onHide, editable, categoryRowData })
             // permissionsId: "",
         },
         onSubmit: async (data) => {
+        
+            
             if (editable === true) {
-                data["categoryId"] = categoryRowData;
-                // data["icon"] = fileUploadData;
+                onHide()
+                    // toast.configure();
+                    
+                data["icon"] = fileUploadData;
+                data["categoryId"] = categoryRowData;             
                 const res = await dispatch(handlePatchRequest(data, "api/v1/category/", true, true));
+                
                 if (res?.status === 200) {
+                   
                     await getCategoryData();
+                    
                     formik.resetForm();
                     onHide();
+                    
+                    
                 }
+            
+              
             } else {
-                data["icon"] = fileUploadData;
+                data["icon"]= fileUploadData;
+                  //toast.configure();
+                  data["categoryId"] = categoryRowData;
                 const res = await dispatch(handlePostRequest(data, "api/v1/category/", true, true));
                 if (res?.status === 200) {
                     await getCategoryData();
                     formik.resetForm();
+                    
                     onHide();
                 }
+                
             }
         },
     });
@@ -84,12 +107,14 @@ const AddEditCategory = ({ getCategoryData, onHide, editable, categoryRowData })
     };
 
     const handleCancel = (e) => {
-        e.preventDefault();
-        onHide();
+         e.preventDefault();
+         onHide();
     };
     const handleImages = (images) => {
         setfileUploadData(images);
     };
+
+   
 
     return (
         <>
@@ -97,6 +122,7 @@ const AddEditCategory = ({ getCategoryData, onHide, editable, categoryRowData })
                 <ProgressSpinner style={{ display: "flex", justifyContent: "center", alignItem: "center", height: "50vh" }} strokeWidth="2" stroke-miterlimit="10" />
             ) : (
                 <form onSubmit={formik.handleSubmit}>
+                    
                     <div className="grid p-p-3">
                         <div className="col-12 md:col-12 lg:col-12 xl:col-12">
                             <div className="flex flex-column">
@@ -107,14 +133,14 @@ const AddEditCategory = ({ getCategoryData, onHide, editable, categoryRowData })
                         </div>
                         <div className="col-12 md:col-12 lg:col-12 xl:col-12">
                             <div className="flex flex-column">
-                                <label className="mb-2">Picture</label>
-                                <AddEditImage handleImages={handleImages} editable={editable} EditIconImage={formik?.values?.icon} />
+                                <label className="mb-2">Image</label>
+                                <AddEditImage handleImages={handleImages} editable={editable} EditIconImage={formik?.values.icon} />
                             </div>
                         </div>
                         <div className="col-12 md:col-12 lg:col-12 xl:col-12">
                             <div className="flex flex-column">
                                 <label className="mb-2">Description</label>
-                                <InputText
+                                <InputTextarea
                                     placeholder="Enter Description"
                                     id="description"
                                     name="description"
@@ -125,10 +151,12 @@ const AddEditCategory = ({ getCategoryData, onHide, editable, categoryRowData })
                                 {getFormErrorMessage("description")}
                             </div>
                         </div>
+                        
 
                         <div className="col-12 text-center">
-                            <Button label="Cancel" onClick={(e) => handleCancel(e)} className="Cancelbtn p-mr-3" />
-                            <Button disabled={loading} iconPos="right" label={editable ? "UPDATE" : "SAVE"} autoFocus className="Savebtn p-mr-3" />
+                                <Button label="Cancel" onClick={(e) => handleCancel(e)} className="Cancelbtn p-mr-3" />
+                                <Button  type="submit" disabled={loading}  iconPos="right" label={editable ? "Update" : "Save"} autoFocus className="Savebtn p-mr-3" />
+                                
                         </div>
                     </div>
                 </form>

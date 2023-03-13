@@ -5,14 +5,25 @@ import { Column } from 'primereact/column';
 // import { Dropdown } from 'primereact/dropdown';
 // import { useHistory } from 'react-router-dom';
 import { handleGetRequest } from '../../service/GetTemplate';
-
+import { FilterMatchMode } from "primereact/api";
 
 const Index = () => {
 
     const [inventoryData, setInventoryData] = useState([]);
     // const [loading, setloading] = useState(false);
     const [globalFilter, setGlobalFilter] = useState(null);
+    const [globalFilterValue, setGlobalFilterValue] = useState("");
+    const [filters, setFilters] = useState({
+        global: { value: null, matchMode: FilterMatchMode.CONTAINS },
+    });
 
+    const onGlobalFilterChange = (e) => {
+        const value = e.target.value;
+        let _filters = { ...filters };
+        _filters["global"].value = value;
+        setFilters(_filters);
+        setGlobalFilterValue(value);
+    };
     const getInventoryData = async () => {
         // setloading(true);
         const res = await handleGetRequest("api/v1/inventoryStatus/all", false);
@@ -33,7 +44,7 @@ const Index = () => {
 
                         <div className="">
                             <span class="p-input-icon-right mr-3">
-                                <input type="text" placeholder="Search" class="p-inputtext p-component p-filled" onInput={(e) => setGlobalFilter(e.target.value)} />
+                                <input type="text" placeholder="Search" onChange={onGlobalFilterChange} class="p-inputtext p-component p-filled" onInput={(e) => setGlobalFilter(e.target.value)} />
                                 <i class="pi pi-search"></i>
                             </span>
                         </div>
@@ -65,6 +76,7 @@ const Index = () => {
                             paginator
                             responsiveLayout="scroll"
                             value={inventoryData}
+                            globalFilterFields={["productsName"]}
                         >
                             <Column field="productsId" header="ProductID" />
                             <Column field="productsName" header="Product Name" />

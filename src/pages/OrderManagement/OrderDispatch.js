@@ -6,14 +6,23 @@ import { handleGetRequest } from "../../service/GetTemplate";
 import { Button } from "primereact/button";
 import { handlePostRequest } from "../../service/PostTemplate";
 import { useDispatch } from "react-redux";
-import { useHistory} from "react-router-dom";
+import { useHistory, useLocation} from "react-router-dom";
 
-const OrderDispatch = (props) => {
+const OrderDispatch = ({status,id}) => {
+
+// const location = useLocation();
 
     const [selectedCateg, setSelectedCateg] = useState();
     const [selectedStatus, setSelectedStatus] = useState();
     const [selectedCities1, setSelectedCities1] = useState(null);
-    const [orderId, setOrderId] = useState(props?.id);
+    const [orderId, setOrderId] = useState(id);
+
+
+    // useEffect(() => {
+    //     if(selectedStatus === "") {
+    //         setSelectedStatus(location?.state?.data?.status)
+    //     }
+    // }, [selectedStatus]);
 
     // const [orderId, setOrderId] = useState(props?.id ? props?.id:null);
 
@@ -34,8 +43,9 @@ const OrderDispatch = (props) => {
         data["orderStatus"] = selectedStatus;
         data["orderId"] = orderId;
        
-        console.log("data",data);
+        
         const res = await dispatch(handlePostRequest(data, "api/v1/order/orderDispatch", false));
+        
         if (res?.status === 200) {
             setOrderId(res);
         }
@@ -63,7 +73,10 @@ const OrderDispatch = (props) => {
     const getAllStatus = async () => {
         setloading(true);
         const res = await handleGetRequest("api/v1/orderStatus/all", false);
+        
         if (res) {
+            let selectedId=res.find((item)=>item.orderStatusName===status)?._id;
+            setSelectedStatus(selectedId);
             setSelectedCities1(res);
 
         }
@@ -125,13 +138,13 @@ const OrderDispatch = (props) => {
                 </div>
                 <div className="col-12 md:col-12 lg:col-12 xl:col-12">
                     <div className="flex flex-column">
-                        <label className="mb-2">Odered ID</label>
+                        <label className="mb-2">Ordered ID </label>
                         <InputText type="text" placeholder="Enter" className="w-full md:w-10 inputClass" value={orderId} />
                     </div>
                 </div>
                 <div className="col-12 text-center">
 
-                    <Button disabled={loading} iconPos="right" label={"Dispatch"} autoFocus className="Savebtn p-mr-3"
+                    <Button disabled={loading} iconPos="right" label={"Submit"} autoFocus className="Savebtn p-mr-3"
                         onClick={() => handleDispatch()} />
                 </div>
             </div>

@@ -5,7 +5,7 @@ import { trimData } from "../utilities/TrimPayloadData";
 import { loadingAction } from "../redux/actions/loadingAction";
 
 export const handlePostRequest =
-    (data, url, isShowLoad = false, isShowToast = true, isShowToastErr = false) =>
+    (data, url, isShowLoad = false, isShowToast = false, isShowToastErr = false) =>
     async (dispatch) => {
         //   data = await trimData(data);
         try {
@@ -21,7 +21,16 @@ export const handlePostRequest =
                 },
             });
 
-            if (isShowToast) toast.success(response?.data?.msg);
+            
+
+            if (isShowToast)
+            {
+                const res = response?.data?.msg;
+                console.log("res", response)
+                console.log("response", response?.data?.msg);
+                toast.success(res);  
+            } 
+            
             if (isShowLoad) dispatch(loadingAction(false));
             // return response?.data;
             return response;

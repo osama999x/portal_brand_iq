@@ -23,6 +23,7 @@ const Roles = () => {
     const [position, setPosition] = useState('center');
     const [userData, setUserData] = useState([]);
     const [loading,setloading] = useState(false);
+    var selectedDeleteId;
     const dialogFuncMap = {
         'displayBasic': setDisplayBasic,
         'displayBasic2': setDisplayBasic2,
@@ -67,7 +68,8 @@ const Roles = () => {
     const RequestResetPassword = async () => {
         // setloading(true);
         const data = {};
-        data["roleId"] = usersRowData;
+        data["roleId"] = selectedDeleteId;
+        
         const res = await dispatch(handleDeleteRequest(data, `api/v1/role/`,false ,false));
         if (res?.status === 200) {
             getRoleData();
@@ -98,12 +100,12 @@ const Roles = () => {
             </div>
         );
     };
-    const PermissionsTemplate = (rowData) => {
-        const roles = rowData?.permissions;
-        const rolesName = roles.map((name) => name?.name).toString();
-        return <React.Fragment>{rolesName.replace(/,/g, ', ')}</React.Fragment>;
+    // const PermissionsTemplate = (rowData) => {
+    //     const roles = rowData?.permissions;
+    //     const rolesName = roles.map((name) => name?.name).toString();
+    //     return <React.Fragment>{rolesName.replace(/,/g, ', ')}</React.Fragment>;
 
-    }
+    // }
     
     const editUsers = (rowData) => {
         setVisibleEdit(true);
@@ -111,9 +113,10 @@ const Roles = () => {
         setUsersRowData(rowData._id);
     };
     const confirm2 = (rowData) => {
-        setUsersRowData(rowData._id);
+        selectedDeleteId = rowData._id;
+        //setUsersRowData(rowData._id);
         confirmDialog({
-            message: 'Do you want to delete this record?',
+            message: 'Are you sure you want to delete this item?',
             header: 'Delete Confirmation',
             icon: 'pi pi-trash',
             acceptClassName: 'Savebtn',
@@ -123,6 +126,7 @@ const Roles = () => {
         });
     };
     const accept = () => {
+        RequestResetPassword();
         setVisibleDelete(true);
         // toast.current.show({ severity: 'info', summary: 'Confirmed', detail: 'You have accepted', life: 3000 });
     }
@@ -161,7 +165,7 @@ const Roles = () => {
                         <DataTable globalFilter={globalFilter} rows={7} paginator responsiveLayout="scroll" value={userData}>
                             <Column field="name" header="User Role" />
                             <Column field="description" header="Description" />
-                            <Column body={PermissionsTemplate} header="Assign Rights" />
+                            {/* <Column body={PermissionsTemplate} header="Assign Rights" /> */}
                             <Column body={actionTemplate} header="Action" />
                         </DataTable>
                     </div>

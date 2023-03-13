@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { DataTable } from 'primereact/datatable';
 import { Button } from 'primereact/button';
 import { Column } from 'primereact/column';
@@ -10,10 +10,10 @@ import { Rating } from 'primereact/rating';
 const Index = () => {
     const [globalFilter, setGlobalFilter] = useState(null);
     const [feedback, setFeedback] = useState([]);
-    const [loading, setloading] = useState(false);
+    //const [loading, setloading] = useState(false);
     const [visibleEdit, setVisibleEdit] = useState(false);
-    const [editable, setEditable] = useState(false);
-    const [customerRowData, setCustomerRowData] = useState("");
+    //const [editable, setEditable] = useState(false);
+    //const [customerRowData, setCustomerRowData] = useState("");
 
     const renderFooter = (name, canDel) => {
         return (
@@ -27,7 +27,7 @@ const Index = () => {
         );
     };
     const getFeedbackData = async () => {
-        setloading(true);
+      //  setloading(true);
         const res = await handleGetRequest("api/v1/feedback/all", false);
         // console.log("data Object",res);
         if (res) {
@@ -35,26 +35,26 @@ const Index = () => {
             // console.log("show File data",res);
 
         }
-        setloading(false);
+        //setloading(false);
     };
     useEffect(() => {
         getFeedbackData();
     }, []);
 
-    const actionTemplate = (rowData) => {
-        return (
-            <div className="Edit_Icon">
-                <Button tooltip="Details" icon="pi pi-eye" tooltipOptions={{ position: "top" }} className="edit p-mr-2" onClick={() => editUsers(rowData)} />
-            </div>
-        );
-    };
-    const editUsers = (rowData) => {
-        setVisibleEdit(true);
-        setEditable(true);
-        setCustomerRowData(rowData.customerId._id);
-    };
+    // const actionTemplate = (rowData) => {
+    //     return (
+    //         <div className="Edit_Icon">
+    //             <Button tooltip="Details" icon="pi pi-eye" tooltipOptions={{ position: "top" }} className="edit p-mr-2" onClick={() => editUsers(rowData)} />
+    //         </div>
+    //     );
+    // };
+    // const editUsers = (rowData) => {
+    //     setVisibleEdit(true);
+    //   //  setEditable(true);
+    //     setCustomerRowData(rowData.customerId._id);
+    // };
     const onHide = () => {
-        setEditable(false);
+        //setEditable(false);
         setVisibleEdit(false);
     }
     const customerNameTemplete = (rowData) => {

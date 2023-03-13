@@ -17,10 +17,10 @@ import { useHistory, useLocation } from "react-router-dom";
 import { Dialog } from "primereact/dialog";
 import OrderDispatch from "./OrderDispatch";
 
-const AddEditOrderManagement = (props) => {
-    console.log("Props here:    ", props)
+const AddEditOrderManagement = () => {
+
     let { search, state } = useLocation();
-    // console.log('state here',state)
+    
     const query = new URLSearchParams(search);
     const orderRowData = query.get("orderid");
     const editable = orderRowData ? true : false;
@@ -31,8 +31,9 @@ const AddEditOrderManagement = (props) => {
     const [displayDialog, setDisplayDialog] = useState(false);
     const [productData, setProductData] = useState();
 
+
     const history = useHistory();
-    console.log("Data here: ", { search, state, history });
+    
     const dispatch = useDispatch();
 
     const onHide = (name) => {
@@ -41,18 +42,31 @@ const AddEditOrderManagement = (props) => {
 
     };
 
+
+
     const handleDialog = () => {
 
         setDisplayDialog(true);
 
     };
+    const handleCancel = (e) => {
+        e.preventDefault();
+        history.push("./ordermanagement")
+        onHide();
+    };
+    const [status, setStatus] = useState();
+    const [id, setId] = useState();
 
     const getUsersByID = async () => {
         const data = {};
         data["roleId"] = orderRowData;
         setLoading(true);
         const res = await handleGetRequest(`api/v1/order/detail?orderId=${orderRowData}`, true);
+    
         if (res) {
+            setStatus(res.status);
+            setId(res._id);
+
             setProductData(res?.product)
             const keyData = res;
             setLoading(false);
@@ -101,7 +115,7 @@ const AddEditOrderManagement = (props) => {
                 // if (res?.status === 200) {
                 //     await getOrderData();
                 //     formik.resetForm();
-                //     // onHide();
+                //      onHide();
                 // }
             } else {
                 data["icon"] = fileUploadData;
@@ -122,10 +136,11 @@ const AddEditOrderManagement = (props) => {
     };
 
     const categoryTemplete = (rowData) => {
-        return <React.Fragment>{rowData?.categoryId?.name}</React.Fragment>;
+        return <React.Fragment>{rowData?.productId?.category?.name}</React.Fragment>;
     };
     const subCategoryTemplete = (rowData) => {
-        return <React.Fragment>{rowData?.subcategoryId?.name}</React.Fragment>;
+        
+        return <React.Fragment>{rowData?.productId?.subcategory?.name}</React.Fragment>;
     };
     const productTemplete = (rowData) => {
         return <React.Fragment>{rowData?.productId?.name}</React.Fragment>;
@@ -133,8 +148,8 @@ const AddEditOrderManagement = (props) => {
 
     return (
         <>
-            <Dialog header="ORDER DISPATAH" visible={displayDialog} style={{ width: "40vw" }} closable={true}  onHide={() => onHide('displayDialog')}>
-                <OrderDispatch id={state?.id} />
+            <Dialog header="Order Status" visible={displayDialog} style={{ width: "40vw" }} closable={true} onHide={() => onHide('displayDialog')}>
+                <OrderDispatch status={status} id={state?.id} />
             </Dialog>
 
             {loading ? (
@@ -181,7 +196,7 @@ const AddEditOrderManagement = (props) => {
                                 <div className="col-12 innr_padding mt-3 mb-3">
                                     <div className="grid">
                                         <div className="col-12 md:col-12 lg:col-12 xl:col-12">
-                                            <div className="innr-Body">
+                                            <div className="innr-Body ">
                                                 <DataTable rows={5} responsiveLayout="scroll" value={productData} >
                                                     <Column body={categoryTemplete} header="Category" />
                                                     <Column body={subCategoryTemplete} header="Sub-Category" />
@@ -195,8 +210,8 @@ const AddEditOrderManagement = (props) => {
                                 </div>
                             </div>
                             <div className="grid">
-                                <div className="col-12 text-right pt-4">
-
+                                <div className="col-12 text-center pt-4">
+                                    <Button label="Cancel" onClick={(e) => handleCancel(e)} className="Cancelbtn p-mr-3" />
                                     <Button autoFocus className="Savebtn" label="Process" onClick={handleDialog} />
                                 </div>
                             </div>

@@ -9,18 +9,21 @@ import { handlePatchRequest } from "../../../service/PatchTemplete";
 import { classNames } from 'primereact/utils';
 import { Button } from 'primereact/button';
 import AddEditImage from "../../../components/AddEditImage";
-import { Dropdown } from 'primereact/dropdown';
+//import { Dropdown } from 'primereact/dropdown';
+import { Checkbox } from "primereact/checkbox";
+import moment from 'moment';
 
 const Addedit = ({ onHide, getCoupandata, addEditCoupan, coupanRowData }) => {
 
     const [loading, setloading] = useState(false);
+    
     // const [statusoption, setstatusoption] = useState(false);
     const [fileUploadData, setfileUploadData] = useState("");
     const dispatch = useDispatch();
     const getMembersByID = async () => {
-        const data = {};
-        data["coupanId"] = coupanRowData;
-        const res = await handleGetRequest(`api/v1/coupan/getOne?coupanId=${coupanRowData}`, true);
+       // const data = {};
+        // data["couponId"] = coupanRowData;
+        const res = await handleGetRequest(`api/v1/coupon/getOne?couponId=${coupanRowData}`, true);
         setloading(false);
         if (res) {
             const keyData = res;
@@ -33,45 +36,55 @@ const Addedit = ({ onHide, getCoupandata, addEditCoupan, coupanRowData }) => {
     }
 
     const validationSchema = Yup.object().shape({
-        coupanCode: Yup.mixed().required("This field is required."),
-        coupanValue: Yup.mixed().required("This field is required."),
-        activeFrom: Yup.mixed().required("This field is required."),
-        activeTo: Yup.mixed().required("This field is required."),
-        isActive: Yup.mixed().required("This field is required."),
+        // couponCode:Yup.string().required("This field is required"),
         // image: Yup.mixed().required("This field is required."),
+        // expireDate: Yup.string().required("This field is required"),
+        // orderPriceLimit: Yup.mixed().required("This field is required."),
+        // couponValue: Yup.mixed().required("This field is required."),
+        // // activeFrom: Yup.mixed().required("This field is required."),
+        // // activeTo: Yup.mixed().required("This field is required."),
+        // // isActive: Yup.mixed().required("This field is required."),
+         
 
     });
-    const formik = useFormik({
+    const formik = useFormik({  
         validationSchema: validationSchema,
         initialValues: {
-            coupanCode: "",
-            coupanValue: "",
-            activeFrom: "",
-            activeTo: "",
-            isActive: "",
-            image: ""
+            couponCode:"",
+             image: "",
+            expireDate:"",
+            orderPriceLimit: "",
+            couponValue: "",
+            // activeFrom: "",
+            // activeTo: "",
+            // isActive: "",
+            
         },
         onSubmit: async (data) => {
             if (addEditCoupan === true) {
-                data["image"] = fileUploadData;
-                data["coupanId"] = coupanRowData;
-                const res = await dispatch(handlePatchRequest(data, "api/v1/coupan", true, true));
+                data["image"] = fileUploadData[0];
+                 data["couponId"] = coupanRowData;
+                const res = await dispatch(handlePatchRequest(data, "api/v1/coupon", true, true));
                 if (res.status === 200) {
                     await getCoupandata();
+                    formik.resetForm();
+                    onHide();
                 }
-                onHide();
+                
             } else {
                 data["image"] = fileUploadData;
-                data["coupanId"] = coupanRowData;
-                const res = await dispatch(handlePostRequest(data, "api/v1/coupan", true, true));
-                // console.log("Coupan Add Response", res);
+                data["expireDate"] = moment().format("MM/DD/YYYY")     
+                const res = await dispatch(handlePostRequest(data, "api/v1/coupon", true, true));
                 if (res?.status === 200 || res?.status === 201) {
                     await getCoupandata();
+                    formik.resetForm();
+                    onHide();
                 }
-                onHide();
+            
             }
         },
     });
+
 
     const isFormFieldValid = (name) => !!(formik.touched[name] && formik.errors[name]);
     const getFormErrorMessage = (name) => {
@@ -91,49 +104,115 @@ const Addedit = ({ onHide, getCoupandata, addEditCoupan, coupanRowData }) => {
         { name: 'Active', status: true },
         { name: 'InActive', status: false },
     ];
+    const couponOption = [  
+        { name: 'Flate',cpn:'flate' },
+        { name: 'Product',cpn:'product'},
+    ];
 
     return (
         <div>
-
+                   
             <form onSubmit={formik.handleSubmit}>
                 <div className="grid">
+                    <div className="col-12 md:col-12 lg:col-12 xs:col-12">
+                        <div className="flex flex-column">
+                            <label className="mb-2">Coupon Code</label>
+                            <InputText
+                                name='couponCode'
+                                id='couponCode'
+                                keyfilter="int"
+                                className={classNames({ "p-invalid": isFormFieldValid("couponCode") }, "w-full md:w-10 inputClass")}
+                                value={formik.values.couponCode}
+                                onChange={formik.handleChange}
+                                placeholder=""
+                            />
+                        </div>
+                        {getFormErrorMessage("couponCode")}
+                    </div>
                     <div className="col-12 md:col-12 lg:col-12 xl:col-12">
                         <div className="flex flex-column">
                             <label className="mb-2">Upload Voucher</label>
                             <AddEditImage handleImages={handleImages} editable={addEditCoupan} EditIconImage={formik?.values?.image} />
                         </div>
                     </div>
+
                     <div className="col-12 md:col-12 lg:col-12 xs:col-12">
                         <div className="flex flex-column">
-                            <label className="mb-2">Coupan Code</label>
+                            <label htmlFor="fromDate">Expire Date</label>
                             <InputText
-                                name='coupanCode'
-                                id='coupanCode'
-                                keyfilter="int"
-                                className={classNames({ "p-invalid": isFormFieldValid("coupanCode") }, "w-full md:w-10 inputClass")}
-                                value={formik.values.coupanCode}
+                                id="expireDate"
+                                name="expireDate"
+                                value={moment(formik.values.expireDate).format("YYYY-MM-DD")}
                                 onChange={formik.handleChange}
-                                placeholder=""
-                            />
-                        </div>
-                        {getFormErrorMessage("coupanCode")}
-                    </div>
-                    <div className="col-12 md:col-12 lg:col-12 xs:col-12">
-                        <div className="flex flex-column">
-                            <label htmlFor="fromDate"> From Date</label>
-                            <InputText
-                                id="activeFrom"
-                                name="activeFrom"
-                                value={formik.values.activeFrom.split('T')[0]}
-                                onChange={formik.handleChange}
-                                className={classNames({ "p-invalid": isFormFieldValid("activeFrom") }, "w-full md:w-10 inputClass")}
+                                className={classNames({ "p-invalid": isFormFieldValid("expireDate") }, "w-full md:w-10 inputClass")}
                                 optionlabel="name"
                                 type="date"
                             />
                         </div>
-                        {getFormErrorMessage("activeFrom")}
+                        {getFormErrorMessage("expireDate")}
                     </div>
                     <div className="col-12 md:col-12 lg:col-12 xs:col-12">
+                        <div className="flex flex-column">
+                            <label className="mb-2">Order Price Limit</label>
+                            <InputText
+                                name='orderPriceLimit'
+                                id='orderPriceLimit'
+                                className={classNames({ "p-invalid": isFormFieldValid("orderPriceLimit") }, "w-full md:w-10 inputClass")}
+                                value={formik.values.orderPriceLimit}
+                                onChange={formik.handleChange}
+                                placeholder=""
+                            />
+                        </div>
+                        {getFormErrorMessage("orderPriceLimit")}
+                    </div>
+                 
+                     <div className="col-12 md:col-6 lg:col-6 xl:col-6">
+                        <div className="flex flex-column">
+                            <label className="mb-2">Is Active</label>
+                            <Checkbox id="isActive" name="isActive" inputId="binary" checked={formik?.values?.isActive} onChange={formik.handleChange} />
+                            {getFormErrorMessage("isActive")}
+                        </div>
+                    </div> 
+                    <div className="col-12 md:col-6 lg:col-6 xl:col-6">
+                        <div className="flex flex-column">
+                            <label className="mb-2">Is Percentage</label>
+                            <Checkbox id="isPercentage" name="isPercentage" inputId="binary" checked={formik?.values?.isPercentage} onChange={formik.handleChange} />
+                            {getFormErrorMessage("isPercentage")}
+                        </div>
+                    </div>
+                    <div className="col-12 flex innr_padding">
+                        <div className="col-12 md:col-12 lg:col-12 xs:col-12">
+                            <div className="flex flex-column">
+                                <label className="mb-2">Coupon Value </label>
+                                <InputText
+                                    name='couponValue'
+                                    id='couponValue'
+                                    type="number"
+                                    className={classNames({ "p-invalid": isFormFieldValid("couponValue") }, "w-full md:w-10 inputClass")}
+                                    value={formik.values.couponValue}
+                                    onChange={formik.handleChange}
+                                />
+                            </div>
+                            {getFormErrorMessage("couponValue")}
+                        </div>
+                    </div>
+                    {/* <div className="col-12 md:col-12 lg:col-12 xs:col-12">
+                        <div className="flex flex-column">
+                            <label className="mb-2">Coupan Type</label>
+                            <Dropdown
+                                id="couponType"
+                                name="couponType"
+                                value={formik.values.couponType}
+                                onChange={formik.handleChange}
+                                className={classNames({ "p-invalid": isFormFieldValid("couponType") }, "w-full md:w-10 inputClass")}
+                                options={couponOption}
+                                optionLabel="name"
+                                optionValue="cpn"
+                            />
+                        </div> 
+                     {getFormErrorMessage("couponType")}
+                    </div>  */}
+                    {/* <div className="col-12 md:col-12 lg:col-12 xs:col-12">
                         <div className="flex flex-column">
                             <label htmlFor="fromDate"> To Date</label>
                             <InputText
@@ -148,8 +227,8 @@ const Addedit = ({ onHide, getCoupandata, addEditCoupan, coupanRowData }) => {
 
                         </div>
                         {getFormErrorMessage("activeTo")}
-                    </div>
-                    <div className="col-12 md:col-12 lg:col-12 xs:col-12">
+                    </div> */}
+                    {/* <div className="col-12 md:col-12 lg:col-12 xs:col-12">
                         <div className="flex flex-column">
                             <label className="mb-2">Status</label>
                             <Dropdown
@@ -164,23 +243,8 @@ const Addedit = ({ onHide, getCoupandata, addEditCoupan, coupanRowData }) => {
                             />
                         </div>
                         {getFormErrorMessage("isActive")}
-                    </div>
-                    <div className="col-12 flex innr_padding">
-                        <div className="col-12 md:col-12 lg:col-12 xs:col-12">
-                            <div className="flex flex-column">
-                                <label className="mb-2">Coupan Value </label>
-                                <InputText
-                                    name='coupanValue'
-                                    id='coupanValue'
-                                    type="number"
-                                    className={classNames({ "p-invalid": isFormFieldValid("coupanValue") }, "w-full md:w-10 inputClass")}
-                                    value={formik.values.coupanValue}
-                                    onChange={formik.handleChange}
-                                />
-                            </div>
-                            {getFormErrorMessage("coupanValue")}
-                        </div>
-                    </div>
+                    </div> */}
+                 
                     <div className="col-12 md:col-12 xl:col-12 lg:col-12 text-center">
                         <Button
                             label="Cancel"

@@ -1,7 +1,7 @@
 import React from 'react';
 import { TabView, TabPanel } from 'primereact/tabview';
 import CategoryManagement from './CategoryManagement/CategoryManagement';
-import SubCategoryManagement from './subCategoryManagement/subCategoryManagement';
+//import SubCategoryManagement from './subCategoryManagement/subCategoryManagement';
 import ProductManagement from './ProductManagement/ProductManagement';
 const Index = () => {
   return (
@@ -9,16 +9,17 @@ const Index = () => {
         <div className="grid">
                 <div className="col-12 md:col-12 lg:col-12 xs:col-12">
                   
-                    <TabView>
+                    <TabView > 
+                    <TabPanel header="Product Management"  className="productIcon">
+                            <ProductManagement />
+                        </TabPanel>
                         <TabPanel header="Category Management" className="categoryIcon">
                             <CategoryManagement/>
                         </TabPanel>
-                        <TabPanel header="Sub-Category Management" className="subCategoryIcon">
+                        {/* <TabPanel header="Sub-Category Management" className="subCategoryIcon">
                             <SubCategoryManagement />
-                        </TabPanel>
-                        <TabPanel header="Product Management"  className="productIcon">
-                            <ProductManagement />
-                        </TabPanel>
+                        </TabPanel> */}
+                      
                     </TabView>
                 </div>
 

@@ -17,7 +17,7 @@ const PointsManagement = () => {
   const [globalFilter, setGlobalFilter] = useState(null);
   const [pointsdata, setPointsdata] = useState([]);
   const [visibleDelete, setVisibleDelete] = useState(false);
-
+  var selectedDeleteId; 
   const dispatch = useDispatch();
 
   const getPointdata = async () => {
@@ -53,22 +53,23 @@ const PointsManagement = () => {
   };
   const RequestResetPassword = async () => {
     const data = {};
-    data["pointManageId"] = pointRowData;
+    data["pointManageId"] = selectedDeleteId;;
     const res = await dispatch(handleDeleteRequest(data, `api/v1/pointManage`, true, true));
     if (res?.status === 200) {
       getPointdata();
     }
   }
-  useEffect(() => {
-    if (visibleDelete === true) {
-      RequestResetPassword();
-    }
-  }, [visibleDelete]);
+  // useEffect(() => {
+  //   if (visibleDelete === true) {
+  //     RequestResetPassword();
+  //   }
+  // }, [visibleDelete]);
 
   const confirm2 = (rowData) => {
-    setPointRowData(rowData._id);
+    // setPointRowData(rowData._id);
+    selectedDeleteId = rowData._id;
     confirmDialog({
-      message: 'Do you want to delete this record?',
+      message: 'Are you sure you want to delete this item?',
       header: 'Delete Confirmation',
       icon: 'pi pi-trash',
       acceptClassName: 'Savebtn',
@@ -78,11 +79,12 @@ const PointsManagement = () => {
     });
   };
   const accept = () => {
+    RequestResetPassword();
     setVisibleDelete(true);
   }
 
   const reject = () => {
-    setVisibleDelete(false);
+    setVisibleDelete(false);   
   }
   const toast = useRef(null);
   return (
@@ -105,11 +107,11 @@ const PointsManagement = () => {
               <input type="text" placeholder="Search" class="p-inputtext p-component p-filled" onInput={(e) => setGlobalFilter(e.target.value)} />
               <i class="pi pi-search"></i>
             </span>
-            <button className="p-button p-button-primary p-component" onClick={() => setDisplayBasic(true)}>
+            {/* <button className="p-button p-button-primary p-component" onClick={() => setDisplayBasic(true)}>
               <span className="p-button-icon p-c p-button-icon-left pi pi-plus"></span>
               <span className="p-button-label p-c">Create</span>
               <span className="p-ink"></span>
-            </button>
+            </button> */}
 
           </div>
         </div>
@@ -122,7 +124,7 @@ const PointsManagement = () => {
               responsiveLayout="scroll"
               value={pointsdata}>
               {/* <Column field="_id" header="Policy ID" /> */}
-              <Column field="initialPoint" header="Initial Point" />
+              <Column field="initialPoint" header="SignUp Point" />
               <Column field="pointOrderPrice" header="Order Price" />
               <Column field="pointPerOrder" header="Points Per Order" />
               <Column body={actionTemplate} header="Action" />

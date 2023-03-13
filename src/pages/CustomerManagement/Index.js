@@ -17,10 +17,10 @@ const Index = () => {
                         <TabPanel header="Points Management" className="pointManagement">
                             <PointsManagement />
                         </TabPanel>
-                        <TabPanel header="Coupan Policy Management" className="coupanManagement">
+                        <TabPanel header="Coupon Policy Management" className="coupanManagement">
                             <CoupanPolicy />
                         </TabPanel>
-                        <TabPanel header="Membership Benifit Management" className="membershipManagement">
+                        <TabPanel header="Membership Benefit Management" className="membershipManagement">
                             <MembershipBenifits />
                         </TabPanel>
                     </TabView>

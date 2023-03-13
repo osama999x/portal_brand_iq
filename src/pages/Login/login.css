@@ -32,29 +32,61 @@
     background-position: center;
 
 }
+.forgotbg_body {
+    /* background-image: url(/static/media/background1.2f356eab.svg); */
+    background-image: url(../../assets/background2.svg);
+    position: relative;
+    background-repeat: no-repeat;
+    background-size: cover;
+    height: 100vh;
+    background-position: center;
+
+}
+.resetbg_body{
+    background-image: url(../../assets/background3.svg);
+        position: relative;
+        background-repeat: no-repeat;
+        background-size: cover;
+        height: 100vh;
+        background-position: center;
+}
+.heading{
+    color: #000;
+    text-align: center;
+}
 
 .img_email {
-    background-image   : url(../../assets/Login/email.svg) !important;
+    /* background-image   : url(../../assets/Login/email.svg) !important; */
     background-repeat  : no-repeat !important;
     background-position: 7px !important;
-    padding-left       : 30px;
+    /* padding-left       : 30px; */
 
 
 
 }
 
 .password__class {
-    background-image   : url(../../assets/Login/password.svg) !important;
+    /* background-image   : url(../../assets/Login/password.svg) !important; */
     background-repeat  : no-repeat !important;
     background-position: 7px !important;
     padding-left       : 30px;
     z-index            : 999 !important;
+    
 
 }
+/* .otp_class{  
+        width: '3rem';  
+        height: '3rem';  
+        margin: '20px 1rem';  
+        font-size: '1rem';  
+        border-radius: 4;  
+        border: '2px solid rgba(0,0,0,0.3)',
+
+} */
 
 .Form-inputfield .p-inputtext {
     width        : 100% !important;
-    padding-left : 30px !important;
+    padding-left : 11px !important;
     height       : 40px;
     margin-top   : 10px;
     margin-bottom: 5px;
@@ -69,6 +101,9 @@
     text-align: center;
 
 
+}
+.heading{
+color: #000;
 }
 
 .login_container {
@@ -212,4 +247,8 @@
         height: auto;
     }
 
+}.otp-input input {
+    width: 50px;
+    margin-right: 33px;
+    
 }

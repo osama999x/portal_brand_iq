@@ -76,7 +76,7 @@ const Addedit = ({ onHide, getPointdata, addeditable, pointRowData }) => {
 
                 <div className="col-12 md:col-12 lg:col-12 xl:col-12">
                     <div className="flex flex-column">
-                        <label className="mb-2">Initial Point</label>
+                        <label className="mb-2">SignUp Point</label>
                         <InputText
                             name='initialPoint'
                             id='initialPoint'

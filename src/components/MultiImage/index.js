@@ -56,7 +56,8 @@ function MultiImage({ handleImages }) {
                 let newfiles = JSON.parse(JSON.stringify(files));
                 const filetype = file.type.split("/");
                 newfiles.push({ fileBase64: reader.result, fileName: file.name, fileSize: file.size, fileExtension: `.${filetype[1]}` });
-                setImgBase64((imgBase64) => [...imgBase64, reader.result])
+                //setImgBase64(reader.result)
+                 setImgBase64((imgBase64) => [...imgBase64, reader.result])
                 // newfiles.push({ fileBase64: reader.result});
                 setfiles(newfiles);
             }

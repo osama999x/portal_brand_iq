@@ -39,7 +39,7 @@ const Login = () => {
                 history.push("/");
             }
             setloading(false);
-            setloadingIcon("");
+            setloadingIcon(true);
             // formik.resetForm();
         }
     });
@@ -56,7 +56,7 @@ const Login = () => {
         <div className="bg_body">
             <div className="header__login">
                 <h2>Welcome to</h2>
-                <h3>Z-Store</h3>
+                <h3>M-Safa</h3>
             </div>
             <div className="login_container">
                 <div className="row d-flex justify-content-center">
@@ -67,11 +67,11 @@ const Login = () => {
                             </div>
                             <div className="Form-inputfield">
                                 <div>
-                                    <label className="form-control" htmlFor="email">User Name / Email</label>
+                                    <label className="form-control" htmlFor="email">Email</label>
                                     <InputText name="email"
                                         id="email"
-                                        className="img_email"
-                                        placeholder="Enter Your Email"
+                                        //className="img_email"
+                                        placeholder="Enter Email"
                                         value={formik.values.email}
                                         onChange={formik.handleChange} autoFocus />
                                     {getFormErrorMessage('email')}
@@ -82,11 +82,11 @@ const Login = () => {
                                     <InputText type="password"
                                         name="password"
                                         id="password"
-                                        placeholder="Enter Your Password"
+                                        placeholder="Enter Password"
                                         value={formik.values.password}
                                         onChange={formik.handleChange}
-                                        className="password__class"
-                                        // toggleMask
+                                        //className="password__class"
+                                    // toggleMask
                                     />
                                     {getFormErrorMessage('password')}
                                 </div>

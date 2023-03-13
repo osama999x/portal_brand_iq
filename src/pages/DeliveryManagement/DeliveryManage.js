@@ -43,7 +43,7 @@ const DeliveryManage = () => {
     };
     const confirm2 = () => {
         confirmDialog({
-            message: 'Do you want to delete this record?',
+            message: 'Are you sure you want to delete this item?',
             header: 'Delete Confirmation',
             icon: 'pi pi-trash',
             acceptClassName: 'Savebtn',

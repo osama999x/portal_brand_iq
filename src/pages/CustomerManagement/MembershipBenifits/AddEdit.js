@@ -10,6 +10,7 @@ import { classNames } from 'primereact/utils';
 import { Button } from 'primereact/button';
 import AddEditImage from "../../../components/AddEditImage";
 import { Dropdown } from 'primereact/dropdown';
+import { InputTextarea } from 'primereact/inputtextarea';
 // import { Dropdown } from 'primereact/dropdown';
 
 const AddEdit = ({ onHide, getMemberBenifitdata, addeditable, benifitRowData }) => {
@@ -55,7 +56,7 @@ const AddEdit = ({ onHide, getMemberBenifitdata, addeditable, benifitRowData }) 
         },
         onSubmit: async (data) => {
             if (addeditable === true) {
-                data["image"] = fileUploadData;
+                data["image"] = fileUploadData[0];
                 data["membershipBenifitId"] = benifitRowData;
                 const res = await dispatch(handlePatchRequest(data, "api/v1/membershipBenifit", true, true));
                 if (res.status === 200) {
@@ -147,7 +148,7 @@ const AddEdit = ({ onHide, getMemberBenifitdata, addeditable, benifitRowData }) 
                     <div className="col-12 md:col-12 lg:col-12 xs:col-12">
                         <div className="flex flex-column">
                             <label htmlFor="fromDate">Description</label>
-                            <InputText
+                            <InputTextarea
                                 id="description"
                                 name="description"
                                 value={formik.values.description}
