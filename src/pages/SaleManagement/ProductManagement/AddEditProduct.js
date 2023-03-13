@@ -28,6 +28,7 @@ import EditSizeDialog from "./edit_size_dialog";
 import { Image } from 'primereact/image';
 //import { getClippingParents } from "@fullcalendar/core";
 import { baseURL } from "../../../utilities/Config";
+import { Chips } from 'primereact/chips';
 
 const AddEditProduct = ({ getProductData, onHide, editable, productRowData }) => {
     const [loading, setLoading] = useState(false);
@@ -1393,10 +1394,23 @@ const AddEditProduct = ({ getProductData, onHide, editable, productRowData }) =>
                                     {getFormErrorMessage("metaDataString")}
                                 </div>
                             </div>
+                             {/* <div className="col-12 md:col-4">
+                                <div className="flex flex-column">
+                                    <label className="mb-2">Meta Data</label>
+                                    <Chips id="metaDataString"
+                                        name="metaDataString"
+                                         value={formik?.values?.metaDataString}
+                                         onChange={formik.handleChange}
+                                         className={classNames({ "p-invalid": isFormFieldValid("metaDataString") }, "w-full md:w-10 inputClass")}
+                                          separator="," />
+                                    {getFormErrorMessage("metaDataString")}
+                                </div>
+                            </div> */}
                             <div className="col-12 md:col-4">
                                 <div className="flex flex-column">
                                     <label className="mb-2">Meta Description</label>
                                     <InputTextarea 
+                                    rows={5} cols={30}
                                         placeholder="Enter Meta Description"
                                         id="metaDescriptionString"
                                         name="metaDescriptionString"
@@ -1411,6 +1425,7 @@ const AddEditProduct = ({ getProductData, onHide, editable, productRowData }) =>
                                 <div className="flex flex-column">
                                     <label className="mb-2">Description</label>
                                     <InputTextarea 
+                                    rows={5} cols={30}
                                         placeholder="Enter Description"
                                         id="description"
                                         name="description"
@@ -1425,6 +1440,7 @@ const AddEditProduct = ({ getProductData, onHide, editable, productRowData }) =>
                                 <div className="flex flex-column">
                                     <label className="mb-2">Long Description</label>
                                     <InputTextarea 
+                                    rows={5} cols={30}
                                         placeholder="Enter Long Description"
                                         id="longDescription"
                                         name="longDescription"

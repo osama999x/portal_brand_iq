@@ -141,6 +141,7 @@ const AddEditCategory = ({ getCategoryData, onHide, editable, categoryRowData, }
                             <div className="flex flex-column">
                                 <label className="mb-2">Description</label>
                                 <InputTextarea
+                                rows={5} cols={30}
                                     placeholder="Enter Description"
                                     id="description"
                                     name="description"
