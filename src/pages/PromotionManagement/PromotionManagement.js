@@ -7,7 +7,6 @@ import { confirmDialog } from 'primereact/confirmdialog';
 import { handleGetRequest } from '../../service/GetTemplate';
 import { handleDeleteRequest } from '../../service/DeleteTemplete';
 import { useDispatch } from 'react-redux';
-import moment from 'moment';
 //import { baseURL } from '../../utilities/Config';
 import AddPromotion from './AddPromotion';
 import { useHistory, useParams } from "react-router-dom";
@@ -108,13 +107,21 @@ const PromotionManagement = () => {
     //     return <div className={rowData?.isActive === true ? "green" : "red"}>{rowData?.isActive === true ? "Active" : "InActive"}</div>;
     // };
 
+    // const expireDateTemplete = (rowData) => {
+    //     return (
+    //         <React.Fragment>
+    //             {moment(rowData?.expireDate).format("YYYY-MM-DD")}
+    //         </React.Fragment>
+    //     );
+    // };
     const expireDateTemplete = (rowData) => {
         return (
             <React.Fragment>
-                {moment(rowData?.expireDate).format("YYYY-MM-DD")}
+                {rowData?.expireDate?.split('T')[0]}
             </React.Fragment>
         );
     };
+
     const subcategoryTemplate = (rowData) => {
         
         return (

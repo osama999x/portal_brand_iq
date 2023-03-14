@@ -56,7 +56,7 @@ const OrderDispatch = ({status,id}) => {
         setloading(true);
 
         const res = await handleGetRequest("api/v1/deliverypartner/deliverPartnerList", false);
-
+        console.log("M&P",res)
         if (res) {
             setDeliveryPaetner(res);
         }
@@ -73,7 +73,7 @@ const OrderDispatch = ({status,id}) => {
     const getAllStatus = async () => {
         setloading(true);
         const res = await handleGetRequest("api/v1/orderStatus/all", false);
-        
+        console.log("ccc",res)
         if (res) {
             let selectedId=res.find((item)=>item.orderStatusName===status)?._id;
             setSelectedStatus(selectedId);
