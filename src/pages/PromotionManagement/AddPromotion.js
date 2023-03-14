@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { InputText } from 'primereact/inputtext';
 import * as Yup from "yup";
@@ -7,17 +8,18 @@ import { handleGetRequest } from '../../service/GetTemplate';
 import { handlePatchRequest } from '../../service/PatchTemplete';
 import { classNames } from 'primereact/utils';
 import { Button } from 'primereact/button';
-import moment from 'moment';
 import { handlePostRequest } from '../../service/PostTemplate';
 import { MultiSelect } from "primereact/multiselect";
 import { Dropdown } from "primereact/dropdown";
+
 
 const AddPromotion = ({ onHide, getPromotiondata, addEditPromotion, promotionRowData, rowDataId  }) => {
 
     const [loading, setloading] = useState(false);
     const [subCategories, setSubCategories] = useState();
     const [products, setProducts] = useState([]);
-    const [subcategory, setSubCategory] = useState([]);
+
+    
     
     const dispatch = useDispatch();
     
@@ -58,7 +60,7 @@ const AddPromotion = ({ onHide, getPromotiondata, addEditPromotion, promotionRow
             } else {
             
                 data["campaignId"] = rowDataId;
-                data["expireDate"] = moment().format("MM/DD/YYYY")
+               // data["expireDate"] = moment().format("MM/DD/YYYY")
                 
                 const res = await dispatch(handlePostRequest(data, "api/v1/promotion/addPromotion", true, true));
                 if (res?.status === 200 || res?.status === 201) {
@@ -72,6 +74,7 @@ const AddPromotion = ({ onHide, getPromotiondata, addEditPromotion, promotionRow
     });
     const getAllSubCategories = async () => {
         const response = await handleGetRequest("api/v1/subcategory/all", false);
+        console.log("Sub",response)
         
         if (response) {
             setSubCategories(response);
@@ -119,8 +122,6 @@ const AddPromotion = ({ onHide, getPromotiondata, addEditPromotion, promotionRow
     ];
     
     const getPromotionByID = async () => {
-        const data = {};
-        // data["couponId"] = coupanRowData;
         const res = await handleGetRequest(`api/v1/promotion/getOnePromotion?promotionId=${promotionRowData}`, true);
         
         
@@ -137,6 +138,7 @@ const AddPromotion = ({ onHide, getPromotiondata, addEditPromotion, promotionRow
             });
              
             formik.setFieldValue("product", [keyData["product"][0]["_id"]] );
+            console.log(formik.setFieldValue("product", [keyData["product"][0]["_id"]] ));
              formik.setFieldValue("subcategory", keyData["subcategory"]["_id"]);
            
             
@@ -158,7 +160,7 @@ const AddPromotion = ({ onHide, getPromotiondata, addEditPromotion, promotionRow
                                 value={formik?.values?.subcategory}
                                 onChange={formik.handleChange}
                                  placeholder="Sub Category"
-                                optionLabel="category.name"
+                                optionLabel="name"
                                 optionValue="_id"
                                 options={subCategories}
                                                        />
@@ -179,7 +181,7 @@ const AddPromotion = ({ onHide, getPromotiondata, addEditPromotion, promotionRow
                                 htmlFor="product"
                                 options={products}
                                 value={formik?.values?.product}
-                                optionLabel="category.name"
+                                optionLabel="name"
                                 optionValue="_id"
                                 onChange={formik.handleChange}
                             />
@@ -210,7 +212,8 @@ const AddPromotion = ({ onHide, getPromotiondata, addEditPromotion, promotionRow
                             <InputText
                                 id="expireDate"
                                 name="expireDate"
-                                value={moment(formik.values.expireDate).format("YYYY-MM-DD")}
+                                //value={moment(formik.values.expireDate).format("YYYY-MM-DD")}
+                                value={formik.values.expireDate.split('T')[0]}
                                 onChange={formik.handleChange}
                                 className={classNames({ "p-invalid": isFormFieldValid("expireDate") }, "w-full md:w-10 inputClass")}
                                 optionlabel="name"

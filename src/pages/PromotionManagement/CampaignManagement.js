@@ -125,20 +125,34 @@ const CampaignManagement = () => {
     //     return <div className={rowData?.isActive === true ? "green" : "red"}>{rowData?.isActive === true ? "Active" : "InActive"}</div>;
     // };
 
+    // const fromDateTemplate = (rowData) => {
+    //     return (
+    //         <React.Fragment>
+    //             {moment(rowData?.activeFrom).format("YYYY-MM-DD")}
+    //         </React.Fragment>
+    //     );
+    // };
     const fromDateTemplate = (rowData) => {
         return (
             <React.Fragment>
-                {moment(rowData?.activeFrom).format("YYYY-MM-DD")}
+                {moment(rowData?.activeFrom).format("YYYY-MM-DD HH:mm a")}
             </React.Fragment>
         );
-    };
+    }
     const toDateTemplate = (rowData) => {
         return (
             <React.Fragment>
-                {moment(rowData?.activeTo).format("YYYY-MM-DD")}
+                {moment(rowData?.activeTo).format("YYYY-MM-DD HH:mm a")}
             </React.Fragment>
         );
-    };
+    }
+    // const toDateTemplate = (rowData) => {
+    //     return (
+    //         <React.Fragment>
+    //             {moment(rowData?.activeTo).format("YYYY-MM-DD")}
+    //         </React.Fragment>
+    //     );
+    // };
 
     const imageTemplate = (rowData) => {
         return (

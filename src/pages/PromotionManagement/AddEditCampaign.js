@@ -11,6 +11,7 @@ import MultiImage from '../../components/MultiImage';
 import moment from 'moment';
 import { handlePostRequest } from '../../service/PostTemplate';
 import { InputTextarea } from 'primereact/inputtextarea';
+import { Calendar } from 'primereact/calendar'
 //import { current } from '@reduxjs/toolkit';
 //import AddEditImage from '../../components/AddEditImage';
 
@@ -29,11 +30,18 @@ const AddEditCampaign = ({ onHide, getCampigndata, addEditCampign, campignRowDat
         if (res) {
             
             const keyData = res;
-            Object.keys(keyData).forEach((key) => {
-                if (formik.initialValues.hasOwnProperty(key)) {
-                    formik.setFieldValue(key, keyData[key]);
-                }
-            });
+            formik.setFieldValue("campaignName",keyData.campaignName);
+            formik.setFieldValue("description",keyData.description);
+            formik.setFieldValue("banner",keyData.banner);
+            formik.setFieldValue("activeFrom",new Date(keyData.activeFrom));
+            console.log("activeFrom",keyData.activeFrom)
+            formik.setFieldValue("activeTo",new Date(keyData.activeTo));
+            console.log("activeTo",keyData.activeTo)
+            // Object.keys(keyData).forEach((key) => {
+            //     if (formik.initialValues.hasOwnProperty(key)) {
+            //         formik.setFieldValue(key, keyData[key]);
+            //     }
+            // });
         }
     }
 
@@ -71,8 +79,8 @@ const AddEditCampaign = ({ onHide, getCampigndata, addEditCampign, campignRowDat
 
             } else {
                 data["banner"] = fileUploadData[0];
-                data["activeFrom"] = moment().format("MM/DD/YYYY")
-                data["activeTo"] = moment().format("MM/DD/YYYY")
+                // data["activeFrom"] = moment().format("MM/DD/YYYY")
+                // data["activeTo"] = moment().format("MM/DD/YYYY")
             
                 
                 const res = await dispatch(handlePostRequest(data, "api/v1/promotion/", true, true));
@@ -154,7 +162,7 @@ const AddEditCampaign = ({ onHide, getCampigndata, addEditCampign, campignRowDat
                         </div>
                     </div>
                   
-                    <div className="col-12 md:col-12 lg:col-12 xs:col-12">
+                    {/* <div className="col-12 md:col-12 lg:col-12 xs:col-12">
                         <div className="flex flex-column">
                                 <label htmlFor="fromDate">Active From</label>
                             <InputText
@@ -169,8 +177,52 @@ const AddEditCampaign = ({ onHide, getCampigndata, addEditCampign, campignRowDat
                             />
                         </div>
                             {getFormErrorMessage("activeFrom")}
+                    </div> */}
+                     <div className="col-12 md:col-12 lg:col-12 xs:col-12">
+                        <div className="flex flex-column">
+                                <label htmlFor="fromDate">Active From</label>
+                            <Calendar
+                                id="activeFrom"
+                                name="activeFrom"
+                                value={formik.values.activeFrom}
+                                // value={formik.values.activeFrom}
+                                 //onChange={formik.handleChange}
+                                 //onChange={(e) => formik.setFieldValue("activeFrom", e.value)}
+                                 onChange={(e) => formik.setFieldValue('activeFrom', e.value)}
+                                className={classNames({ "p-invalid": isFormFieldValid("activeFrom") }, "w-full md:w-10 inputClass")}
+                                optionlabel="name"
+                                showTime
+                                hourFormat="12"
+                                type="date"
+                               // min={disabledPastDate()}
+                            />
+                        </div>
+                            {getFormErrorMessage("activeFrom")}
                     </div>
-                    <div className="col-12 md:col-12 lg:col-12 xs:col-12">
+                             <div className="col-12 md:col-12 lg:col-12 xs:col-12">
+                        <div className="flex flex-column">
+                            <label htmlFor="fromDate">Active To</label>
+                            <Calendar
+                                id="activeTo"
+                                name="activeTo"
+                                //value={moment(formik.values.activeTo).format("YYYY-MM-DD HH:mm a")}
+                                //value={formik.values.activeTo.split('T')[0]}
+                                value={formik.values.activeTo}
+                                //onChange={formik.handleChange}
+                                onChange={(e) => formik.setFieldValue('activeTo', e.value)}
+                                //onChange={(e) => formik.setFieldValue("activeTo", e.value)}
+                                className={classNames({ "p-invalid": isFormFieldValid("activeTo") }, "w-full md:w-10 inputClass")}
+                                optionlabel="name"
+                                type="date"
+                                showTime
+                                min={formik.values.activeFrom}
+                                hourFormat="12"
+                               // min={disabledPastDate()}
+                            />
+                        </div>
+                        {getFormErrorMessage("activeTo")}
+                    </div>
+                    {/* <div className="col-12 md:col-12 lg:col-12 xs:col-12">
                         <div className="flex flex-column">
                             <label htmlFor="fromDate">Active To</label>
                             <InputText
@@ -186,7 +238,7 @@ const AddEditCampaign = ({ onHide, getCampigndata, addEditCampign, campignRowDat
                             />
                         </div>
                         {getFormErrorMessage("activeTo")}
-                    </div>
+                    </div> */}
                     <div className="col-12 md:col-12 xl:col-12 lg:col-12 text-center">
                         <Button
                             label="Cancel"
