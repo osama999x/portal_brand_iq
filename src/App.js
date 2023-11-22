@@ -26,6 +26,7 @@ import CustomerMangement from "./pages/RegisteredUsers/CustomerManagement";
 import CustomerDetails from "./pages/RegisteredUsers/CustomerDetails";
 import ReviewsManagement from "./pages/ReviewsManagement/index";
 import Feedback from "./pages/Feedback/Index";
+import CustomerCare from "./pages/CustomerCare/Index";
 import ShipmentManagement from "./pages/ShipmentManagement/Index";
 import DeliveryManagement from "./pages/DeliveryManagement/DeliveryManage";
 import CreateDeliveryManagement from "./pages/DeliveryManagement/DeliverySubmenu/AddEditDelivery";
@@ -58,7 +59,12 @@ import AddEditPromtionManagement from "./pages/PromotionManagement/AddEditPromot
 // import ResetPassword from "./pages/ResetPassword/ResetPassword"
 import CampaignManagement from "./pages/PromotionManagement/CampaignManagement";
 import ReturnManage from "./pages/ReturnPolicy/ManageReturn";
+import SubCategoryManagement from "./pages/SaleManagement/subCategoryManagement/subCategoryManagement";
+import ReviewsDetail from "./pages/ReviewsManagement/ReviewsDetail";
+import AssignRole from "./pages/AssignRole/AssignRole";
+
 const App = () => {
+
     const [storedEmail, setStoredEmail] = useState("");
     const [layoutMode, setLayoutMode] = useState("static");
     const [layoutColorMode, setLayoutColorMode] = useState("light");
@@ -74,6 +80,32 @@ const App = () => {
     const isActive = useSelector((state) => state?.authenticationSlice?.isActive);
     const copyTooltipRef = useRef();
     const location = useLocation();
+    const [isLogin, SetIsLogin] = useState();
+    const [sideBar, setSideBar] = useState([])
+
+    const authState = useSelector(state => state.authenticationSlice)
+
+    const [dynamicMenu, setDynamicMenu] = useState([{
+        items: [{ label: "Dashboard", icon: "pi pi-table", to: "/" }],
+    }])
+
+    useEffect(() => {
+        if (authState?.permissions) {
+            getPermissions()
+        }
+    }, [authState?.permissions])
+
+    // const handleMenuItemClick = (item) => {
+    //     if (item?.item?.label && item?.item?.icon) {
+    //         setClickedItem(item);
+    //     }
+    // };
+    // const handleSubMenuItemClick = (item) => {
+    //     if (item?.item?.label && item?.item?.to) {
+    //         setSubClickedItem(item);
+    //     }
+    // };
+
     require("dotenv").config();
     PrimeReact.ripple = true;
 
@@ -91,6 +123,9 @@ const App = () => {
     useEffect(() => {
         copyTooltipRef && copyTooltipRef.current && copyTooltipRef.current.updateTargetEvents();
     }, [location]);
+
+
+
 
     const onInputStyleChange = (inputStyle) => {
         setInputStyle(inputStyle);
@@ -170,20 +205,68 @@ const App = () => {
     const isDesktop = () => {
         return window.innerWidth >= 992;
     };
-     
-   
+
+    const getPermissions = async () => {
+        const permissions = localStorage.getItem("permissions");
+        if (permissions === null || permissions === undefined || permissions === "undefined") {
+            // console.log("sdda")
+            return;
+        }
+
+        // console.log("below")
+        // console.log("permissions: ", permissions)
+        const perms = JSON.parse(permissions && permissions);
+
+        let result = perms?.modules && perms?.modules.map((item) => {
+            // console.log("UTREEEN", item)
+            return {
+                label: item.module?.label,
+                to: item?.module?.route,
+                items: mapChilds(item.sub_Modules),
+                icon: item?.module?.icon,
+            }
+
+        });
+
+        result = result.filter((item) => item.items.length === 0)
+        setDynamicMenu((prev) => {
+            return [...prev, {
+                items: result
+            }]
+        });
+        // console.log("result", result)
+    }
+
+    const mapChilds = (list) => {
+        // console.log("list", list)
+        return list
+            .map(item => {
+                return {
+                    label: item.name,
+                    route: item.route,
+                    icon: item.icon,
+                };
+            });
+    };
+
+
+    // console.log("dynamicMenu: ", dynamicMenu)
+    // const getPremissions = async () => {
+
+    // }
+
     const menu = [
         {
             items: [
                 {
                     label: "Dashboard",
-                        icon: "pi pi-fw pi-th-large",
+                    icon: "pi pi-fw pi-th-large",
                     to: "/",
                 },
             ],
         },
         {
-            items: [{ label: "User Management", icon: "pi pi-fw pi-user", to: "/usermangement" }],
+            items: [{ label: "User Management", icon: "pi pi-fw pi-user", to: "/usermanagement" }],
         },
         {
             items: [{ label: "Taxes Management", icon: "pi pi-fw pi-id-card", to: "/taxesmanagement" }],
@@ -210,7 +293,7 @@ const App = () => {
             items: [{ label: "Orders Management", icon: "pi pi-fw pi-shopping-cart", to: "/ordermanagement" }],
         },
         {
-            items: [{ label: "Dispute Policy", icon: "pi pi-fw pi-backward", to: "/returnmanage" }],
+            items: [{ label: "Dispute Policy", icon: "pi pi-fw pi-backward", to: "/returnmanagement" }],
         },
         {
             items: [{ label: "Inventory Status", icon: "pi pi-fw pi-folder-open", to: "/inventorystatus" }],
@@ -224,9 +307,9 @@ const App = () => {
         {
             items: [{ label: "Reviews Management", icon: "pi pi-fw pi-camera", to: "/reviewsmanagement" }],
         },
-         {
-             items: [{ label: "Feedback", icon: "pi pi-fw pi-chevron-left", to: "/feedback" }],
-         },
+        {
+            items: [{ label: "Feedback", icon: "pi pi-fw pi-chevron-left", to: "/feedback" }],
+        },
         // {
         //     items: [{ label: "To Day Deal", icon: "pi pi-fw pi-tags", to: "/dealmanagement" }],
         // },
@@ -253,13 +336,20 @@ const App = () => {
         "layout-theme-light": layoutColorMode === "light",
     });
 
+    useEffect(() => {
+        getPermissions()
+    }, [])
+
+    function loginResponse(args) {
+        setSideBar(args);
+    }
 
     return (
         <div className={wrapperClass} onClick={onWrapperClick}>
             {/* <GlobalLoader isShow={isLoading} /> */}
-            <ToastContainer/>
+            <ToastContainer />
             <Tooltip ref={copyTooltipRef} target=".block-action-copy" position="bottom" content="Copied to clipboard" event="focus" />
-            {!localStorage.getItem("login") === true ? (
+            {!localStorage.getItem("login") ? (
                 <div>
                     {/* <Route path="/" component={Login} /> */}
                     <Switch>
@@ -267,6 +357,7 @@ const App = () => {
                         <Route exact path="/forgetpassword" render={() => <Forget setStoredEmail={setStoredEmail} />} />
                         <Route exact path="/OTPView/:email" render={() => <OTP storedEmail={storedEmail} />} />
                         <Route exact path="/resetpass/:email" render={() => <ResetPass storedEmail={storedEmail} />} />
+                        <Route path="/" render={() => <Login loginResponse={loginResponse} />} />
                         <Redirect to="/" />
                     </Switch>
                 </div>
@@ -275,20 +366,19 @@ const App = () => {
                     <AppTopbar onToggleMenuClick={onToggleMenuClick} layoutColorMode={layoutColorMode} mobileTopbarMenuActive={mobileTopbarMenuActive} onMobileTopbarMenuClick={onMobileTopbarMenuClick} onMobileSubTopbarMenuClick={onMobileSubTopbarMenuClick} />
 
                     <div className="layout-sidebar" onClick={onSidebarClick}>
-                        <AppMenu model={menu} onMenuItemClick={onMenuItemClick} layoutColorMode={layoutColorMode} />
+                        <AppMenu model={dynamicMenu} onMenuItemClick={onMenuItemClick} layoutColorMode={layoutColorMode} />
                     </div>
-                        
-
                     <div className="layout-main-container">
                         <div className="layout-main">
                             <Switch>
                                 <Route exact path="/" render={() => <Dashboard />} />
                                 {/* <Route exact path="/login" render={() => <Login />} /> */}
-                                <Route exact path="/usermangement" element={<UserMangement/>} render={() => <UserMangement />} />
+                                <Route exact path="/usermanagement" element={<UserMangement />} render={() => <UserMangement />} />
                                 <Route exact path="/taxesmanagement" render={() => <TaxesManagement />} />
                                 <Route exact path="/salemanagement" render={() => <SaleManagement />} />
+                                <Route exact path="/subcategorymanage" render={() => <SubCategoryManagement />} />
                                 <Route exact path="/discountmanage" render={() => <DiscountManage />} />
-                                <Route exact path="/promotionmanagement" render={() => <CampaignManagement/>} />
+                                <Route exact path="/promotionmanagement" render={() => <CampaignManagement />} />
                                 <Route exact path="/promotiondetail" render={() => <AddEditCampaign />} />
                                 <Route exact path="/managepromotion/:id" render={() => <PromotionManagment />} />
                                 <Route exact path="/managepromotiondetail" render={() => <AddEditPromtionManagement />} />
@@ -299,15 +389,20 @@ const App = () => {
                                 <Route exact path="/createdeliverymanagement" render={() => <CreateDeliveryManagement />} />
                                 <Route exact path="/editdeliverymanagement" render={() => <EditDeliveryManagement />} />
                                 <Route exact path="/ordermanagement" render={() => <OrderManagement />} />
-                                <Route exact path="/returnmanage" render={() => <ReturnManage />} />
+                                <Route exact path="/returnmanagement" render={() => <ReturnManage />} />
                                 <Route exact path="/detailreturnordermanagement" render={() => <AddEditReturn />} />
                                 <Route exact path="/detailordermanagement" render={() => <AddEditOrderManagement />} />
                                 <Route exact path="/inventorystatus" render={() => <InventoryStatus />} />
                                 <Route exact path="/registeredusers" render={() => <CustomerMangement />} />
                                 <Route exact path="/reviewsmanagement" render={() => <ReviewsManagement />} />
-                                {/* <Route exact path="/dealmanagement" render={() => <ManageDeal/>} /> */}
+                                <Route exact path="/reviewdetail" render={() => <ReviewsDetail />} />
+                                {/* <Route exact path="/dealmanagement" render={() => <ManageDeal />} /> */}
                                 {/* <Route exact path="/productsupload" render={() => <UploadBulkProducts />} /> */}
                                 <Route exact path="/feedback" render={() => <Feedback />} />
+                                <Route exact path="/customercare" render={() => <CustomerCare />} />
+
+
+                                {/* <Route exact path="/assignrole" render={() => <AssignRole />} /> */}
                             </Switch>
                         </div>
                     </div>

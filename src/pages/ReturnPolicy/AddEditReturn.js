@@ -22,7 +22,10 @@ import OrderRetured from "./OrderRetured";
 const AddEditReturn = (props) => {
 
     let { search, state } = useLocation();
-    
+
+    console.log("stasddste", state?.id)
+
+
     const query = new URLSearchParams(search);
     const orderRowData = query.get("orderid");
     const editable = orderRowData ? true : false;
@@ -36,6 +39,7 @@ const AddEditReturn = (props) => {
     const [exchange, setExchange] = useState();
     const [shipment, setShipment] = useState();
     const [data, setData] = useState([]);
+    const [myId, setMyId] = useState();
 
     const history = useHistory();
     const dispatch = useDispatch();
@@ -47,7 +51,7 @@ const AddEditReturn = (props) => {
     };
 
     useEffect(() => {
-        
+
     }, [data])
 
     const handleDialog = () => {
@@ -57,7 +61,7 @@ const AddEditReturn = (props) => {
     };
     const handleCancel = (e) => {
         e.preventDefault();
-        history.push("./returnmanage")
+        history.push("./returnmanagement")
         onHide();
     };
 
@@ -66,9 +70,9 @@ const AddEditReturn = (props) => {
         data["roleId"] = orderRowData;
         setLoading(true);
         const res = await handleGetRequest(`api/v1/returnOrder/details?orderId=${orderRowData}`, true);
-        
+
         setReturnProduct(res?.returnProduct[0]?.productId?._id)
-        
+
         setExchange(res?.exchangeReason)
         setShipment(res?.shipmentType)
         setProductData(res?.orderId?.product);
@@ -174,14 +178,14 @@ const AddEditReturn = (props) => {
 
 
                 <Image src={`${baseURL}/${orderRowData}`} zoomSrc={`http://20.212.227.60:3007/${data}`} alt="Image" width="80" height="60" preview />
-                
+
             </React.Fragment>
         );
     };
 
 
     // const subImageTemplate = (rowData) => {
-    
+
     //     return (
     //         <React.Fragment>
     //             {/* {rowData?.image} */}
@@ -190,10 +194,12 @@ const AddEditReturn = (props) => {
     //         </React.Fragment>
     //     );
     // };
+
     return (
         <>
-            <Dialog header="ORDER RETURED" visible={displayDialog} style={{ width: "40vw" }} closable={true} onHide={() => onHide('displayDialog')}>
+            <Dialog header="Order Returned" visible={displayDialog} style={{ width: "40vw" }} closable={true} onHide={() => onHide('displayDialog')}>
                 <OrderRetured id={state?.id} />
+
             </Dialog>
 
             {loading ? (
@@ -202,7 +208,7 @@ const AddEditReturn = (props) => {
                 <form onSubmit={formik.handleSubmit}>
                     <div className="card headr_bg">
                         <div className="card-header">
-                            <label>DETAILS</label>
+                            <label>Details</label>
                         </div>
                         <div className="card-body">
                             <div className="grid">
@@ -277,7 +283,7 @@ const AddEditReturn = (props) => {
                             </div>
                             <div className="grid">
                                 <div className="col-12 text-center pt-4">
-                                <Button label="Cancel" onClick={(e) => handleCancel(e)}  className="Cancelbtn p-mr-3" />
+                                    <Button label="Cancel" onClick={(e) => handleCancel(e)} className="Cancelbtn p-mr-3" />
                                     <Button autoFocus className="Savebtn" label="Process" onClick={handleDialog} />
                                 </div>
                             </div>

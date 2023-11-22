@@ -13,9 +13,11 @@ import AddEditCampaign from './AddEditCampaign';
 import { useHistory } from "react-router-dom";
 //import AddPromotion from './AddPromotion';
 import PromotionManagement from './PromotionManagement';
+import Edit from '../../assets/ICONS/icon_edit.png';
+import Delete from '../../assets/ICONS/icon_delete.png';
 const CampaignManagement = () => {
 
-  //  const [rowDataId, setRowDataId] = useState();
+    //  const [rowDataId, setRowDataId] = useState();
     //const [campaignId, setCampaignID] = useState("");
     const [displayBasic, setDisplayBasic] = useState(false);
     const [campigndata, setCampigndata] = useState([]);
@@ -24,15 +26,15 @@ const CampaignManagement = () => {
     const [campignRowData, setCampignRowData] = useState("");
     const [visibleDelete, setVisibleDelete] = useState(false);
     const [selectedDeleteId, setSelectedDeleteId] = useState('')
-    
+
     // const [promotionRowData, setPromotionRowData] = useState("");
     const history = useHistory();
 
     const dispatch = useDispatch();
 
     const getCampigndata = async () => {
-        const res = await handleGetRequest("api/v1/promotion/all", false);
-        
+        const res = await handleGetRequest("api/v1/promotion/web/all", false);
+
         if (res) {
             setCampigndata(res);
         }
@@ -42,7 +44,7 @@ const CampaignManagement = () => {
     }, []);
     useEffect(() => {
         if (visibleDelete === true) {
-            
+
             deleteCampaign();
         }
     }, [visibleDelete]);
@@ -55,8 +57,12 @@ const CampaignManagement = () => {
 
         return (
             <div className="Edit_Icon">
-                <Button tooltip="Edit" icon="pi pi-pencil" tooltipOptions={{ position: "top" }} className="edit p-mr-2" onClick={() => editcampign(rowData)} />
-                <Button tooltip="Delete" icon="pi pi-trash" tooltipOptions={{ position: "top" }} className="delete p-mr-2 p-ml-3" onClick={() => { confirm2(rowData) }} />
+                <Button tooltip="Edit" tooltipOptions={{ position: "top" }} className="edit p-mr-2" onClick={() => editcampign(rowData)} >
+                    <img src={Edit} />
+                </Button>
+                <Button tooltip="Delete" tooltipOptions={{ position: "top" }} className="delete p-mr-2 p-ml-3" onClick={() => { confirm2(rowData) }} >
+                    <img src={Delete} />
+                </Button>
                 <Button
                     tooltip=" Add Promotion"
                     icon="pi pi-arrow-circle-right"
@@ -71,7 +77,7 @@ const CampaignManagement = () => {
 
     //const a = "";
     const forwardId = (rowData) => {
-        
+
         history.push("/managepromotion/" + rowData._id)
     }
 
@@ -88,8 +94,8 @@ const CampaignManagement = () => {
 
 
     }
-    
-    
+
+
 
 
     const editcampign = (rowData) => {
@@ -104,7 +110,7 @@ const CampaignManagement = () => {
 
         setSelectedDeleteId(rowData._id)
         confirmDialog({
-            message: 'Are you sure you want to delete this item?',
+            message: 'Are you sure you want to delete this campign?',
             header: 'Delete Confirmation',
             icon: 'pi pi-trash',
             acceptClassName: 'Savebtn',
@@ -132,17 +138,12 @@ const CampaignManagement = () => {
     //         </React.Fragment>
     //     );
     // };
+
+
     const fromDateTemplate = (rowData) => {
         return (
             <React.Fragment>
                 {moment(rowData?.activeFrom).format("YYYY-MM-DD HH:mm a")}
-            </React.Fragment>
-        );
-    }
-    const toDateTemplate = (rowData) => {
-        return (
-            <React.Fragment>
-                {moment(rowData?.activeTo).format("YYYY-MM-DD HH:mm a")}
             </React.Fragment>
         );
     }
@@ -153,6 +154,14 @@ const CampaignManagement = () => {
     //         </React.Fragment>
     //     );
     // };
+
+    const toDateTemplate = (rowData) => {
+        return (
+            <React.Fragment>
+                {moment(rowData?.activeTo).format("YYYY-MM-DD HH:mm a")}
+            </React.Fragment>
+        );
+    }
 
     const imageTemplate = (rowData) => {
         return (
@@ -165,7 +174,7 @@ const CampaignManagement = () => {
     return (
         <>
             {/* <Toast ref={toast} /> */}
-            <Dialog header={addEditCampign ? "Edit" : "CREATE CAMPAIGN"} visible={displayBasic} style={{ width: '40vw' }} onHide={onHide}>
+            <Dialog header={addEditCampign ? "Edit" : "Create Campaign"} visible={displayBasic} style={{ width: '40vw' }} onHide={onHide}>
                 <AddEditCampaign
                     onHide={onHide}
                     getCampigndata={getCampigndata}
@@ -183,9 +192,9 @@ const CampaignManagement = () => {
             <div className="grid">
                 <div className="col-12 md:col-12 lg:col-12 xs:col-12">
                     <div className="text-right">
-                        <span class="p-input-icon-right mr-3">
-                            <input type="text" placeholder="Search" class="p-inputtext p-component p-filled" onInput={(e) => setGlobalFilter(e.target.value)} />
-                            <i class="pi pi-search"></i>
+                        <span className="p-input-icon-right mr-3">
+                            <input type="text" placeholder="Search" className="p-inputtext p-component p-filled" onInput={(e) => setGlobalFilter(e.target.value)} />
+                            <i className="pi pi-search"></i>
                         </span>
                         <button className="p-button p-button-primary p-component" onClick={() => setDisplayBasic(true)}>
                             <span className="p-button-icon p-c p-button-icon-left pi pi-plus"></span>
@@ -197,6 +206,8 @@ const CampaignManagement = () => {
                 <div className="col-12 md:col-12 lg:col-12 xs:col-12">
                     <div className="innr-Body">
                         <DataTable
+                            paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
+                            currentPageReportTemplate="Showing {first} to {last} of {totalRecords} Records"
                             globalFilter={globalFilter}
                             rows={7}
                             paginator
@@ -207,7 +218,7 @@ const CampaignManagement = () => {
 
                             <Column field="campaignName" header="Campaign Name" />
                             <Column body={imageTemplate} header="Banner" />
-                            <Column field="description" header="Description" />
+                            <Column field="description" header="Description" style={{ width: '250px', height: '57px' }} />
                             <Column body={fromDateTemplate} header="Active From" />
                             <Column body={toDateTemplate} header="Active To" />
                             <Column body={actionTemplate} header="Action" />

@@ -21,7 +21,7 @@ const AddEdit = ({ addEditTax, getTaxpData, TaxRowData, onHide }) => {
 
     useEffect(() => {
         getTaxList();
-        if (addEditTax == true) {
+        if (addEditTax === true) {
             getHeadByID();
 
         }
@@ -37,12 +37,12 @@ const AddEdit = ({ addEditTax, getTaxpData, TaxRowData, onHide }) => {
         //const data = {};
         //data["_id"] = TaxRowData;
         const res = await handleGetRequest(`api/v1/tax/head/getOne?taxHeadId=${TaxRowData}`, true);
-    
+
         setTaxHead(res.taxHead)
         setSelectedTaxType(res.taxType._id)
         setDescription(res?.description)
 
-    
+
     }
 
 
@@ -66,7 +66,7 @@ const AddEdit = ({ addEditTax, getTaxpData, TaxRowData, onHide }) => {
             //setloading(true);
             if (addEditTax === true) {
 
-                
+
                 data["taxHeadId"] = TaxRowData;
                 //data["taxHeadId"] = TaxRowData;
                 //data["taxHead"] = TaxRowData;
@@ -122,7 +122,8 @@ const AddEdit = ({ addEditTax, getTaxpData, TaxRowData, onHide }) => {
                         <div className="flex flex-column">
                             <label className="mb-2">Tax Head</label>
                             <InputText name='taxHead'
-                            keyfilter={/^[0-9!@#$%^&*]+$/}
+                                keyfilter={/^[0-9!@#$%^&*]+$/}
+                                maxLength={16}
                                 id='taxHead'
                                 type="text"
                                 className={classNames({ "p-invalid": isFormFieldValid("taxHead") }, "w-full md:w-10 inputClass")}
@@ -135,6 +136,7 @@ const AddEdit = ({ addEditTax, getTaxpData, TaxRowData, onHide }) => {
                         <div className="flex flex-column">
                             <label className="mb-2">Description</label>
                             <InputTextarea name='description'
+                                rows={5} cols={30}
                                 id='description'
                                 type="text"
                                 className={classNames({ "p-invalid": isFormFieldValid("description") }, "w-full md:w-10 inputClass")}

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { DataTable } from 'primereact/datatable';
 import { Button } from 'primereact/button';
 import { Column } from 'primereact/column';
@@ -11,6 +11,9 @@ import { handleDeleteRequest } from '../../service/DeleteTemplete';
 // import { handlePostRequest } from '../../service/DeleteTemplete';
 import { useDispatch } from "react-redux";
 import AddEditUsers from './AddEditUsers';
+import { FilterMatchMode } from 'primereact/api';
+import Edit from '../../../src/assets/ICONS/icon_edit.png'
+import Delete from '../../../src/assets/ICONS/icon_delete.png'
 // import { toast } from "react-toastify";
 
 const Tab1 = () => {
@@ -21,6 +24,36 @@ const Tab1 = () => {
     const [editable, setEditable] = useState(false);
     const [usersRowData, setUsersRowData] = useState("");
     const [userData, setUserData] = useState([]);
+    const [globalFilterValue, setGlobalFilterValue] = useState("");
+
+    const [filters, setFilters] = useState({
+
+
+
+        global: { value: null, matchMode: FilterMatchMode.CONTAINS },
+
+
+
+    });
+
+
+
+
+    const onGlobalFilterChange = (e) => {
+
+        const value = e.target.value;
+
+        let _filters = { ...filters };
+
+        _filters["global"].value = value;
+
+
+
+        setFilters(_filters);
+
+        setGlobalFilterValue(value);
+
+    };
     var selectedDeleteId;
 
 
@@ -50,13 +83,13 @@ const Tab1 = () => {
         const data = {};
         data["userId"] = selectedDeleteId;
 
-        const res = await dispatch(handleDeleteRequest(data, `api/v1/user/`, false, false));
+        const res = await dispatch(handleDeleteRequest(data, `api/v1/user/`, true, true));
         // setloading(false);
         if (res?.status === 200) {
             getUserData();
         }
         else {
-           
+
         }
 
     }
@@ -71,13 +104,17 @@ const Tab1 = () => {
     const actionTemplate = (rowData) => {
         return (
             <div className="Edit_Icon">
-                <Button tooltip="Edit" icon="pi pi-pencil" tooltipOptions={{ position: "top" }} className="edit p-mr-2" onClick={() => editUsers(rowData)} />
-                <Button tooltip="Delete" icon="pi pi-trash" tooltipOptions={{ position: "top" }} className="delete p-mr-2 p-ml-3" onClick={() => confirm2(rowData)} />
+                <Button tooltip="Edit" tooltipOptions={{ position: "top" }} className="edit" onClick={() => editUsers(rowData)}>
+                    <img src={Edit} />
+                </Button>
+                <Button tooltip="Delete" tooltipOptions={{ position: "top" }} className="delete" onClick={() => confirm2(rowData)} >
+                    <img src={Delete} />
+                </Button>
                 {/* <Button tooltip="Delete" icon="pi pi-trash" tooltipOptions={{ position: "top" }} className="delete p-mr-2 p-ml-3" onClick={confirm2} /> */}
             </div>
         );
     };
-    
+
     const editUsers = (rowData) => {
         setVisibleEdit(true);
         setEditable(true);
@@ -85,9 +122,9 @@ const Tab1 = () => {
     };
     const confirm2 = (rowData) => {
         // setUsersRowData(rowData._id);
-        selectedDeleteId=rowData._id;
+        selectedDeleteId = rowData._id;
         confirmDialog({
-            message: 'Are you sure you want to delete this item?',
+            message: 'Are you sure you want to delete this user?',
             header: 'Delete Confirmation',
             icon: 'pi pi-trash',
             acceptClassName: 'Savebtn',
@@ -110,7 +147,7 @@ const Tab1 = () => {
     return (
         <>
             {/* <Toast ref={toast} /> */}
-            <Dialog header={editable ? "EDIT" : "ADD NEW USER"} visible={visibleEdit} style={{ width: '40vw' }} onHide={() => onHide('displayBasic')}>
+            <Dialog header={editable ? "Edit" : "Add New User"} visible={visibleEdit} style={{ width: '40vw' }} onHide={() => onHide('displayBasic')}>
                 <AddEditUsers getUserData={getUserData} editable={editable} onHide={onHide} UsersRowData={usersRowData} />
             </Dialog>
 
@@ -118,7 +155,7 @@ const Tab1 = () => {
                 <div className="col-12  md:col-12 lg:col-12 xl:col-12">
                     <div className="text-right">
                         <span className="p-input-icon-right mr-3">
-                            <input type="text" placeholder="Search" onInput={(e) => setGlobalFilter(e.target.value)} className="p-inputtext p-component p-filled    " />
+                            <input type="text" placeholder="Search" onChange={onGlobalFilterChange} value={globalFilterValue} className="p-inputtext p-component p-filled" />
                             <i className="pi pi-search"></i>
                         </span>
                         <button className="p-button p-button-primary p-component" onClick={() => setVisibleEdit(true)}>
@@ -131,9 +168,20 @@ const Tab1 = () => {
                 </div>
                 <div className="col-12 md:col-12 lg:col-12 xl:col-12">
                     <div className="innr-Body">
-                        <DataTable globalFilter={globalFilter} rows={7} paginator responsiveLayout="scroll" value={userData}>
+                        <DataTable
+                            globalFilter={globalFilter}
+                            paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
+                            currentPageReportTemplate="Showing {first} to {last} of {totalRecords} Records"
+                            rows={7}
+                            paginator
+                            //rowsPerPageOptions={[10, 25, 50, 100]}
+                            responsiveLayout="scroll"
+
+                            value={userData}
+                            filters={filters}
+                            globalFilterFields={["role.name", "name"]}>
                             <Column field="name" header="Name" />
-                            <Column body={RolesTemplate} header="Role" />
+                            <Column body={RolesTemplate} field="role.name" header="User Role" />
                             <Column field="email" header="Email" />
                             <Column field="contact" header="Contact Number" />
                             <Column body={actionTemplate} header="Action" />

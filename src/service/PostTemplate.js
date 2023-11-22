@@ -6,41 +6,41 @@ import { loadingAction } from "../redux/actions/loadingAction";
 
 export const handlePostRequest =
     (data, url, isShowLoad = false, isShowToast = false, isShowToastErr = false) =>
-    async (dispatch) => {
-        //   data = await trimData(data);
-        try {
-            
-            if (isShowLoad) dispatch(loadingAction(true));
-            const response = await axios({
-                method: "post",
-                url: `${baseURL + url}`,
-                data: data,
-                headers: {
-                    "Content-Type": "application/json",
-                    Authorization: localStorage.getItem("token"),
-                },
-            });
+        async (dispatch) => {
+            //   data = await trimData(data);
+            try {
 
-            
+                if (isShowLoad) dispatch(loadingAction(true));
+                const response = await axios({
+                    method: "post",
+                    url: `${baseURL + url}`,
+                    data: data,
+                    headers: {
+                        "Content-Type": "application/json",
+                        Authorization: localStorage.getItem("token"),
+                    },
+                });
 
-            if (isShowToast)
-            {
-                const res = response?.data?.msg;
-                console.log("res", response)
-                console.log("response", response?.data?.msg);
-                toast.success(res);  
-            } 
-            
-            if (isShowLoad) dispatch(loadingAction(false));
-            // return response?.data;
-            return response;
 
-        } catch (error) {
-            if (isShowLoad) dispatch(loadingAction(false));
-            if (error?.response?.status === 400) toast.warn(error?.response?.data?.msg || "Something went wrong !!");
-            else if (error?.response?.status === 500) toast.error(error?.response?.data?.msg || "Something went wrong !!");
-            else toast.warn(error?.response?.data?.msg || "Something went wrong !!");
+                console.log("response", response)
 
-            return error?.response;
-        }
-    };
+                if (isShowToast) {
+                    const res = response?.data?.msg;
+                    console.log("res poat", res)
+                    console.log("response", response?.data?.msg);
+                    toast.success(res);
+                }
+
+                if (isShowLoad) dispatch(loadingAction(false));
+                // return response?.data;
+                return response;
+
+            } catch (error) {
+                if (isShowLoad) dispatch(loadingAction(false));
+                if (error?.response?.status === 400) toast.warn(error?.response?.data?.msg || "Something went wrong !!");
+                else if (error?.response?.status === 500) toast.error(error?.response?.data?.msg || "Something went wrong !!");
+                else toast.warn(error?.response?.data?.msg || "Something went wrong !!");
+
+                return error?.response;
+            }
+        };

@@ -48,6 +48,8 @@ const CustomerMangement = () => {
                 <div className="col-12 md:col-12 lg:col-12 xl:col-12">
                     <div className="innr-Body">
                         <DataTable
+                            paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
+                            currentPageReportTemplate="Showing {first} to {last} of {totalRecords} Records"
                             // loading={loading}
                             rows={10}
                             globalFilter={GlobalFilter}

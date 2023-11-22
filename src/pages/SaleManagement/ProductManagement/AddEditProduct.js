@@ -40,8 +40,8 @@ const AddEditProduct = ({ getProductData, onHide, editable, productRowData }) =>
     const [taxType, setTaxType] = useState();
     const [taxHead, setTaxHead] = useState();
     const [oldImages, setOldImages] = useState([])
-    const [isFromColumn,setIsFromColumn]=useState(false)
-    const [variantColorName,setVariantColorName]=useState(false)
+    const [isFromColumn, setIsFromColumn] = useState(false)
+    const [variantColorName, setVariantColorName] = useState(false)
     const history = useHistory();
     const dispatch = useDispatch();
     const [variants, setVariants] = useState([]);
@@ -55,7 +55,9 @@ const AddEditProduct = ({ getProductData, onHide, editable, productRowData }) =>
     const [showEditColorDialog, setShowEditColorDialog] = useState(false);
     const [editProductId, setEditProductId] = useState();
     const [expandedRows, setExpandedRows] = useState(null);
-    const [isDiscount,setIsDiscount]=useState(false);
+    const [isDiscount, setIsDiscount] = useState(false);
+
+    const [existingSKUs, setExistingSKUs] = useState([]);
 
     const dialogFuncMap = {
         'showEditSizeDialog': setShowEditSizeDialog,
@@ -102,7 +104,7 @@ const AddEditProduct = ({ getProductData, onHide, editable, productRowData }) =>
     };
     const getTaxTypes = async () => {
         const res = await handleGetRequest("api/v1/tax/type", false);
-    
+
         if (res) {
             setTaxType(res);
         }
@@ -120,7 +122,7 @@ const AddEditProduct = ({ getProductData, onHide, editable, productRowData }) =>
             getProductById();
         }
     }, []);
-   
+
 
     const stringToAbsString = (value) => {
         return Math.abs(parseInt(value.toString())).toString();
@@ -135,21 +137,27 @@ const AddEditProduct = ({ getProductData, onHide, editable, productRowData }) =>
         vendor: Yup.mixed().required("This field is required"),
         description: Yup.mixed().required("This field is required"),
         taxType: Yup.mixed().required("This field is required"),
-        sku: ((!hasColors && !hasSizes) || (hasSizes && !hasColors)) ? Yup.string() .required("This field is required") .test('sku-test', 'SKU can contain only letters, numbers, "_" and "-".', function (value) { return /^[\w-_]+$/.test(value); }) : null,
-          actualPrice: !hasColors && !hasSizes ? Yup.number().required("This field is required").min(1, 'Minimum price is 1') : null,
-         discountedPrice:isDiscount===true ?Yup.number().required("Discount Price is required").min(1,'Minimum discount is 1'):null,
+        metaDataString: Yup.mixed().required("This field is required"),
+        tags: Yup.mixed().required("This field is required"),
+        sku: ((!hasColors && !hasSizes) || (hasSizes && !hasColors)) ? Yup.string().required("This field is required").test('sku-test', 'SKU can contain only letters, numbers, "_" and "-".', function (value) { return /^[\w-_]+$/.test(value); }) : null,
+        actualPrice: !hasColors && !hasSizes ? Yup.number().required("This field is required").min(1, 'Minimum price is 1') : null,
+        // actualPrice: Yup.number()
+        //     .test('len', 'Actual Price must not exceed 10 characters', val => val.toString().length <= 10)
+        //     .required('Actual Price is required'),
+        //discountedPrice: isDiscount === true ? Yup.number().required("Discount Price is required").min(1, 'Minimum discount is 1') : null,
         quantity: !hasColors && !hasSizes ? Yup.number().required("Quantity is required is required").min(0, 'Minimum discount is 0') : null,
+
 
     });
 
- 
+
     const formik = useFormik({
         validationSchema: validationSchema,
         initialValues: {
             categoryId: "",
             subcategoryId: "",
             name: "",
-            taxType:"",
+            taxType: "",
             title: "",
             description: "",
             longDescription: "",
@@ -158,17 +166,22 @@ const AddEditProduct = ({ getProductData, onHide, editable, productRowData }) =>
             metaDataString: "",
             metaDescription: "",
             sku: "",
-            actualPrice: "",
+            actualPrice: '',
             discountedPrice: "",
             quantity: "",
             isActive: true,
             oneTimeDeal: false,
-            isDiscount:false
-        
+            isDiscount: false,
+            tags: "",
+            taxAmount: '',
+
+
 
         },
         onSubmit: async (data) => {
 
+
+            //data['metaData']= data?.metaDataString.toString()
 
             if (hasVariants && !hasColors && !hasSizes) {
                 toast.warn("Wrong selection");
@@ -226,39 +239,39 @@ const AddEditProduct = ({ getProductData, onHide, editable, productRowData }) =>
         },
     });
 
-    
-    const getCommonFields=(data)=>{
+
+    const getCommonFields = (data) => {
         let multipleImages = JSON.parse(JSON.stringify(allImages));
 
-        let value= {
+        let value = {
             "categoryId": data.categoryId,
             "subcategoryId": data.subcategoryId,
             "name": data.name,
-            "taxType":data.taxType,
+            "taxType": data.taxType,
             "title": data.title,
             "description": data.description,
             "longDescription": data.longDescription,
-            "isDiscount":data.isDiscount,
+            "isDiscount": data.isDiscount,
             "isDeal": false,
             "vendor": data.vendor,
-            "metaData": data.metaDataString,
+            "metaData": data.metaDataString.join(','),
             "metaDescription": data.metaDescription,
             "thumbnail": featureImage,
-         
             "isTaxable": true,
             "taxHead": "6385e95304beaf8be86471ce",
             "isPercentage": false,
-            "taxAmount": 10,
-            "tags": "shirt",
+            "taxAmount": data.taxAmount,
+            "tags": data.tags,
             "addons": [],
-            "isColor": true
+            "isColor": true,
+
         };
-        if(editable){
-            value['images']=oldImages;
-            value['newImages']=multipleImages
-           
-        }else{
-            value['images']=multipleImages;
+        if (editable) {
+            value['images'] = oldImages;
+            value['newImages'] = multipleImages
+
+        } else {
+            value['images'] = multipleImages;
 
         }
 
@@ -323,7 +336,7 @@ const AddEditProduct = ({ getProductData, onHide, editable, productRowData }) =>
 
 
     const handleColorsNoSize = async (data) => {
-        
+
         if (variants.length === 0) {
             toast.warn("Please add at least one variant")
             return;
@@ -332,7 +345,7 @@ const AddEditProduct = ({ getProductData, onHide, editable, productRowData }) =>
         let body = {
             ...getCommonFields(data),
             "variant": variants,
-          
+
 
 
         }
@@ -349,7 +362,7 @@ const AddEditProduct = ({ getProductData, onHide, editable, productRowData }) =>
         let body = {
             ...getCommonFields(data),
             "variant": variants,
-          
+
 
 
         }
@@ -383,14 +396,14 @@ const AddEditProduct = ({ getProductData, onHide, editable, productRowData }) =>
                 }
             ],
         }
-    
+
 
         handleApiCall(body);
 
 
     }
     const handleNoColorNoSizeEditSubmit = async (data) => {
-        
+
 
 
 
@@ -414,7 +427,7 @@ const AddEditProduct = ({ getProductData, onHide, editable, productRowData }) =>
         handleUpdateApiCall(body);
     }
     const handleNoColorSizes = async (data) => {
-        
+
         let multipleImages = JSON.parse(JSON.stringify(allImages));
         data["thumbnail"] = featureImage;
         let body = {
@@ -425,7 +438,7 @@ const AddEditProduct = ({ getProductData, onHide, editable, productRowData }) =>
                     "colorHex": "",
                     "sku": data.sku,
                     "size": sizes,
-                    "discountedPrice":data.discountedPrice,
+                    "discountedPrice": data.discountedPrice,
 
                 }
             ],
@@ -460,30 +473,29 @@ const AddEditProduct = ({ getProductData, onHide, editable, productRowData }) =>
 
     const handleApiCall = async (body) => {
 
-        
-        console.log("Date", body);
-        
         setLoading(true);
-        const res = await dispatch(handlePostRequest(body, "api/v1/products/", true));
+        const res = await dispatch(handlePostRequest(body, "api/v1/products/", true, true));
         setLoading(false);
         if (res?.status === 200) {
             await getProductData();
             formik.resetForm();
             onHide();
         }
-    
+
     }
     const handleUpdateApiCall = async (body) => {
+
         body['productId'] = editProductId;
         setLoading(true);
         const res = await dispatch(handlePatchRequest(body, "api/v1/products/", true));
+
         setLoading(false);
         if (res?.status === 200) {
             await getProductData();
             formik.resetForm();
             onHide();
         }
-        
+
     }
 
 
@@ -524,9 +536,6 @@ const AddEditProduct = ({ getProductData, onHide, editable, productRowData }) =>
             "quantity": ""
         })
     }
-
-
-
 
     const resetAddVariant = () => {
         setAddVariant({
@@ -595,7 +604,7 @@ const AddEditProduct = ({ getProductData, onHide, editable, productRowData }) =>
         delete varnts['size'];
         delete varnts['image'];
 
-        if(formik.values.isDiscount===false){
+        if (formik.values.isDiscount === false) {
             delete varnts['discountedPrice'];
         }
 
@@ -604,12 +613,12 @@ const AddEditProduct = ({ getProductData, onHide, editable, productRowData }) =>
             toast.warn("Please enter all the values");
             return;
         }
-        if(formik.values.isDiscount){
-            if(varnts['discountedPrice']<1){
+        if (formik.values.isDiscount) {
+            if (varnts['discountedPrice'] < 1) {
                 toast.warn("Discount price is required");
                 return;
             }
-            
+
         }
         let sku = addVariant.sku;
         if (variants.filter((item) => item.sku === sku).length > 0) {
@@ -664,7 +673,7 @@ const AddEditProduct = ({ getProductData, onHide, editable, productRowData }) =>
     const handleAddSizeSubmit = (e) => {
 
         e.preventDefault();
-        if(formik.values.isDiscount===false){
+        if (formik.values.isDiscount === false) {
             delete addSize['discountedPrice'];
         }
 
@@ -675,12 +684,12 @@ const AddEditProduct = ({ getProductData, onHide, editable, productRowData }) =>
             return;
         }
         let name = addSize.name;
-        if(formik.values.isDiscount){
-            if(addSize['discountedPrice']<1){
+        if (formik.values.isDiscount) {
+            if (addSize['discountedPrice'] < 1) {
                 toast.warn("Discount price is required");
                 return;
             }
-            
+
         }
         if (sizes.filter((item) => item.name === name).length > 0) {
             toast.warn("Please choose a size name");
@@ -692,12 +701,20 @@ const AddEditProduct = ({ getProductData, onHide, editable, productRowData }) =>
             return [...prev, { ...addSizeVal }];
         });
 
+
+        addSize.quantity = ""
+        addSize.discountedPrice = ""
+        addSize.name = ""
+        addSize.actualPrice = ""
+
+
     }
 
 
     const getProductById = async () => {
         setLoading(true);
         const res = await handleGetRequest(`api/v1/products/detailsWeb?productId=${productRowData}`, false);
+        console.log("data", res)
         if (res) {
             let product = res;
             let firstVariant = product.variant[0];
@@ -732,9 +749,9 @@ const AddEditProduct = ({ getProductData, onHide, editable, productRowData }) =>
     //handling no color no size product editing
 
     const handleNoColorNoSizeProductEdit = (product) => {
-        
-        
-        
+
+
+
         setHasVariants(false);
         setHasColors(false);
         setHasSizes(false);
@@ -746,14 +763,19 @@ const AddEditProduct = ({ getProductData, onHide, editable, productRowData }) =>
         formik.setFieldValue("description", product.description);
         formik.setFieldValue("longDescription", product.longDescription);
         formik.setFieldValue("vendor", product.vendor);
-        formik.setFieldValue("metaDataString", product.metaData);
+        formik.setFieldValue("metaDataString", product.metaData.split(','));
         formik.setFieldValue("metaDescription", product.metaDescription);
         formik.setFieldValue("sku", variant.sku);
         formik.setFieldValue("actualPrice", variant.actualPrice);
+        //formik.setFieldValue("discountedPrice", variant.discountedPrice);
         formik.setFieldValue("discountedPrice", product.discount);
-        
         formik.setFieldValue("taxType", product.taxType);
+        formik.setFieldValue("taxAmount", product.taxAmount);
         formik.setFieldValue("quantity", product.variant[0].quantity);
+        formik.setFieldValue("discountedPrice", variant.discountedPrice);
+        formik.setFieldValue("isDiscount", product.isDiscount);
+        formik.setFieldValue("tags", product.tags);
+
 
 
 
@@ -762,7 +784,7 @@ const AddEditProduct = ({ getProductData, onHide, editable, productRowData }) =>
         setHasVariants(true);
         setHasColors(false);
         setHasSizes(true);
-        
+
         let variant = product.variant[0]
         formik.setFieldValue("categoryId", product.category._id);
         formik.setFieldValue("subcategoryId", product.subcategory._id);
@@ -771,13 +793,17 @@ const AddEditProduct = ({ getProductData, onHide, editable, productRowData }) =>
         formik.setFieldValue("description", product.description);
         formik.setFieldValue("longDescription", product.longDescription);
         formik.setFieldValue("vendor", product.vendor);
-        formik.setFieldValue("metaDataString", product.metaData)
+        formik.setFieldValue("metaDataString", product.metaData.split(','))
         formik.setFieldValue("metaDescription", product.metaDescription);
         formik.setFieldValue("sku", variant.sku.replace(variant.size, ""));
         formik.setFieldValue("actualPrice", variant.actualPrice);
+        //formik.setFieldValue("discountedPrice", variant.discountedPrice);
         formik.setFieldValue("discountedPrice", product.discountedPrice);
         formik.setFieldValue("quantity", product.quantity);
         formik.setFieldValue("taxType", product.taxType);
+        formik.setFieldValue("taxAmount", product.taxAmount);
+        formik.setFieldValue("tags", product.tags);
+        formik.setFieldValue("isDiscount", product.isDiscount);
         let temp = [];
         for (var item of product.variant) {
             temp.push({
@@ -797,7 +823,7 @@ const AddEditProduct = ({ getProductData, onHide, editable, productRowData }) =>
         setHasVariants(true);
         setHasColors(true);
         setHasSizes(false);
-    
+
         let variant = product.variant[0]
         formik.setFieldValue("categoryId", product.category._id);
         formik.setFieldValue("subcategoryId", product.subcategory._id);
@@ -806,13 +832,17 @@ const AddEditProduct = ({ getProductData, onHide, editable, productRowData }) =>
         formik.setFieldValue("description", product.description);
         formik.setFieldValue("longDescription", product.longDescription);
         formik.setFieldValue("vendor", product.vendor);
-        formik.setFieldValue("metaDataString", product.metaData);
+        formik.setFieldValue("metaDataString", product.metaData.split(','));
         formik.setFieldValue("metaDescription", product.metaDescription);
         formik.setFieldValue("sku", variant.sku);
         formik.setFieldValue("actualPrice", variant.actualPrice);
+        //formik.setFieldValue("discountedPrice", variant.discountedPrice);
         formik.setFieldValue("discountedPrice", product.discountedPrice);
         formik.setFieldValue("quantity", product.quantity);
         formik.setFieldValue("taxType", product.taxType);
+        formik.setFieldValue("taxAmount", product.taxAmount);
+        formik.setFieldValue("tags", product.tags);
+        formik.setFieldValue("isDiscount", product.isDiscount);
         let localVariants = [];
         for (var item of product.variant) {
             localVariants.push({
@@ -837,7 +867,7 @@ const AddEditProduct = ({ getProductData, onHide, editable, productRowData }) =>
         setHasVariants(true);
         setHasColors(true);
         setHasSizes(true);
-        
+
         let variant = product.variant[0]
         formik.setFieldValue("categoryId", product.category._id);
         formik.setFieldValue("subcategoryId", product.subcategory._id);
@@ -846,13 +876,17 @@ const AddEditProduct = ({ getProductData, onHide, editable, productRowData }) =>
         formik.setFieldValue("description", product.description);
         formik.setFieldValue("longDescription", product.longDescription);
         formik.setFieldValue("vendor", product.vendor);
-        formik.setFieldValue("metaDataString", product.metaData);
-        formik.setFieldValue("metaDescription", product.description);
+        formik.setFieldValue("metaDataString", product.metaData.split(','));
+        formik.setFieldValue("metaDescription", product.metaDescription);
         formik.setFieldValue("sku", variant.sku);
         formik.setFieldValue("actualPrice", variant.actualPrice);
-        formik.setFieldValue("discountedPrice",product.discountedPrice);
+        //formik.setFieldValue("discountedPrice", variant.discountedPrice);
+        formik.setFieldValue("discountedPrice", product.discountedPrice);
         formik.setFieldValue("quantity", product.quantity);
         formik.setFieldValue("taxType", product.taxType);
+        formik.setFieldValue("taxAmount", product.taxAmount);
+        formik.setFieldValue("tags", product.tags);
+        formik.setFieldValue("isDiscount", product.isDiscount);
         let localVariants = [];
         const grouped = product.variant.reduce((acc, item) => {
             const key = `${item.colorName}-${item.colorHex}`;
@@ -885,7 +919,7 @@ const AddEditProduct = ({ getProductData, onHide, editable, productRowData }) =>
                 })
 
 
-            
+
 
             })
 
@@ -898,20 +932,17 @@ const AddEditProduct = ({ getProductData, onHide, editable, productRowData }) =>
 
 
     }
-    
+
     useEffect(() => {
-        if(formik.values.discountedPrice!== ""&& formik.values.actualPrice !==""&& formik.values.discountedPrice > formik.values.actualPrice)
-        {
+        if (formik.values.discountedPrice !== "" && formik.values.actualPrice !== "" && formik.values.discountedPrice > formik.values.actualPrice) {
             toast.warn("Discounted Price can't be more than actual price")
             setDisable(true)
             return;
-        } 
-        if(formik.values.discountedPrice!== ""&& formik.values.actualPrice !==""&& formik.values.discountedPrice < formik.values.actualPrice)
-        {
+        }
+        else {
             setDisable(false)
-            return;
-        } 
-    },[formik.values.discountedPrice,formik.values.actualPrice]);
+        }
+    }, [formik.values.discountedPrice, formik.values.actualPrice]);
 
 
     const onRowExpand = (event) => {
@@ -919,7 +950,17 @@ const AddEditProduct = ({ getProductData, onHide, editable, productRowData }) =>
 
 
     }
-    
+
+
+    useEffect(() => {
+        if (addSize.discountedPrice !== "" && addSize.actualPrice !== "" && parseFloat(addSize.discountedPrice) > parseFloat(addSize.actualPrice)) {
+            setDisable(true);
+            toast.warn("Discounted Price can't be more than actual price");
+        }
+        else {
+            setDisable(false);
+        }
+    }, [addSize.discountedPrice, addSize.actualPrice]);
 
     const allowExpansion = (rowData) => {
 
@@ -935,7 +976,9 @@ const AddEditProduct = ({ getProductData, onHide, editable, productRowData }) =>
             <DataTable showGridlines={true} responsiveLayout="scroll" value={sizeData.size}>
                 <Column field="name" header="Name" />
                 <Column field="actualPrice" header="Actual Price" />
-                <Column hidden={!formik.values.isDiscount} field="discountedPrice" header="Dicounted Price" />
+                <Column
+                    //hidden={!formik.values.isDiscount} 
+                    field="discountedPrice" header="Dicounted Price" />
                 <Column field="quantity" header="Quantity" />
                 <Column header="Action" body={(data, props) => {
                     return (
@@ -989,7 +1032,10 @@ const AddEditProduct = ({ getProductData, onHide, editable, productRowData }) =>
                     <div className="col-12 md:col-6 lg:col-6 xl:col-6">
                         <div className="flex flex-column">
                             <label className="mb-2">Sku</label>
-                            <InputText placeholder="Sku" value={addVariant.sku} onChange={(e) => onAddVariantsFieldsChange('sku', e.target.value)} className="w-full md:w-10 inputClass" />
+                            <InputText placeholder="Sku"
+                                value={addVariant.sku}
+                                //value={formik?.values?.sku?.replace(/\s\s+/g, " ")}
+                                onChange={(e) => onAddVariantsFieldsChange('sku', e.target.value)} className="w-full md:w-10 inputClass" />
                         </div>
                     </div>
                     <div className="col-12 md:col-6 lg:col-6 xl:col-6">
@@ -998,7 +1044,7 @@ const AddEditProduct = ({ getProductData, onHide, editable, productRowData }) =>
                             <InputText placeholder="Actual price" type="number" min="1" value={addVariant.actualPrice} onChange={(e) => onAddVariantsFieldsChange('actualPrice', e.target.value)} className="w-full md:w-10 inputClass" />
                         </div>
                     </div>
-                   {formik.values.isDiscount&& <div className="col-12 md:col-6 lg:col-6 xl:col-6">
+                    {formik.values.isDiscount && <div className="col-12 md:col-6 lg:col-6 xl:col-6">
                         <div className="flex flex-column">
                             <label className="mb-2">Discounted Price</label>
                             <InputText placeholder="Discounted price" type='number' min="0" value={addVariant.discountedPrice} onChange={(e) => onAddVariantsFieldsChange('discountedPrice', e.target.value)} className="w-full md:w-10 inputClass" />
@@ -1051,21 +1097,23 @@ const AddEditProduct = ({ getProductData, onHide, editable, productRowData }) =>
                                 })
                             }
                         })} />
-                        <Column hidden={!formik.values.isDiscount} field="discountedPrice" header="Discounted Price" body={(data, props) => customEditInput({
-                            value: data.discountedPrice, onChange: (e) => {
-                                let value = e.target.value;
-                                setVariants((prev) => {
-                                    prev[props.rowIndex].discountedPrice = value;
-                                    return [...prev]
-                                })
-                            }
-                        })} />
+                        <Column
+                            //hidden={!formik.values.isDiscount} 
+                            field="discountedPrice" header="Discounted Price" body={(data, props) => customEditInput({
+                                value: data.discountedPrice, onChange: (e) => {
+                                    let value = e.target.value;
+                                    setVariants((prev) => {
+                                        prev[props.rowIndex].discountedPrice = value;
+                                        return [...prev]
+                                    })
+                                }
+                            })} />
 
                         <Column header="Action" body={(data, props) => {
                             return (
                                 <Button onClick={(e) => {
                                     e.preventDefault();
-                                    
+
                                     setVariants((prev) => {
                                         prev.splice(props.rowIndex, 1);
                                         return [...prev]
@@ -1102,10 +1150,10 @@ const AddEditProduct = ({ getProductData, onHide, editable, productRowData }) =>
                             <InputText placeholder="Actual Price" min="1" value={addSize.actualPrice} onChange={(e) => onSizeFieldsChange('actualPrice', e.target.value)} className="w-full md:w-10 inputClass" />
                         </div>
                     </div>
-                   {formik.values.isDiscount&& <div className="col-12 md:col-6 lg:col-6 xl:col-6">
+                    {formik.values.isDiscount && <div className="col-12 md:col-6 lg:col-6 xl:col-6">
                         <div className="flex flex-column">
                             <label className="mb-2">Discounted Price</label>
-                            <InputText placeholder="Discounted Price" min='1' value={addSize.discountedPrice} onChange={(e) => onSizeFieldsChange('discountedPrice', e.target.value)} className="w-full md:w-10 inputClass" />
+                            <InputText placeholder="Discounted Price" min='0' value={addSize.discountedPrice} onChange={(e) => onSizeFieldsChange('discountedPrice', e.target.value)} className="w-full md:w-10 inputClass" />
                         </div>
                     </div>}
                     <div className="col-12 md:col-6 lg:col-6 xl:col-6">
@@ -1131,9 +1179,11 @@ const AddEditProduct = ({ getProductData, onHide, editable, productRowData }) =>
 
                         <Column field="name" header="Name" />
                         <Column field="actualPrice" header="Actual Price" />
-                    <Column hidden={!formik.values.isDiscount} field="discountedPrice" header="Dicounted Price" />
-                                              
-                          <Column field="quantity" header="Quantity" />
+                        <Column
+                            //hidden={!formik.values.isDiscount}
+                            field="discountedPrice" header="Dicounted Price" />
+
+                        <Column field="quantity" header="Quantity" />
                         <Column header="Action" body={(data, props) => {
                             return (
                                 <>
@@ -1213,7 +1263,7 @@ const AddEditProduct = ({ getProductData, onHide, editable, productRowData }) =>
             <div className="col-12 md:col-12 lg:col-12 xl:col-12">
                 <div className="innr-Body">
                     <DataTable onRowExpand={onRowExpand} expandedRows={expandedRows} onRowToggle={(e) => {
-            
+
                         setExpandedRows(e.data);
                     }}
 
@@ -1234,19 +1284,19 @@ const AddEditProduct = ({ getProductData, onHide, editable, productRowData }) =>
                             }
                         })} />
                         <Column field="colorHex" header="Color Hex"
-                        body={(data, props) => customEditInput({
-                            value: data.colorHex, onChange: (e) => {
-                                let value = e.target.value;
-                                setVariants((prev) => {
-                                    prev[props.rowIndex].colorHex = value;
-                                    return [...prev]
-                                })
-                            }
-                        })}
+                            body={(data, props) => customEditInput({
+                                value: data.colorHex, onChange: (e) => {
+                                    let value = e.target.value;
+                                    setVariants((prev) => {
+                                        prev[props.rowIndex].colorHex = value;
+                                        return [...prev]
+                                    })
+                                }
+                            })}
                         />
-                        <Column field="sku" 
-                        
-                        header="SKU" />
+                        <Column field="sku"
+
+                            header="SKU" />
 
 
                         <Column header="Action" body={(data, props) => {
@@ -1281,12 +1331,10 @@ const AddEditProduct = ({ getProductData, onHide, editable, productRowData }) =>
 
     }
 
-
-
     return (
         <>
             <Dialog header="Edit size" visible={showEditSizeDialog} style={{ width: '40vw' }} onHide={() => onHideInternal('showEditSizeDialog')}>
-                <EditSizeDialog isFromColumn={isFromColumn} setVariants={setVariants} colorName={variantColorName}  onHide={() => onHideInternal('showEditSizeDialog')} setSizes={setSizes} size={editSize} sizes={sizes} index={editSizeIndex} />
+                <EditSizeDialog isFromColumn={isFromColumn} setVariants={setVariants} colorName={variantColorName} onHide={() => onHideInternal('showEditSizeDialog')} setSizes={setSizes} size={editSize} sizes={sizes} index={editSizeIndex} />
             </Dialog>
             {loading === true && editable === true ? <ProgressSpinner /> : (
                 <form onSubmit={formik.handleSubmit}>
@@ -1333,7 +1381,7 @@ const AddEditProduct = ({ getProductData, onHide, editable, productRowData }) =>
                             <div className="col-12 md:col-4">
                                 <div className="flex flex-column">
                                     <label className="mb-2">Product Name</label>
-                                    <InputText placeholder="Enter Product Name" id="name" name="name" value={formik?.values?.name?.replace(/\s\s+/g, " ")} onChange={formik.handleChange} className={classNames({ "p-invalid": isFormFieldValid("name") }, "w-full md:w-10 inputClass")} />
+                                    <InputText maxLength={40} minLength={3} placeholder="Enter Product Name" id="name" name="name" value={formik?.values?.name?.replace(/\s\s+/g, " ")} onChange={formik.handleChange} className={classNames({ "p-invalid": isFormFieldValid("name") }, "w-full md:w-10 inputClass")} />
                                     {getFormErrorMessage("name")}
                                 </div>
                             </div>
@@ -1357,11 +1405,18 @@ const AddEditProduct = ({ getProductData, onHide, editable, productRowData }) =>
                                     {getFormErrorMessage("taxType")}
                                 </div>
                             </div>
+                            <div className="col-12 md:col-4">
+                                <div className="flex flex-column">
+                                    <label className="mb-2">Tax Amount</label>
+                                    <InputText maxLength={6} keyfilter="int" placeholder="Enter Tax Amount" id="taxAmount" name="taxAmount" value={formik?.values?.taxAmount} onChange={formik.handleChange} className={classNames({ "p-invalid": isFormFieldValid("taxAmount") }, "w-full md:w-10 inputClass")} />
+                                    {getFormErrorMessage("taxAmount")}
+                                </div>
+                            </div>
 
                             <div className="col-12 md:col-4">
                                 <div className="flex flex-column">
                                     <label className="mb-2">Product Title</label>
-                                    <InputText placeholder="Enter Product Name" id="title" name="title" value={formik?.values?.title?.replace(/\s\s+/g, " ")} onChange={formik.handleChange} className={classNames({ "p-invalid": isFormFieldValid("title") }, "w-full md:w-10 inputClass")} />
+                                    <InputText maxLength={70} placeholder="Enter Product Title" id="title" name="title" value={formik?.values?.title?.replace(/\s\s+/g, " ")} onChange={formik.handleChange} className={classNames({ "p-invalid": isFormFieldValid("title") }, "w-full md:w-10 inputClass")} />
                                     {getFormErrorMessage("title")}
                                 </div>
                             </div>
@@ -1377,55 +1432,54 @@ const AddEditProduct = ({ getProductData, onHide, editable, productRowData }) =>
                                     {/* {getFormErrorMessage("isActive")} */}
                                 </div>
                             </div>
-                          
+
 
 
                             <div className="col-12 md:col-4">
-                                <div className="flex flex-column">
-                                    <label className="mb-2">Meta Data</label>
-                                    <InputTextarea
-                                        placeholder="Enter Meta Data"
-                                        id="metaDataString"
-                                        name="metaDataString"
-                                        value={formik?.values?.metaDataString}
-                                        onChange={formik.handleChange}
-                                        className={classNames({ "p-invalid": isFormFieldValid("metaDataString") }, "w-full md:w-10 inputClass")}
-                                    />
-                                    {getFormErrorMessage("metaDataString")}
-                                </div>
-                            </div>
-                             {/* <div className="col-12 md:col-4">
                                 <div className="flex flex-column">
                                     <label className="mb-2">Meta Data</label>
                                     <Chips id="metaDataString"
                                         name="metaDataString"
-                                         value={formik?.values?.metaDataString}
-                                         onChange={formik.handleChange}
-                                         className={classNames({ "p-invalid": isFormFieldValid("metaDataString") }, "w-full md:w-10 inputClass")}
-                                          separator="," />
+                                        value={formik?.values?.metaDataString}
+                                        onChange={formik.handleChange}
+                                        className={classNames({ "p-invalid": isFormFieldValid("metaDataString") }, "w-full md:w-10 inputClass")}
+                                        separator="," />
                                     {getFormErrorMessage("metaDataString")}
                                 </div>
-                            </div> */}
+                            </div>
+                            <div className="col-12 md:col-4">
+                                <div className="flex flex-column">
+                                    <label className="mb-2">Tags</label>
+                                    <InputText id="tags"
+                                        name="tags"
+                                        value={formik?.values?.tags}
+                                        onChange={formik.handleChange}
+                                        className={classNames({ "p-invalid": isFormFieldValid("tags") }, "w-full md:w-10 inputClass")}
+                                    //separator=","
+                                    />
+                                    {getFormErrorMessage("tags")}
+                                </div>
+                            </div>
                             <div className="col-12 md:col-4">
                                 <div className="flex flex-column">
                                     <label className="mb-2">Meta Description</label>
-                                    <InputTextarea 
-                                    rows={5} cols={30}
+                                    <InputTextarea
+                                        rows={5} cols={30}
                                         placeholder="Enter Meta Description"
-                                        id="metaDescriptionString"
-                                        name="metaDescriptionString"
-                                        value={formik?.values?.metaDescriptionString?.replace(/\s\s+/g, " ")}
+                                        id="metaDescription"
+                                        name="metaDescription"
+                                        value={formik?.values?.metaDescription?.replace(/\s\s+/g, " ")}
                                         onChange={formik.handleChange}
-                                        className={classNames({ "p-invalid": isFormFieldValid("metaDescriptionString") }, "w-full md:w-10 inputClass")}
+                                        className={classNames({ "p-invalid": isFormFieldValid("metaDescription") }, "w-full md:w-10 inputClass")}
                                     />
-                                    {getFormErrorMessage("metaDescriptionString")}
+                                    {getFormErrorMessage("metaDescription")}
                                 </div>
                             </div>
                             <div className="col-12 md:col-4">
                                 <div className="flex flex-column">
                                     <label className="mb-2">Description</label>
-                                    <InputTextarea 
-                                    rows={5} cols={30}
+                                    <InputTextarea
+                                        rows={5} cols={30}
                                         placeholder="Enter Description"
                                         id="description"
                                         name="description"
@@ -1439,8 +1493,8 @@ const AddEditProduct = ({ getProductData, onHide, editable, productRowData }) =>
                             <div className="col-12 md:col-6">
                                 <div className="flex flex-column">
                                     <label className="mb-2">Long Description</label>
-                                    <InputTextarea 
-                                    rows={5} cols={30}
+                                    <InputTextarea
+                                        rows={5} cols={30}
                                         placeholder="Enter Long Description"
                                         id="longDescription"
                                         name="longDescription"
@@ -1454,7 +1508,7 @@ const AddEditProduct = ({ getProductData, onHide, editable, productRowData }) =>
                             <div className="col-12 md:col-4">
                                 <div className="flex flex-column">
                                     <label className="mb-2">Vendor</label>
-                                    <InputText placeholder="Enter Name" id="vendor" name="vendor" value={formik?.values?.vendor?.replace(/\s\s+/g, " ")} onChange={formik.handleChange} className={classNames({ "p-invalid": isFormFieldValid("vendor") }, "w-full md:w-10 inputClass")} />
+                                    <InputText placeholder="Enter Vendor" id="vendor" name="vendor" value={formik?.values?.vendor?.replace(/\s\s+/g, " ")} onChange={formik.handleChange} className={classNames({ "p-invalid": isFormFieldValid("vendor") }, "w-full md:w-10 inputClass")} />
                                     {getFormErrorMessage("vendor")}
                                 </div>
                             </div>
@@ -1470,10 +1524,10 @@ const AddEditProduct = ({ getProductData, onHide, editable, productRowData }) =>
 
                                                     <Button icon="pi pi-times" onClick={(e) => {
                                                         e.preventDefault();
-                                                        
+
                                                         setOldImages((prev) => {
 
-                                                            
+
 
                                                             return [...prev]
                                                         })
@@ -1501,12 +1555,12 @@ const AddEditProduct = ({ getProductData, onHide, editable, productRowData }) =>
                             </div>}
                             {!hasVariants && <div className="col-12 md:col-3">
                                 <div className="flex flex-column">
-                                    <label className="mb-2">Product Price</label>
+                                    <label className="mb-2">Acutal Price</label>
                                     <InputText placeholder="Acutal Price" id="title" type='number' min="1" name="actualPrice" value={formik?.values?.actualPrice} onChange={formik.handleChange} className={classNames({ "p-invalid": isFormFieldValid("actualPrice") }, "w-full md:w-10 inputClass")} />
                                     {getFormErrorMessage("actualPrice")}
                                 </div>
                             </div>}
-                            {formik.values.isDiscount&&!hasVariants && <div className="col-12 md:col-3">
+                            {formik.values.isDiscount && !hasVariants && <div className="col-12 md:col-3">
                                 <div className="flex flex-column">
                                     <label className="mb-2">Product Discounted Price</label>
                                     <InputText placeholder="Discounted Price" id="title" type='number' min="0" name="discountedPrice" value={formik?.values?.discountedPrice} onChange={formik.handleChange} className={classNames({ "p-invalid": isFormFieldValid("discountedPrice") }, "w-full md:w-10 inputClass")} />
@@ -1540,14 +1594,14 @@ const AddEditProduct = ({ getProductData, onHide, editable, productRowData }) =>
                         {hasVariants && hasSizes && hasColors && colorSizeComponent()}
                     </div>
                     <div className="col-12 md:col-12 xl:col-12 lg:col-12 text-center">
-                    <Button
+                        <Button
                             label="Cancel"
                             onClick={onHide}
                             type="button"
                             className="Cancelbtn p-mr-3"
                         />
-                    <Button type="submit" disabled={disable} loading={loading} iconPos="right" label={editable ? "Update" : "Save"} autoFocus className="Savebtn p-mr-3" />
-</div>                    
+                        <Button type="submit" disabled={disable} loading={loading} iconPos="right" label={editable ? "Update" : "Save"} autoFocus className="Savebtn p-mr-3" />
+                    </div>
                 </form>
             )}
         </>

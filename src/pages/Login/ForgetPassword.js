@@ -95,10 +95,7 @@ const ForgetPassword = ({setStoredEmail}) => {
 
         <div className="forgotbg_body">
 
-            {/* <div className="header__login">
-                <h2>Welcome to</h2>
-                <h3>Z-Store</h3>
-            </div> */}
+            
 
             <div className="login_container">
                 <div className="row d-flex justify-content-center">

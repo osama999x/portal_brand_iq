@@ -9,8 +9,11 @@ import { confirmDialog } from 'primereact/confirmdialog';
 import { handleDeleteRequest } from '../../service/DeleteTemplete';
 import { useDispatch } from "react-redux";
 import { FilterMatchMode } from "primereact/api";
+import { useHistory } from "react-router-dom";
+import Edit from '../../assets/ICONS/icon_edit.png';
+import Delete from '../../assets/ICONS/icon_delete.png';
 
-const Index = () => {
+const Index = (rowData) => {
     // const [selectedCateg, setSelectedCateg] = useState();
 
     const [displayBasic, setDisplayBasic] = useState(false);
@@ -20,7 +23,7 @@ const Index = () => {
     const [apprejdata, setAppRejData] = useState([]);
     const [visibleDelete, setVisibleDelete] = useState(false);
     const dispatch = useDispatch();
-  
+
     const [globalFilterValue, setGlobalFilterValue] = useState("");
     const [filters, setFilters] = useState({
         global: { value: null, matchMode: FilterMatchMode.CONTAINS },
@@ -33,15 +36,40 @@ const Index = () => {
         setGlobalFilterValue(value);
     };
 
+    const history = useHistory();
     const onHide = (name) => {
         setDisplayBasic(false);
     }
 
+
+    const detailTemplate = (reviewsRowData) => {
+        return (
+            <Button tooltip="Details"
+                //  icon="pi pi-pencil"
+                label="Details"
+                tooltipOptions={{ position: "top" }}
+                className="btn btn-info ml-auto"
+                onClick={() => history.push({
+                    // id:rowData._id},'',`/detailordermanagement?orderid=${rowData._id}`
+
+                    pathname: '/reviewdetail',
+                    search: `?reviewId=${reviewsRowData._id}`,
+                    state: { id: reviewsRowData.reviewId, data: reviewsRowData }
+                }
+                )} />
+        )
+    }
+
     const actionTemplate = (rowData) => {
+
         return (
             <div className="Edit_Icon">
-                <Button tooltip="Details" icon="pi pi-pencil" tooltipOptions={{ position: "top" }} className="edit p-mr-2" onClick={() => approveReject(rowData)} />
-                <Button tooltip="Delete" icon="pi pi-trash" tooltipOptions={{ position: "top" }} className="delete p-mr-2 p-ml-3" onClick={() => { confirm2(rowData) }} />
+                <Button tooltip="Edit" tooltipOptions={{ position: "top" }} className="edit p-mr-2" onClick={() => approveReject(rowData)} >
+                    <img src={Edit} />
+                </Button>
+                <Button tooltip="Delete" tooltipOptions={{ position: "top" }} className="delete p-mr-2 p-ml-3" onClick={() => { confirm2(rowData) }} >
+                    <img src={Delete} />
+                </Button>
             </div>
         );
     };
@@ -59,15 +87,15 @@ const Index = () => {
     //         return (<div>{customerName}</div>)
     //     }
     // };
-    
+
     // const productTemplate = (rowData) => {
     //     return (
     //         <div>
     //             {rowData?.productId?.name}
     //         </div>
     //     );
-            
-        
+
+
     // };
     // const membershipTemplate = (rowData) => {
     //     return (
@@ -83,10 +111,10 @@ const Index = () => {
     //         </div>
     //     );
     // };
-    const approveTemp = (rowData) => {
-        return (<div>{rowData?.isApproved === true ? "Approved" : "Reject"}</div>
-        );
-    };
+    // const approveTemp = (rowData) => {
+    //     return (<div>{rowData?.isApproved === true ? "Approved" : "Reject"}</div>
+    //     );
+    // };
     const getReviewsData = async () => {
 
         const res = await handleGetRequest("api/v1/review/all", false);
@@ -122,7 +150,7 @@ const Index = () => {
     const confirm2 = (rowData) => {
         setReviewsRowData(rowData._id);
         confirmDialog({
-            message: 'Are you sure you want to delete this item?',
+            message: 'Are you sure you want to delete this review?',
             header: 'Delete Confirmation',
             icon: 'pi pi-trash',
             acceptClassName: 'Savebtn',
@@ -142,7 +170,7 @@ const Index = () => {
     }
     return (
         <div>
-            <Dialog header="DETAIL Reviews" visible={displayBasic} style={{ width: '40vw' }} onHide={onHide}>
+            <Dialog header="Detail Review" visible={displayBasic} style={{ width: '40vw' }} onHide={onHide}>
                 <ApproveReject
                     onHide={onHide}
                     getReviewsData={getReviewsData}
@@ -157,8 +185,8 @@ const Index = () => {
                         <div className="">
                             <span class="p-input-icon-right mr-3">
                                 <input type="text" placeholder="Search" onChange={onGlobalFilterChange} class="p-inputtext p-component p-filled"
-                                  onInput={(e) => setGlobalFilter(e.target.value)}
-                                  />
+                                    onInput={(e) => setGlobalFilter(e.target.value)}
+                                />
                                 <i class="pi pi-search"></i>
                             </span>
                         </div>
@@ -167,21 +195,26 @@ const Index = () => {
                 <div className="col-12">
                     <div className="innr-Body">
                         <DataTable
+                            paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
+                            currentPageReportTemplate="Showing {first} to {last} of {totalRecords} Records"
                             globalFilter={globalFilter}
                             rows={7}
                             paginator
                             responsiveLayout="scroll"
                             value={reviewData}
-                            globalFilterFields={["customerId.contact","channel"]}
+                            globalFilterFields={["customerId.contact", "channel"]}
 
                         >
                             <Column field="customer.name" header="Customer's Name" />
                             <Column field="customer.membershipCategory" header="Membership Category" />
-                            <Column field="product.name" header="Product"/>
+                            <Column field="product.name" header="Product" />
                             <Column field="customer.contact" header="Contact Number" />
                             <Column field="channel" header="Channel" />
-                            <Column body={approveTemp} header="Approved Status" />
+                            <Column field="status" header="Status"
+                                style={{ textTransform: 'uppercase' }}
+                            />
                             <Column body={actionTemplate} header="Action" />
+                            <Column body={detailTemplate} header="Detail" />
                         </DataTable>
                     </div>
                 </div>

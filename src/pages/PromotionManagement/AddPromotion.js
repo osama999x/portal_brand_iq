@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { InputText } from 'primereact/inputtext';
 import * as Yup from "yup";
@@ -11,19 +10,21 @@ import { Button } from 'primereact/button';
 import { handlePostRequest } from '../../service/PostTemplate';
 import { MultiSelect } from "primereact/multiselect";
 import { Dropdown } from "primereact/dropdown";
+import moment from 'moment';
 
 
-const AddPromotion = ({ onHide, getPromotiondata, addEditPromotion, promotionRowData, rowDataId  }) => {
+const AddPromotion = ({ onHide, getPromotiondata, addEditPromotion, promotionRowData, rowDataId }) => {
 
     const [loading, setloading] = useState(false);
     const [subCategories, setSubCategories] = useState();
     const [products, setProducts] = useState([]);
+    const [dataa, setDataa] = useState("");
 
-    
-    
+
+
     const dispatch = useDispatch();
-    
-    
+
+
     const validationSchema = Yup.object().shape({
         // subcategory:Yup.string().required("This field is required"),
         // product: Yup.mixed().required("This field is required."),
@@ -41,16 +42,16 @@ const AddPromotion = ({ onHide, getPromotiondata, addEditPromotion, promotionRow
             status: "",
             expireDate: "",
             discount: "",
-            
 
-            
+
+
         },
         onSubmit: async (data) => {
             if (addEditPromotion === true) {
                 data["campaignId"] = rowDataId;
                 data["promotionId"] = promotionRowData
                 const res = await dispatch(handlePatchRequest(data, "api/v1/promotion/updatePromotion", true, true));
-                
+
                 if (res.status === 200) {
                     await getPromotiondata();
                     formik.resetForm();
@@ -58,10 +59,10 @@ const AddPromotion = ({ onHide, getPromotiondata, addEditPromotion, promotionRow
                 }
 
             } else {
-            
+
                 data["campaignId"] = rowDataId;
-               // data["expireDate"] = moment().format("MM/DD/YYYY")
-                
+                // data["expireDate"] = moment().format("MM/DD/YYYY")
+
                 const res = await dispatch(handlePostRequest(data, "api/v1/promotion/addPromotion", true, true));
                 if (res?.status === 200 || res?.status === 201) {
                     await getPromotiondata();
@@ -72,36 +73,47 @@ const AddPromotion = ({ onHide, getPromotiondata, addEditPromotion, promotionRow
             }
         },
     });
+
+
+
     const getAllSubCategories = async () => {
         const response = await handleGetRequest("api/v1/subcategory/all", false);
-        console.log("Sub",response)
-        
+
+
         if (response) {
             setSubCategories(response);
         }
     };
     useEffect(() => {
         getAllSubCategories();
-    
+
     }, []);
-    const getAllProducts = async () => {
-        const response = await handleGetRequest(`api/v1/products/all`, false);
-        if (response) {
-            setProducts(response);
+
+    const getAllProductsById = async () => {
+        if (addEditPromotion === true) {
+            const response = await handleGetRequest(`api/v1/subcategory/products?subCategoryId=${dataa && dataa}`, false);
+            if (response) {
+
+                setProducts(response?.products);
+            }
+        }
+        else {
+
+            const response = await handleGetRequest(`api/v1/subcategory/products?subCategoryId=${formik?.values?.subcategory && formik?.values?.subcategory}`, false);
+            if (response) {
+
+                setProducts(response?.products);
+            }
         }
     };
 
     useEffect(() => {
-    
-        getAllProducts();
-    }, []);
-    
-    useEffect(() => {
-        if (formik.values.subcategory.length > 0) {
-            getAllProducts();
+        if (formik.values.subcategory !== "") {
+            getAllProductsById();
         }
 
     }, [formik.values.subcategory]);
+
 
 
     const isFormFieldValid = (name) => !!(formik.touched[name] && formik.errors[name]);
@@ -112,36 +124,37 @@ const AddPromotion = ({ onHide, getPromotiondata, addEditPromotion, promotionRow
         if (promotionRowData !== undefined && promotionRowData !== null && addEditPromotion === true) {
             getPromotionByID();
         };
-        
+
     }, []);
-    
-    
+
+
     const statusOption = [
         { name: 'Active', status: "active" },
         { name: 'InActive', status: "inactive" },
     ];
-    
+
     const getPromotionByID = async () => {
         const res = await handleGetRequest(`api/v1/promotion/getOnePromotion?promotionId=${promotionRowData}`, true);
-        
-        
-      
+
+
+        setDataa(res?.subcategory._id)
+
         setloading(false);
         if (res) {
             const keyData = res;
-            
+
             Object.keys(keyData).forEach((key) => {
                 if (formik.initialValues.hasOwnProperty(key)) {
                     formik.setFieldValue(key, keyData[key]);
                 }
-              
+
             });
-             
-            formik.setFieldValue("product", [keyData["product"][0]["_id"]] );
-            console.log(formik.setFieldValue("product", [keyData["product"][0]["_id"]] ));
-             formik.setFieldValue("subcategory", keyData["subcategory"]["_id"]);
-           
-            
+
+            formik.setFieldValue("subcategory", res.subcategory._id);
+            // formik.setFieldValue("product", res?.product[0]?._id && res?.product[0]?._id);
+            formik.setFieldValue("product", [keyData["product"][0]?.["_id"]]);
+
+
         }
     }
 
@@ -159,11 +172,11 @@ const AddPromotion = ({ onHide, getPromotiondata, addEditPromotion, promotionRow
                                 className={classNames({ "p-invalid": isFormFieldValid("subcategory") }, "w-full md:w-10 inputClass")}
                                 value={formik?.values?.subcategory}
                                 onChange={formik.handleChange}
-                                 placeholder="Sub Category"
+                                placeholder="Sub Category"
                                 optionLabel="name"
                                 optionValue="_id"
                                 options={subCategories}
-                                                       />
+                            />
                         </div>
                         {getFormErrorMessage("subcategory")}
                     </div>
@@ -188,7 +201,7 @@ const AddPromotion = ({ onHide, getPromotiondata, addEditPromotion, promotionRow
                             {getFormErrorMessage("product")}
                         </div>
                     </div>
-                    
+
                     <div className="col-12 md:col-12 lg:col-12 xs:col-12">
                         <div className="flex flex-column">
                             <label className="mb-2">Status</label>
@@ -212,12 +225,14 @@ const AddPromotion = ({ onHide, getPromotiondata, addEditPromotion, promotionRow
                             <InputText
                                 id="expireDate"
                                 name="expireDate"
-                                //value={moment(formik.values.expireDate).format("YYYY-MM-DD")}
                                 value={formik.values.expireDate.split('T')[0]}
+                                //value={moment(formik.values.expireDate).format("YYYY-MM-DD")}
+                                //value={formik.values.expireDate.split('T')[0]}
                                 onChange={formik.handleChange}
                                 className={classNames({ "p-invalid": isFormFieldValid("expireDate") }, "w-full md:w-10 inputClass")}
                                 optionlabel="name"
                                 type="date"
+                                min={moment().format("YYYY-MM-DD")}
                             />
                         </div>
                         {getFormErrorMessage("expireDate")}
@@ -226,6 +241,8 @@ const AddPromotion = ({ onHide, getPromotiondata, addEditPromotion, promotionRow
                         <div className="flex flex-column">
                             <label className="mb-2">Discount %</label>
                             <InputText
+                                maxLength={2}
+                                keyfilter="int"
                                 type="number"
                                 name="discount"
                                 id="discount"
@@ -236,7 +253,7 @@ const AddPromotion = ({ onHide, getPromotiondata, addEditPromotion, promotionRow
                         </div>
                     </div>
 
-                  
+
                     <div className="col-12 md:col-12 xl:col-12 lg:col-12 text-center">
                         <Button
                             label="Cancel"

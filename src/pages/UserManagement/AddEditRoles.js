@@ -18,17 +18,14 @@ import { useDispatch } from "react-redux";
 // import moment from "moment";
 import { ProgressSpinner } from "primereact/progressspinner";
 import { InputTextarea } from 'primereact/inputtextarea';
-import { Dropdown } from "primereact/dropdown";
-
-
-    const AddEditRoles = ({ getRoleData, onHide, editable, UsersRowData }) => {
+const AddEditRoles = ({ getRoleData, onHide, editable, UsersRowData }) => {
     const [loading, setLoading] = useState(false);
     // const [loadingIcon, setloadingIcon] = useState("pi pi-save");
     const [userPermissions, setUserPermissions] = useState([]);
     const [selectPermissionValue, setSelectPermissionValue] = useState([]);
 
     const [userId, setUserId] = useState();
-    
+
     // const onlyalphabetSRegex = /^(?!\s)[A-Za-z0-9\s]+$/;
 
 
@@ -43,44 +40,45 @@ import { Dropdown } from "primereact/dropdown";
     // }
 
     const getUsersByID = async () => {
-        const data= {};
-        data ["roleId"]=UsersRowData;
+        const data = {};
+        data["roleId"] = UsersRowData;
         setLoading(true);
-        const res = await dispatch(handlePostRequest(data,"api/v1/role/roleDetails"));
+        const res = await dispatch(handlePostRequest(data, "api/v1/role/roleDetails"));
         const keyData = res?.data?.data;
         setUserId(res.userId);
         setLoading(false);
         const roles = keyData?.permissions;
-        const rolesName = roles.map((name) => name?._id);
+        //const rolesName = roles.map((name) => name?._id);
         Object.keys(keyData).forEach((key) => {
             if (formik.initialValues.hasOwnProperty(key)) {
                 formik.setFieldValue(key, keyData[key]);
             }
         });
-        formik.setFieldValue("permissionsId",rolesName)
-        
+        //formik.setFieldValue("permissionsId",rolesName)
+
     };
-    const getUsersRole = async () => {
-        const res = await handleGetRequest("api/v1/permission/all", false);
-        if (res) {
-        setUserPermissions(res);
-        }
-    }
-   
+    // const getUsersRole = async () => {
+    //     const res = await handleGetRequest("api/v1/permission/all", false);
+    //     if (res) {
+    //     setUserPermissions(res);
+    //     }
+    // }
+
 
     useEffect(() => {
         if (UsersRowData !== undefined && UsersRowData !== null && editable === true) {
-             getUsersByID();
+            getUsersByID();
         }
-    },[]);
-    useEffect(() => {
-         getUsersRole();
     }, []);
+
+    // useEffect(() => {
+    //      getUsersRole();
+    // }, []);
 
     const validationSchema = Yup.object().shape({
         name: Yup.string()?.required("This field is required."),
         // matches(onlyalphabetSRegex, "This field should contain alphabets only"),
-        //permissionsId:Yup.mixed().required("This field is required."),
+        //permissionsId: Yup.mixed().required("This field is required."),
         description: Yup.string()
             .required("This field is required.")
             .nullable(),
@@ -92,15 +90,15 @@ import { Dropdown } from "primereact/dropdown";
             name: "",
             permissionsId: "",
             description: "",
-             
+
         },
 
         onSubmit: async (data) => {
-            
+
             // setLoading(true);
             // setloadingIcon("pi pi-spin pi-spinner");
-            if(data['permissionsId'].length===0){
-                data['permissionsId']="";
+            if (data['permissionsId'].length === 0) {
+                data['permissionsId'] = "";
             }
             if (editable === true) {
                 data["roleId"] = UsersRowData;
@@ -132,7 +130,7 @@ import { Dropdown } from "primereact/dropdown";
         onHide();
     };
 
-    
+
 
     return (
         <>
@@ -143,49 +141,49 @@ import { Dropdown } from "primereact/dropdown";
                     <div className="grid p-p-3">
                         <div className="col-12 md:col-12 lg:col-12 xl:col-12">
                             <div className="flex flex-column">
-                                <label className="mb-2">Role</label>
+                                <label className="mb-2">User Role</label>
                                 <InputText keyfilter="alpha" maxLength={25} placeholder="Enter Role" id="name" name="name" value={formik?.values?.name?.replace(/\s\s+/g, " ")} onChange={formik.handleChange} className={classNames({ "p-invalid": isFormFieldValid("name") }, "w-full md:w-10 inputClass")} />
                                 {getFormErrorMessage("name")}
                             </div>
                         </div>
-                        <div className="col-12 md:col-12 lg:col-12 xl:col-12">
+                        {/* <div className="col-12 md:col-12 lg:col-12 xl:col-12">
                             <div className="flex flex-column">
                                 <label className="mb-2">Permissions</label>
                                 <MultiSelect
-                                            
-                                            id="permissionsId"  
-                                            name="permissionsId"
-                                            placeholder="Select Permissions"
-                                            options={userPermissions}
-                                            optionLabel="name"
-                                            optionValue="_id"
-                                            value={formik.values.permissionsId}
-                                            onChange={(e) => {
-                                                formik.handleChange(e);
-                                                setSelectPermissionValue(e.value);
-                                                
-                                            }}
-                                       
-                                            className={classNames({ "p-invalid": isFormFieldValid("permissionsId") },"w-full md:w-10 inputClass" )}
-                                            
-                                        
-                                        />
-                                    {getFormErrorMessage("permissionsId")}
+
+                                    id="permissionsId"
+                                    name="permissionsId"
+                                    placeholder="Select Permissions"
+                                    options={userPermissions}
+                                    optionLabel="name"
+                                    optionValue="_id"
+                                    value={formik.values.permissionsId}
+                                    onChange={(e) => {
+                                        formik.handleChange(e);
+                                        setSelectPermissionValue(e.value);
+
+                                    }}
+
+                                    className={classNames({ "p-invalid": isFormFieldValid("permissionsId") }, "w-full md:w-10 inputClass")}
+
+
+                                />
+                                {getFormErrorMessage("permissionsId")}
                             </div>
-                        </div>
+                        </div> */}
                         <div className="col-12 md:col-12 lg:col-12 xl:col-12">
                             <div className="flex flex-column">
                                 <label className="mb-2">Description</label>
-                                <InputTextarea placeholder="Enter Description" id="description" name="description" value={formik?.values?.description?.replace(/\s\s+/g, " ")} onChange={formik.handleChange} className={classNames({ "p-invalid": isFormFieldValid("description") }, "w-full md:w-10 inputClass")} />
+                                <InputTextarea rows={5} cols={30} placeholder="Enter Description" id="description" name="description" value={formik?.values?.description?.replace(/\s\s+/g, " ")} onChange={formik.handleChange} className={classNames({ "p-invalid": isFormFieldValid("description") }, "w-full md:w-10 inputClass")} />
                                 {getFormErrorMessage("description")}
                             </div>
                         </div>
-                        
-                            <div className="col-12 text-center">
-                                <Button label="Cancel" onClick={(e) => handleCancel(e)}  className="Cancelbtn p-mr-3" />
-                                <Button disabled={loading} iconPos="right" label={editable ? "Update" : "Save"} autoFocus className="Savebtn p-mr-3" />
-                            </div>
-                       
+
+                        <div className="col-12 text-center">
+                            <Button label="Cancel" onClick={(e) => handleCancel(e)} className="Cancelbtn p-mr-3" />
+                            <Button disabled={loading} iconPos="right" label={editable ? "Update" : "Save"} autoFocus className="Savebtn p-mr-3" />
+                        </div>
+
                     </div>
                 </form>
             )}

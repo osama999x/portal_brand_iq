@@ -10,6 +10,8 @@ import { useDispatch } from 'react-redux';
 import { handleGetRequest } from '../../../service/GetTemplate';
 import { handleDeleteRequest } from '../../../service/DeleteTemplete';
 import { baseURL } from '../../../utilities/Config';
+import Edit from '../../../assets/ICONS/icon_edit.png';
+import Delete from '../../../assets/ICONS/icon_delete.png';
 
 const MembershipBenifits = () => {
     const [displayBasic, setDisplayBasic] = useState(false);
@@ -40,8 +42,12 @@ const MembershipBenifits = () => {
     const actionTemplate = (rowData) => {
         return (
             <div className="Edit_Icon">
-                <Button tooltip="Edit" icon="pi pi-pencil" tooltipOptions={{ position: "top" }} className="edit p-mr-2" onClick={() => editpoints(rowData)} />
-                <Button tooltip="Delete" icon="pi pi-trash" tooltipOptions={{ position: "top" }} className="delete p-mr-2 p-ml-3" onClick={() => { confirm2(rowData) }} />
+                <Button tooltip="Edit" tooltipOptions={{ position: "top" }} className="edit p-mr-2" onClick={() => editpoints(rowData)} >
+                    <img src={Edit} />
+                </Button>
+                <Button tooltip="Delete" tooltipOptions={{ position: "top" }} className="delete p-mr-2 p-ml-3" onClick={() => { confirm2(rowData) }} >
+                    <img src={Delete} />
+                </Button>
             </div>
         );
     };
@@ -54,10 +60,10 @@ const MembershipBenifits = () => {
     };
     const RequestResetPassword = async () => {
         const data = {};
-        data["membershipBenifitId"] =  selectedDeleteId;;
+        data["membershipBenifitId"] = selectedDeleteId;;
         const res = await dispatch(handleDeleteRequest(data, `api/v1/membershipBenifit`, true, true));
         if (res?.status === 200) {
-          await  getMemberBenifitdata();
+            await getMemberBenifitdata();
         }
     }
     // useEffect(() => {
@@ -143,6 +149,8 @@ const MembershipBenifits = () => {
                 <div className="col-12 md:col-12 lg:col-12 xs:col-12">
                     <div className="innr-Body">
                         <DataTable
+                            paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
+                            currentPageReportTemplate="Showing {first} to {last} of {totalRecords} Records"
                             globalFilter={globalFilter}
                             rows={7}
                             paginator
@@ -151,8 +159,8 @@ const MembershipBenifits = () => {
                             <Column body={imageTemplate} header="Image" />
                             <Column body={membCategoryTemplate} header="Membership Category" />
                             <Column field="label" header="Discount On Category" />
-                            <Column body={expireDateTemplate} header="Expire Date" />
-                            <Column field="description" header="Description" />
+                            <Column body={expireDateTemplate} header="Date of Expiry" />
+                            <Column field="description" header="Description" style={{ width: '250px', height: '57px' }} />
                             <Column body={actionTemplate} header="Action" />
                         </DataTable>
                     </div>

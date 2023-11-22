@@ -6,6 +6,7 @@ import { Panel } from "primereact/panel";
 import "./ImageUpload.css";
 
 function MultiImage({ handleImages }) {
+
     const toastBC = React.useRef(null);
     const upload = React.useRef(null);
     const [files, setfiles] = useState([]);
@@ -13,8 +14,11 @@ function MultiImage({ handleImages }) {
     const [loading, setloading] = useState(false);
 
     const header = () => {
+
         return (
+
             <>
+
                 <input
                     type="file"
                     accept="image/png, image/gif, image/jpeg"
@@ -22,6 +26,7 @@ function MultiImage({ handleImages }) {
                     ref={upload}
                     onChange={(e) => onFileChange(e)}
                 />
+
                 <Button
                     onClick={(e) => {
                         e.preventDefault();
@@ -29,73 +34,93 @@ function MultiImage({ handleImages }) {
                     }}
                     label="Choose File"
                 ></Button>
-                {/* &nbsp;
+
+                &nbsp;
+
                 <Button
                     onClick={(e) => {
                         e.preventDefault();
                         handleClear();
                     }}
                     label="Clear"
-                ></Button> */}
+                ></Button>
             </>
         );
     };
 
     const onFileChange = async (e) => {
+
         e.preventDefault();
         setloading(true);
         await getBase64(e.target.files[0]);
         setloading(false);
+
     };
 
     async function getBase64(file) {
+
         var reader = new FileReader();
         reader.readAsDataURL(file);
         reader.onload = function () {
+
             if (!files.some((file) => file?.fileBase64 === reader.result)) {
+
                 let newfiles = JSON.parse(JSON.stringify(files));
                 const filetype = file.type.split("/");
-                newfiles.push({ fileBase64: reader.result, fileName: file.name, fileSize: file.size, fileExtension: `.${filetype[1]}` });
-                //setImgBase64(reader.result)
-                 setImgBase64((imgBase64) => [...imgBase64, reader.result])
-                // newfiles.push({ fileBase64: reader.result});
-                setfiles(newfiles);
+                const img = new Image();
+                img.src = reader.result;
+                img.onload = function () {
+                    if (img.width < 350 || img.width > 400 || img.height < 350 || img.height > 400) {
+                        toastBC.current.show({ severity: 'error', summary: 'Invalid Image', detail: 'Image must be with dimensions between 350 and 400 pixels.' });
+                        return;
+                    }
+                    newfiles.push({ fileBase64: reader.result, fileName: file.name, fileSize: file.size, fileExtension: `.${filetype[1]}` });
+                    setImgBase64((imgBase64) => [...imgBase64, reader.result])
+                    setfiles(newfiles);
+                };
             }
         };
     }
 
     const handleRemove = (b64) => {
+
         let newArr = files.filter((file) => JSON.stringify(file?.fileBase64) !== JSON.stringify(b64));
         setfiles(newArr);
-    };
 
-    // const handleChange = (b64, desc) => {
-    //     let idx = files.findIndex((file) => JSON.stringify(file?.fileBase64) === JSON.stringify(b64));
-    //     let newArr = JSON.parse(JSON.stringify(files));
-    //     newArr[idx].filedescr = desc;
-    //     setfiles(newArr);
-    // };
+    };
 
     const handleClear = () => {
         setfiles([]);
     };
 
     useEffect(() => {
+
         handleImages(imgBase64);
+
     }, [files, handleImages]);
 
     return (
+
         <Panel header={header}>
+
             <Toast ref={toastBC} position="bottom-center" />
 
             <div className="formgrid grid ">
+
                 {files.length ? (
-                    files.map((file,i) => (
+
+                    files.map((file, i) => (
+
                         <React.Fragment key={i}>
+
                             <div className="field col-12 md:col-3" key={file?.fileBase64}>
+
                                 {file?.fileExtension === ".png" || file?.fileExtension === ".jpeg" ? (
+
                                     <img src={file?.fileBase64} width="60px" alt="img" />
+
                                 ) : (
+
                                     <Button
                                         icon={file?.fileExtension === ".pdf" ? "pi pi-file-pdf" : "pi pi-file-excel"}
                                         onClick={(e) => {
@@ -104,13 +129,21 @@ function MultiImage({ handleImages }) {
                                         tooltip={file?.fileExtension === ".pdf" ? "PDF file" : "EXCEL file"}
                                     />
                                 )}
+
                             </div>
+
                             <div className="field col-12 md:col-5 mt-2">
+
                                 <p>{file?.fileName}</p>
+
                             </div>
+
                             <div className="field col-12 md:col-3 mt-2">
+
                                 <Badge value={(file?.fileSize / (1024 * 1024)).toFixed(2) + " MB"} />
+
                             </div>
+
                             <div className="field col-12 md:col-1">
                                 <Button
                                     className="p-button-danger p-button-outlined p-button-sm"
@@ -123,9 +156,10 @@ function MultiImage({ handleImages }) {
                                 </Button>
                             </div>
 
-                            {/* <InputTextarea value={file?.filedescr} placeholder="Description" onChange={(e) => handleChange(file?.fileBase64, e.target.value)} /> */}
-                            </React.Fragment>
+                        </React.Fragment>
+
                     ))
+
                 ) : (
                     <center style={{ height: "3vh" }}>{/* <h6 className="image-placeholder">Please Upload Images</h6> */}</center>
                 )}

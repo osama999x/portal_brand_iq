@@ -2,16 +2,24 @@ import React, { useState, useEffect, useRef } from "react";
 import { Column } from "primereact/column";
 import { DataTable } from "primereact/datatable";
 import { Button } from "primereact/button";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import Moment from "moment";
 import { handleGetRequest } from "../../service/GetTemplate";
-import { ConfirmDialog, confirmDialog } from "primereact/confirmdialog";
+import { confirmDialog } from "primereact/confirmdialog";
 import { Toast } from "primereact/toast";
 import { Sidebar } from "primereact/sidebar";
 import AddEditReturn from "./AddEditReturn";
 import { useHistory } from "react-router-dom";
+import OrderRetured from "./OrderRetured";
+import { Dialog } from "primereact/dialog";
+import { FilterMatchMode } from "primereact/api";
+
 const ManageReturn = () => {
-    
+
+
+    let { search, state } = useLocation();
+    const [displayDialog, setDisplayDialog] = useState(false);
+    // console.log("statssae", state?.id)
     const [visibleEdit, setVisibleEdit] = useState(false);
     const [visibleDelete, setVisibleDelete] = useState(false);
     const [globalFilter, setGlobalFilter] = useState(null);
@@ -20,8 +28,18 @@ const ManageReturn = () => {
     const [loading, setloading] = useState(false);
     const [orderData, setOrderData] = useState([]);
     const [orderRowData, setOrderRowData] = useState("");
+    const [globalFilterValue, setGlobalFilterValue] = useState("");
+    const [filters, setFilters] = useState({
+        global: { value: null, matchMode: FilterMatchMode.CONTAINS },
+    });
 
-
+    const onGlobalFilterChange = (e) => {
+        const value = e.target.value;
+        let _filters = { ...filters };
+        _filters["global"].value = value;
+        setFilters(_filters);
+        setGlobalFilterValue(value);
+    };
 
     const onHide = () => {
         setEditable(false);
@@ -32,7 +50,6 @@ const ManageReturn = () => {
     const getReturnOrderData = async () => {
         setloading(true);
         const res = await handleGetRequest("api/v1/returnOrder/list", false);
-    
         if (res) {
             setReturnOrderData(res);
         }
@@ -43,15 +60,15 @@ const ManageReturn = () => {
     }, []);
     const actionTemplate = (rowData) => {
         return (
-            <div className="Edit_Icon">
-               <Button tooltip="Detail" 
+            <div className="Edit_Iconn">
+                <Button tooltip="Details"
                     // icon="pi pi-arrow-circle-right" 
-                    label="Detail"
+                    label="Details"
                     tooltipOptions={{ position: "top" }} className='btn btn-info ml-auto'
                     onClick={() => history.push({
                         pathname: '/detailreturnordermanagement',
                         search: `?orderid=${rowData?.orderId?._id}`,
-                        state: { id: rowData?.orderId?._id }
+                        state: { id: rowData?.orderId?._id, pageOrderId: rowData?.orderId?.orderId }
                     }
                     )} />
             </div>
@@ -67,7 +84,7 @@ const ManageReturn = () => {
     }
 
     const OrderIdClickable = (rowData) => {
-    
+
         return (
             <React.Fragment>
                 {/* <Link to={"./Dashboard"}>Dashboard</Link> */}
@@ -80,7 +97,7 @@ const ManageReturn = () => {
         let customerName = "";
         if (rowData?.orderId?.customer?.firstName) {
             customerName = rowData?.orderId?.customer?.firstName + " " + rowData?.orderId?.customer?.lastName;
-        
+
             return <React.Fragment>{customerName}</React.Fragment>
         }
     };
@@ -123,42 +140,52 @@ const ManageReturn = () => {
     const history = useHistory();
     const toast = useRef(null);
 
-  return (
-    <>
-          <Toast ref={toast} />
-          <Sidebar header={sidebarHeader} position="right" className="w-full" visible={visibleEdit} onHide={onHide}>
-              {/* <Create /> */}
-              {/* <Add></Add> */}
-              <AddEditReturn getReturnOrderData={getReturnOrderData} editable={editable} onHide={onHide} orderRowData={orderRowData} />
-          </Sidebar>
-          <div className="grid">
-              <div className="col-12  md:col-12 lg:col-12 xl:col-12">
-                  <div className="text-right">
-                      <span className="p-input-icon-right mr-3">
-                          <input type="text" placeholder="Search" onInput={(e) => setGlobalFilter(e.target.value)} className="p-inputtext p-component p-filled" />
-                          <i className="pi pi-search"></i>
-                      </span>
-                  </div>
-              </div>
-              <div className="col-12 md:col-12 lg:col-12 xl:col-12">
-                  <div className="innr-Body">
-                      <DataTable
-                          // loading={loading}
-                          rows={10} paginator
-                          responsiveLayout="scroll"
-                          value={returnorderData}
-                          globalFilter={globalFilter}>
-                          <Column body={OrderIdClickable} header="Order ID" />
-                          <Column body={customerNameTemplete} header="Customer's Name" />
-                          <Column body={orderDateTemplete} header="Return Date" />
-                          <Column body={statusTemplete} header="Status" />
-                          <Column body={actionTemplate} header="Detail" />
-                      </DataTable>
-                  </div>
-              </div> 
-              </div>   
-    </>
-  )
+    console.log("state?.id", state?.id)
+
+    return (
+        <>
+            <Dialog header="Order Returned" visible={displayDialog} style={{ width: "40vw" }} closable={true} onHide={() => onHide('displayDialog')}>
+                <OrderRetured id={state?.id} />
+
+            </Dialog>
+            <Toast ref={toast} />
+            <Sidebar header={sidebarHeader} position="right" className="w-full" visible={visibleEdit} onHide={onHide}>
+                {/* <Create /> */}
+                {/* <Add></Add> */}
+                <AddEditReturn getReturnOrderData={getReturnOrderData} editable={editable} onHide={onHide} orderRowData={orderRowData} />
+            </Sidebar>
+            <div className="grid">
+                <div className="col-12  md:col-12 lg:col-12 xl:col-12">
+                    <div className="text-right">
+                        <span className="p-input-icon-right mr-3">
+                            <input type="text" placeholder="Search" onInput={(e) => setGlobalFilter(e.target.value)} className="p-inputtext p-component p-filled" />
+                            <i className="pi pi-search"></i>
+                        </span>
+                    </div>
+                </div>
+                <div className="col-12 md:col-12 lg:col-12 xl:col-12">
+                    <div className="innr-Body">
+                        <DataTable
+                            paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
+                            currentPageReportTemplate="Showing {first} to {last} of {totalRecords} Records"
+                            // loading={loading}
+                            rows={10} paginator
+                            responsiveLayout="scroll"
+                            value={returnorderData}
+                            globalFilter={globalFilter}
+                            globalFilterFields={["orderId.orderId", "orderId.customer.firstName", "orderId.customer.lastName"]}
+                        >
+                            <Column body={OrderIdClickable} header="Order ID" />
+                            <Column body={customerNameTemplete} field="customer.firstName" header="Customer's Name" />
+                            <Column body={orderDateTemplete} header="Return Date" />
+                            <Column body={statusTemplete} header="Status" />
+                            <Column body={actionTemplate} header="Detail" />
+                        </DataTable>
+                    </div>
+                </div>
+            </div>
+        </>
+    )
 }
 
 export default ManageReturn

@@ -9,11 +9,10 @@ function UploadBulkProducts() {
     const [selectedFile, setselectedFile] = useState();
     const [fileName, setfileName] = useState("");
     const handleExcelFile = async (selectedFile) => {
-        console.log(selectedFile);
         const formData = new FormData();
         formData.append("file", selectedFile);
         const res = await dispatch(handlePostRequest(formData, "uploadProductsFromExcel", true));
-        console.log(res);
+
     };
 
     const onFileChange = (e) => {

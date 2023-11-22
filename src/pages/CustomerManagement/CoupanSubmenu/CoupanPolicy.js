@@ -1,4 +1,4 @@
-import React, { useState, useEffect} from 'react';
+import React, { useState, useEffect } from 'react';
 import { DataTable } from 'primereact/datatable';
 import { Button } from 'primereact/button';
 import { Column } from 'primereact/column';
@@ -10,6 +10,8 @@ import { handleDeleteRequest } from '../../../service/DeleteTemplete';
 import { useDispatch } from 'react-redux';
 import moment from 'moment';
 import { baseURL } from '../../../utilities/Config';
+import Edit from '../../../assets/ICONS/icon_edit.png';
+import Delete from '../../../assets/ICONS/icon_delete.png';
 
 const CoupanPolicy = () => {
   const [displayBasic, setDisplayBasic] = useState(false);
@@ -23,7 +25,7 @@ const CoupanPolicy = () => {
 
   const getCoupandata = async () => {
     const res = await handleGetRequest("api/v1/coupon/all", false);
-    
+
     if (res) {
       setCoupandata(res);
     }
@@ -39,8 +41,12 @@ const CoupanPolicy = () => {
   const actionTemplate = (rowData) => {
     return (
       <div className="Edit_Icon">
-        <Button tooltip="Edit" icon="pi pi-pencil" tooltipOptions={{ position: "top" }} className="edit p-mr-2" onClick={() => editcoupan(rowData)} />
-        <Button tooltip="Delete" icon="pi pi-trash" tooltipOptions={{ position: "top" }} className="delete p-mr-2 p-ml-3" onClick={() => { confirm2(rowData) }} />
+        <Button tooltip="Edit" tooltipOptions={{ position: "top" }} className="edit p-mr-2" onClick={() => editcoupan(rowData)} >
+          <img src={Edit} />
+        </Button>
+        <Button tooltip="Delete" tooltipOptions={{ position: "top" }} className="delete p-mr-2 p-ml-3" onClick={() => { confirm2(rowData) }} >
+          <img src={Delete} />
+        </Button>
       </div>
     );
   };
@@ -51,9 +57,9 @@ const CoupanPolicy = () => {
     data["couponId"] = selectedDeleteId;
     const res = await dispatch(handleDeleteRequest(data, `api/v1/coupon`, true, true));
     if (res?.status === 200) {
-     getCoupandata();
+      getCoupandata();
     }
-    
+
   }
   // useEffect(() => {
   //   if (visibleDelete === true) {
@@ -66,7 +72,7 @@ const CoupanPolicy = () => {
     setDisplayBasic(true);
     setAddEditCoupan(true);
     setCoupanRowData(rowData._id);
-    
+
   };
   const confirm2 = (rowData) => {
     // setCoupanRowData(rowData._id);
@@ -89,18 +95,18 @@ const CoupanPolicy = () => {
   const reject = () => {
     setVisibleDelete(false);
   }
-  const statusTemplate = (rowData) => { 
+  const statusTemplate = (rowData) => {
     return <div className={rowData?.isActive === true ? "green" : "red"}>{rowData?.isActive === true ? "Active" : "InActive"}</div>;
   };
 
   const fromDateTemplate = (rowData) => {
     return (
       <React.Fragment>
-       {moment(rowData?.expireDate).format("YYYY-MM-DD")}
+        {moment(rowData?.expireDate).format("YYYY-MM-DD")}
       </React.Fragment>
     );
   };
-  
+
   const imageTemplate = (rowData) => {
     return (
       <React.Fragment>
@@ -112,7 +118,7 @@ const CoupanPolicy = () => {
   return (
     <>
       {/* <Toast ref={toast} /> */}
-      <Dialog header={addEditCoupan ? "Edit" :  "Create Coupon Policy"} visible={displayBasic} style={{ width: '40vw' }} onHide={onHide}>
+      <Dialog header={addEditCoupan ? "Edit" : "Create Coupon Policy"} visible={displayBasic} style={{ width: '40vw' }} onHide={onHide}>
         <Addedit
           onHide={onHide}
           getCoupandata={getCoupandata}
@@ -138,6 +144,8 @@ const CoupanPolicy = () => {
         <div className="col-12 md:col-12 lg:col-12 xs:col-12">
           <div className="innr-Body">
             <DataTable
+              paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
+              currentPageReportTemplate="Showing {first} to {last} of {totalRecords} Records"
               globalFilter={globalFilter}
               rows={7}
               paginator
@@ -146,8 +154,8 @@ const CoupanPolicy = () => {
             >
               <Column field="couponCode" header="Coupon Code" />
               <Column body={imageTemplate} header="Voucher" />
-              <Column body={fromDateTemplate} header="Expire Data" />
-              <Column field="orderPriceLimit" header="Order Price Limit"/>
+              <Column body={fromDateTemplate} header="Date of Expiry" />
+              <Column field="orderPriceLimit" header="Order Price Limit" />
               <Column field="couponValue" header="Coupon Value" />
               {/* <Column body={statusTemplate} header="Status" /> */}
               <Column body={actionTemplate} header="Action" />

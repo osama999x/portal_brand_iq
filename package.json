@@ -7,7 +7,7 @@
         "type": "git",
         "url": "https://github.com/primefaces/sakai-react.git"
     },
-         "license": "MIT",
+    "license": "MIT",
     "dependencies": {
         "@fullcalendar/core": "^5.7.2",
         "@fullcalendar/daygrid": "^5.7.2",
@@ -33,6 +33,7 @@
         "react-color": "^2.19.3",
         "react-dom": "^17.0.1",
         "react-icons": "^4.4.0",
+        "react-quill": "^2.0.0",
         "react-redux": "^7.2.4",
         "react-router-dom": "^5.2.0",
         "react-scripts": "3.4.1",

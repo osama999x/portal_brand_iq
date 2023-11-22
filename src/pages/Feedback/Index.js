@@ -14,6 +14,22 @@ const Index = () => {
     const [visibleEdit, setVisibleEdit] = useState(false);
     //const [editable, setEditable] = useState(false);
     //const [customerRowData, setCustomerRowData] = useState("");
+    const data = [
+        { channel: 0 },
+        { channel: 1 },
+    ];
+    const renderChannel = (rowData) => {
+        const channelValue = rowData.channel;
+
+        if (channelValue === 0) {
+            return 'WEBSITE';
+        } else if (channelValue === 1) {
+            return 'ANDROID APP';
+        } else {
+            return null; // Handle other cases if needed
+        }
+    };
+
 
     const renderFooter = (name, canDel) => {
         return (
@@ -27,12 +43,12 @@ const Index = () => {
         );
     };
     const getFeedbackData = async () => {
-      //  setloading(true);
+        //  setloading(true);
         const res = await handleGetRequest("api/v1/feedback/all", false);
-        // console.log("data Object",res);
+
         if (res) {
             setFeedback(res);
-            // console.log("show File data",res);
+
 
         }
         //setloading(false);
@@ -82,7 +98,7 @@ const Index = () => {
 
     return (
         <div>
-            <Dialog header="DETAIL" visible={visibleEdit} style={{ width: '40vw' }} footer={renderFooter('visibleEdit')} onHide={onHide}>
+            <Dialog header="Details" visible={visibleEdit} style={{ width: '40vw' }} footer={renderFooter('visibleEdit')} onHide={onHide}>
                 {/* <FeedbackModal editable={editable} onHide={onHide} categoryRowData={customerRowData} getFeedbackData={getFeedbackData}/> */}
             </Dialog>
 
@@ -101,6 +117,8 @@ const Index = () => {
                 <div className="col-12">
                     <div className="innr-Body">
                         <DataTable
+                            paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
+                            currentPageReportTemplate="Showing {first} to {last} of {totalRecords} Records"
                             globalFilter={globalFilter}
                             rows={7}
                             paginator
@@ -110,7 +128,7 @@ const Index = () => {
                             <Column body={customerNameTemplete} header="Customer's Name" />
                             {/* <Column field="MembershipCategory" header="Membership Category" /> */}
                             <Column body={contactTemplate} header="Contact Number" />
-                            <Column field="channel" header="Channel" />
+                            <Column field="channel" header="Channel" body={renderChannel} />
                             <Column field="comments" header="Comments" />
                             <Column body={ratingTemplate} header="Rating" />
                             {/* <Column body={actionTemplate} header="Action" /> */}

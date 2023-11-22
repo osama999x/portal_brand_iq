@@ -16,13 +16,23 @@ import { ProgressSpinner } from "primereact/progressspinner";
 import { useHistory, useLocation } from "react-router-dom";
 import { Dialog } from "primereact/dialog";
 import OrderDispatch from "./OrderDispatch";
+import { Row } from 'primereact/row';
+import { ColumnGroup } from 'primereact/columngroup';
 
 const AddEditOrderManagement = () => {
 
+    const [isDelivered, setIsDelivered] = useState()
+    const [currentStatus, setCurrentStatus] = useState()
+    const [disabled, setDisabled] = useState(false)
+    const [processDisabled, setProcessDisabled] = useState(false)
+
     let { search, state } = useLocation();
-    
+
+
+
     const query = new URLSearchParams(search);
     const orderRowData = query.get("orderid");
+
     const editable = orderRowData ? true : false;
 
     const [loading, setLoading] = useState(false);
@@ -33,40 +43,53 @@ const AddEditOrderManagement = () => {
 
 
     const history = useHistory();
-    
+
     const dispatch = useDispatch();
 
+    useEffect(() => {
+        if (orderRowData !== undefined && orderRowData !== null && editable === true) {
+            getUsersByID();
+        }
+    }, []);
+
+
     const onHide = (name) => {
-
         setDisplayDialog(false);
-
     };
 
-
+    const handleBack = (e) => {
+        e.preventDefault();
+        history.push("./ordermanagement")
+        onHide();
+    };
 
     const handleDialog = () => {
 
         setDisplayDialog(true);
 
     };
-    const handleCancel = (e) => {
-        e.preventDefault();
+    const handleCancel = async () => {
+        // e.preventDefault();
+        const res = await handleGetRequest(`api/v1/order/orderCancel?orderId=${orderRowData}`, true)
         history.push("./ordermanagement")
         onHide();
     };
+
     const [status, setStatus] = useState();
     const [id, setId] = useState();
+    const [trackingId, setTrackingId] = useState();
 
     const getUsersByID = async () => {
         const data = {};
         data["roleId"] = orderRowData;
         setLoading(true);
-        const res = await handleGetRequest(`api/v1/order/detail?orderId=${orderRowData}`, true);
-    
+        const res = await handleGetRequest(`api/v1/order/detail?orderId=${orderRowData}`, false);
+        setIsDelivered(res?.isDeliver)
+        setCurrentStatus(res?.status)
         if (res) {
             setStatus(res.status);
             setId(res._id);
-
+            setTrackingId(res.trackingId);
             setProductData(res?.product)
             const keyData = res;
             setLoading(false);
@@ -80,11 +103,6 @@ const AddEditOrderManagement = () => {
         }
     };
 
-    useEffect(() => {
-        if (orderRowData !== undefined && orderRowData !== null && editable === true) {
-            getUsersByID();
-        }
-    }, []);
 
     const getOrderData = () => {
         history.push("./ordermanagement")
@@ -139,17 +157,43 @@ const AddEditOrderManagement = () => {
         return <React.Fragment>{rowData?.productId?.category?.name}</React.Fragment>;
     };
     const subCategoryTemplete = (rowData) => {
-        
+
         return <React.Fragment>{rowData?.productId?.subcategory?.name}</React.Fragment>;
     };
     const productTemplete = (rowData) => {
         return <React.Fragment>{rowData?.productId?.name}</React.Fragment>;
     };
 
+    useEffect(() => {
+        if (isDelivered === false) {
+            setDisabled(true)
+        }
+    }, [isDelivered])
+
+    useEffect(() => {
+        if (isDelivered === true && currentStatus === "Delivered") {
+            setProcessDisabled(true)
+        }
+    }, [isDelivered, currentStatus])
+    // const footerGroup = (
+
+    // //     <ColumnGroup>
+    // //         <Row>
+    // //             <Column footer="Total Amount:" colSpan={5} footerStyle={{ textAlign: 'right' }} />
+    // //             <Column
+    // //             //footer={lastYearTotal}
+    // //             />
+    // //             <Column
+    // //             //footer={thisYearTotal}
+    // //             />
+    // //         </Row>
+    // //     </ColumnGroup>
+    //  );
+
     return (
         <>
             <Dialog header="Order Status" visible={displayDialog} style={{ width: "40vw" }} closable={true} onHide={() => onHide('displayDialog')}>
-                <OrderDispatch status={status} id={state?.id} />
+                <OrderDispatch status={status} id={state?.id} trackingId={trackingId} />
             </Dialog>
 
             {loading ? (
@@ -158,7 +202,7 @@ const AddEditOrderManagement = () => {
                 <form onSubmit={formik.handleSubmit}>
                     <div className="card headr_bg">
                         <div className="card-header">
-                            <label>DETAILS</label>
+                            <label>Details</label>
                         </div>
                         <div className="card-body">
                             <div className="grid">
@@ -197,11 +241,15 @@ const AddEditOrderManagement = () => {
                                     <div className="grid">
                                         <div className="col-12 md:col-12 lg:col-12 xl:col-12">
                                             <div className="innr-Body ">
-                                                <DataTable rows={5} responsiveLayout="scroll" value={productData} >
+                                                <DataTable rows={5} responsiveLayout="scroll" value={productData}
+                                                //footerColumnGroup={footerGroup}
+                                                >
                                                     <Column body={categoryTemplete} header="Category" />
                                                     <Column body={subCategoryTemplete} header="Sub-Category" />
                                                     <Column body={productTemplete} header="Product Name" />
                                                     <Column field="quantity" header="Quantity" />
+                                                    <Column field="sku" header="Sku" />
+                                                    <Column field="size" header="Size" />
                                                     <Column field="price" header="Price" />
                                                 </DataTable>
                                             </div>
@@ -210,9 +258,17 @@ const AddEditOrderManagement = () => {
                                 </div>
                             </div>
                             <div className="grid">
+
+
+
                                 <div className="col-12 text-center pt-4">
-                                    <Button label="Cancel" onClick={(e) => handleCancel(e)} className="Cancelbtn p-mr-3" />
-                                    <Button autoFocus className="Savebtn" label="Process" onClick={handleDialog} />
+                                    <div className="three_btn">
+                                        <Button label="Back" onClick={(e) => handleBack(e)} className="Cancelbtn p-mr-3" />
+                                        <div>
+                                            <Button disabled={disabled} label="Cancel" onClick={handleCancel} className="Cancelbtn p-mr-3" />
+                                            <Button disabled={processDisabled} autoFocus className="Savebtn" label="Process" onClick={handleDialog} />
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
