@@ -67,6 +67,13 @@ const Index = () => {
         setDisplayBasic(false);
         setAppRejData(false)
     }
+    // const serialTemplate = (rowData, props) => {
+    //     return (
+    //         <div>
+    //             {props.rowIndex + 1}
+    //         </div>
+    //     )
+    // };
 
     return (
         <div>
@@ -123,7 +130,10 @@ const Index = () => {
                             value={inventoryData}
                             globalFilterFields={["productsName"]}
                         >
-                            <Column field="productsId" header="Product-ID" />
+                            {/* <Column field="productsId" header="Product-ID" /> */}
+                            <Column body={(data, props) => {
+                                    return <div>{props.rowIndex + 1}</div>
+                                }} header="Serial" />
                             <Column field="productsName" header="Product Name" />
                             <Column field="categoryName" header="Category" />
                             <Column field="subcategoryName" header="Sub-Category" />
