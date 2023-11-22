@@ -3,8 +3,7 @@ import { DataTable } from "primereact/datatable";
 import { Button } from "primereact/button";
 import { Column } from "primereact/column";
 import { Link } from "react-router-dom";
-import { Dialog } from "primereact/dialog";
-import {  confirmDialog } from "primereact/confirmdialog";
+import { confirmDialog } from "primereact/confirmdialog";
 import { Toast } from "primereact/toast";
 import { handleGetRequest } from "../../service/GetTemplate";
 import { handleDeleteRequest } from "../../service/DeleteTemplete";
@@ -25,13 +24,23 @@ const OrderManagement = () => {
     const [globalFilter, setGlobalFilter] = useState(null);
     const [editable, setEditable] = useState(false);
     const [orderRowData, setOrderRowData] = useState("");
+    const [urlOrderId, setUrlOrderId] = useState("");
     const [orderData, setOrderData] = useState([]);
-    const [loading, setloading] = useState(false);                              
+    const [loading, setloading] = useState(false);
     const [orderid, setOrderid] = useState();
     const [globalFilterValue, setGlobalFilterValue] = useState("");
     const [filters, setFilters] = useState({
         global: { value: null, matchMode: FilterMatchMode.CONTAINS },
     });
+
+    useEffect(() => {
+        getOrderData();
+    }, []);
+    useEffect(() => {
+        if (visibleDelete === true) {
+            handleDeleteRow();
+        }
+    }, [visibleDelete]);
 
     const onGlobalFilterChange = (e) => {
         const value = e.target.value;
@@ -56,16 +65,14 @@ const OrderManagement = () => {
         }
         setloading(false);
     };
-    useEffect(() => {
-        getOrderData();
-    }, []);
+
     const handleDeleteRow = async () => {
         setloading(true);
         const data = {};
         data["productId"] = orderRowData;
 
         const res = await dispatch(handleDeleteRequest(data, `api/v1/products/`, true, true));
-        
+
         setloading(false);
         if (res?.status === 200) {
             getOrderData();
@@ -78,26 +85,23 @@ const OrderManagement = () => {
             // setShowMessage('Please update user email address. "'+ userEmailAddress+'" is not registered ')
         }
     };
-    useEffect(() => {
-        if (visibleDelete === true) {
-            handleDeleteRow();
-        }
-    }, [visibleDelete]);
+
 
     const actionTemplate = (rowData) => {
+        setUrlOrderId(rowData._id);
         return (
-            <div className="Edit_Icon">
-                <Button tooltip="Detail"
-                //  icon="pi pi-pencil"
-                label="Detail"
-                  tooltipOptions={{ position: "top" }}
+            <div className="Edit_Iconn">
+                <Button tooltip="Details"
+                    //  icon="pi pi-pencil"
+                    label="Details"
+                    tooltipOptions={{ position: "top" }}
                     className="btn btn-info ml-auto"
                     onClick={() => history.push({
                         // id:rowData._id},'',`/detailordermanagement?orderid=${rowData._id}`
 
                         pathname: '/detailordermanagement',
                         search: `?orderid=${rowData._id}`,
-                        state: { id: rowData.orderId, data: rowData }
+                        state: { id: rowData._id, data: rowData }
                     }
                     )} />
                 {/* <Button tooltip="Delete" icon="pi pi-trash" tooltipOptions={{ position: "top" }} className="delete p-mr-2 p-ml-3" onClick={() => confirm2(rowData)} /> */}
@@ -105,6 +109,8 @@ const OrderManagement = () => {
             </div>
         );
     };
+
+
 
     const editOrder = (rowData) => {
         setVisibleEdit(true);
@@ -140,6 +146,8 @@ const OrderManagement = () => {
             return <React.Fragment><Link to={`./customerdetails?orderid=${rowData?.customer._id}`}>{customerName}</Link></React.Fragment>;
         }
     };
+
+
     const statusTemplete = (rowData) => {
         const status = capitalizeFirstLetter(rowData?.status);
         return <span className={`${status}`}>{status}</span>;
@@ -169,7 +177,7 @@ const OrderManagement = () => {
     const sidebarHeader = () => {
         return (
             <div className="card-header">
-                <label>DETAILS</label>
+                <label>Details</label>
             </div>
         );
     };
@@ -179,7 +187,7 @@ const OrderManagement = () => {
             <Sidebar header={sidebarHeader} position="right" className="w-full" visible={visibleEdit} onHide={onHide}>
                 {/* <Create /> */}
                 {/* <Add></Add> */}
-                <AddEditOrderManagement getOrderData={getOrderData} editable={editable} onHide={onHide} orderRowData={orderRowData} />
+                <AddEditOrderManagement orderId={urlOrderId} getOrderData={getOrderData} editable={editable} onHide={onHide} orderRowData={orderRowData} />
             </Sidebar>
 
             <div className="grid">
@@ -199,16 +207,18 @@ const OrderManagement = () => {
                 <div className="col-12 md:col-12 lg:col-12 xl:col-12">
                     <div className="innr-Body">
                         <DataTable
+                            paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
+                            currentPageReportTemplate="Showing {first} to {last} of {totalRecords} Records"
                             // loading={loading}
                             rows={10} paginator
                             responsiveLayout="scroll"
                             value={orderData}
                             globalFilter={globalFilter}
-                            globalFilterFields={["orderId"]}
-                            >
+                            globalFilterFields={["orderId", "customer.firstName", "customer.lastName", "placedOn"]}
+                        >
                             <Column body={OrderIdClickable} header="Order ID" />
-                            <Column body={customerNameTemplete} header="Customer's Name" />
-                            <Column body={orderDateTemplete} header="Placed On" />
+                            <Column body={customerNameTemplete} field="customer.firstName" header="Customer's Name" />
+                            <Column body={orderDateTemplete} field="placedOn" header="Placed On" />
                             <Column field="totalBill" header="Order Amount" />
                             <Column body={statusTemplete} header="Status" />
                             <Column body={actionTemplate} header="Action" />

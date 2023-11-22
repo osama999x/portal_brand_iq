@@ -6,10 +6,17 @@ import { Column } from 'primereact/column';
 // import { useHistory } from 'react-router-dom';
 import { handleGetRequest } from '../../service/GetTemplate';
 import { FilterMatchMode } from "primereact/api";
+import Edit from '../../assets/ICONS/icon_edit.png';
+import { Button } from 'primereact/button';
+import AddEditInventory from './AddEditInventory';
+import { Dialog } from 'primereact/dialog';
+import { useHistory } from "react-router-dom";
 
 const Index = () => {
-
+    const [displayBasic, setDisplayBasic] = useState(false);
     const [inventoryData, setInventoryData] = useState([]);
+    const [reviewsRowData, setReviewsRowData] = useState("");
+    const [apprejdata, setAppRejData] = useState("");
     // const [loading, setloading] = useState(false);
     const [globalFilter, setGlobalFilter] = useState(null);
     const [globalFilterValue, setGlobalFilterValue] = useState("");
@@ -27,6 +34,7 @@ const Index = () => {
     const getInventoryData = async () => {
         // setloading(true);
         const res = await handleGetRequest("api/v1/inventoryStatus/all", false);
+
         if (res) {
             setInventoryData(res);
         }
@@ -36,8 +44,43 @@ const Index = () => {
         getInventoryData();
     }, []);
 
+    const actionTemplate = (rowData) => {
+
+        return (
+            <div className="Edit_Icon">
+                <Button tooltip="Edit" tooltipOptions={{ position: "top" }} className="edit p-mr-2" onClick={() => approveReject(rowData)} >
+                    <img src={Edit} />
+                </Button>
+
+            </div>
+        );
+    };
+
+    const approveReject = (rowData) => {
+        setDisplayBasic(true);
+        setAppRejData(true);
+        setReviewsRowData(rowData?.productsId);
+    };
+
+    const history = useHistory();
+    const onHide = (name) => {
+        setDisplayBasic(false);
+        setAppRejData(false)
+    }
+
     return (
         <div>
+            <Dialog header="Update" visible={displayBasic} style={{ width: '40vw' }} onHide={onHide}>
+                <AddEditInventory
+                    onHide={onHide}
+                    reviewsRowData={reviewsRowData}
+                    apprejdata={apprejdata}
+                    displayBasic={displayBasic}
+                //productRowData={productRowData}
+                // apprejdata={apprejdata}
+                // globalFilterValue={globalFilterValue}
+                />
+            </Dialog>
             <div className="grid">
                 <div className="col-12 md:col-12 xl:col-12 lg:col-12">
                     <div className="text-right flex float_right">
@@ -71,6 +114,8 @@ const Index = () => {
                 <div className="col-12 md:col-12 xl:col-12 lg:col-12">
                     <div className="innr-Body">
                         <DataTable
+                            paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
+                            currentPageReportTemplate="Showing {first} to {last} of {totalRecords} Records"
                             globalFilter={globalFilter}
                             rows={7}
                             paginator
@@ -78,11 +123,12 @@ const Index = () => {
                             value={inventoryData}
                             globalFilterFields={["productsName"]}
                         >
-                            <Column field="productsId" header="ProductID" />
+                            <Column field="productsId" header="Product-ID" />
                             <Column field="productsName" header="Product Name" />
                             <Column field="categoryName" header="Category" />
                             <Column field="subcategoryName" header="Sub-Category" />
                             <Column field="remainingQuantity" header="Remaining Status" />
+                            <Column body={actionTemplate} header="Action" />
                         </DataTable>
                     </div>
                 </div>

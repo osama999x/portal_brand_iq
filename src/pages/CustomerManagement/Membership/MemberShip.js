@@ -9,7 +9,8 @@ import AddEdit from './addedit';
 import { handleGetRequest } from '../../../service/GetTemplate';
 import { handleDeleteRequest } from '../../../service/DeleteTemplete';
 import { useDispatch } from 'react-redux';
-
+import Edit from '../../../assets/ICONS/icon_edit.png';
+import Delete from '../../../assets/ICONS/icon_delete.png';
 const MemberShip = () => {
   const dispatch = useDispatch();
   const [displayBasic, setDisplayBasic] = useState(false);
@@ -27,8 +28,12 @@ const MemberShip = () => {
   const actionTemplate = (rowData) => {
     return (
       <div className="Edit_Icon">
-        <Button tooltip="Edit" icon="pi pi-pencil" tooltipOptions={{ position: "top" }} className="edit p-mr-2" onClick={() => editUsers(rowData)} />
-        <Button tooltip="Delete" icon="pi pi-trash" tooltipOptions={{ position: "top" }} className="delete p-mr-2 p-ml-3" onClick={() => { confirm2(rowData) }} />
+        <Button tooltip="Edit" tooltipOptions={{ position: "top" }} className="edit p-mr-2" onClick={() => editUsers(rowData)} >
+          <img src={Edit} />
+        </Button>
+        <Button tooltip="Delete" tooltipOptions={{ position: "top" }} className="delete p-mr-2 p-ml-3" onClick={() => { confirm2(rowData) }} >
+          <img src={Delete} />
+        </Button>
       </div>
     );
   };
@@ -91,7 +96,7 @@ const MemberShip = () => {
   }
   return (
     <>
-      <Dialog header={addEditMember ? "EDIT" : "ADD NEW MEMBERSHIP"} visible={displayBasic} style={{ width: '40vw' }} onHide={onHide}>
+      <Dialog header={addEditMember ? "Edit" : "Add New Membership"} visible={displayBasic} style={{ width: '40vw' }} onHide={onHide}>
         <AddEdit
           onHide={onHide}
           getMembershipData={getMembershipData}
@@ -105,8 +110,9 @@ const MemberShip = () => {
               <input type="text" placeholder="Search" class="p-inputtext p-component p-filled" onInput={(e) => setGlobalFilter(e.target.value)} />
               <i class="pi pi-search"></i>
             </span>
-            <button className="p-button p-button-primary p-component" onClick={() => {setDisplayBasic(true)
-            setaddEditMember(false);
+            <button className="p-button p-button-primary p-component" onClick={() => {
+              setDisplayBasic(true)
+              setaddEditMember(false);
             }}>
               <span className="p-button-icon p-c p-button-icon-left pi pi-plus"></span>
               <span className="p-button-label p-c">Add New</span>
@@ -117,6 +123,8 @@ const MemberShip = () => {
         <div className="col-12 md:col-12 lg:col-12 xs:col-12">
           <div className="innr-Body">
             <DataTable
+              paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
+              currentPageReportTemplate="Showing {first} to {last} of {totalRecords} Records"
               globalFilter={globalFilter}
               rows={7}
               paginator

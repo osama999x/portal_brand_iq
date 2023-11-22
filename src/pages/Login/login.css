@@ -143,7 +143,7 @@ color: #000;
 
 .Login_button {
     width           : 100%;
-    background-color: #153947;
+    background-color: #153947 !important;
     color           : white;
     left            : 4px;
     top             : 36px;

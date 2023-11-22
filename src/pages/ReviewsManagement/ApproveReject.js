@@ -19,7 +19,7 @@ const ApproveReject = ({ onHide, getReviewsData, reviewsRowData, apprejdata }) =
 
         if (res) {
             const keyData = res;
-            
+
             Object.keys(keyData).forEach((key) => {
                 if (formik.initialValues.hasOwnProperty(key)) {
                     formik.setFieldValue(key, keyData[key]);
@@ -39,6 +39,7 @@ const ApproveReject = ({ onHide, getReviewsData, reviewsRowData, apprejdata }) =
         //comment: Yup.mixed().required("This field is required."),
         isApproved: Yup.mixed().required("This field is required."),
 
+
     });
     const formik = useFormik({
         validationSchema: validationSchema,
@@ -49,8 +50,9 @@ const ApproveReject = ({ onHide, getReviewsData, reviewsRowData, apprejdata }) =
         },
         onSubmit: async (data) => {
             if (apprejdata === true) {
-                
+
                 data["reviewId"] = reviewsRowData;
+
                 setLoading(true);
                 const res = await dispatch(handlePatchRequest(data, "api/v1/review/approvedReview", true, true));
                 if (res?.status === 200) {
@@ -69,7 +71,7 @@ const ApproveReject = ({ onHide, getReviewsData, reviewsRowData, apprejdata }) =
         return isFormFieldValid(name) && <small className="p-error">{formik.errors[name]}</small>;
     };
     const statusOption = [
-        { name: 'Approved', isApproved: true },
+        { name: 'Approve', isApproved: true },
         { name: 'Reject', isApproved: false },
     ];
 
@@ -79,7 +81,7 @@ const ApproveReject = ({ onHide, getReviewsData, reviewsRowData, apprejdata }) =
 
                 <div className="col-12 md:col-12 lg:col-12 xs:col-12">
                     <div className="flex flex-column">
-                        <label className="mb-2">Approve Status</label>
+                        <label className="mb-2">Status</label>
                         <Dropdown
                             id="isApproved"
                             name="isApproved"

@@ -16,15 +16,16 @@ import { useDispatch } from "react-redux";
 // import { Dialog } from "primereact/dialog";
 // import moment from "moment";
 import { ProgressSpinner } from "primereact/progressspinner";
-//import { Password } from 'primereact/password';
+import { Password } from 'primereact/password';
 
 const AddEditUsers = ({ getUserData, onHide, editable, UsersRowData }) => {
+
     const [loading, setLoading] = useState(false);
     // const [loadingIcon, setloadingIcon] = useState("pi pi-save");
     const [userRoles, setUserRoles] = useState([]);
     const [userId, setUserId] = useState();
     const [error, setError] = useState('');
-    
+
 
     // const onlyalphabetSRegex = /^(?!\s)[A-Za-z0-9\s]+$/;
     //  const aplhaNumericSRegex = /^[a-zA-Z0-9]+@+[a-zA-Z0-9]+.+[A-z]/
@@ -32,6 +33,7 @@ const AddEditUsers = ({ getUserData, onHide, editable, UsersRowData }) => {
     const validEmail = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
     const history = useHistory();
     const dispatch = useDispatch();
+    const nameRegex = /^[a-zA-Z\s]*$/;
 
 
     const getUsersByID = async () => {
@@ -39,6 +41,7 @@ const AddEditUsers = ({ getUserData, onHide, editable, UsersRowData }) => {
         data["userID"] = UsersRowData;
         setLoading(true);
         const res = await dispatch(handlePostRequest(data, "api/v1/user/userDetails"));
+        console.log("role", res)
         const keyData = res?.data?.data;
         setUserId(res.userId);
         setLoading(false);
@@ -49,7 +52,8 @@ const AddEditUsers = ({ getUserData, onHide, editable, UsersRowData }) => {
                 formik.setFieldValue(key, keyData[key]);
             }
         });
-        formik.setFieldValue("roleId", roles)
+        console.log("kwysdata", keyData)
+        formik.setFieldValue("roleId", keyData.role)
     };
     const getUsersRole = async () => {
         const res = await handleGetRequest("api/v1/role/all", false);
@@ -72,15 +76,15 @@ const AddEditUsers = ({ getUserData, onHide, editable, UsersRowData }) => {
 
 
     const validationSchema = Yup.object().shape({
-        
-        name: Yup.string()?.required("This field is required."),
+
+        name: Yup.string()?.required("Please Enter Name."),
         // .matches(onlyalphabetSRegex,"This field should contain alphabets only"),
-        roleId: Yup.string()?.required("This field is required"),
-        email: Yup.string().required("This field is required.").matches(validEmail, "Invalid email address format"),
-        password: AddEditUsers ? Yup.string() : Yup.string().required("This field is required."),
+        roleId: Yup.string()?.required("Please Select Role"),
+        email: Yup.string().required("Please Enter Email.").matches(validEmail, "Invalid email address format"),
+        password: AddEditUsers ? Yup.string() : Yup.string().required("Please Enter Password."),
 
         contact: Yup.string()
-            .required("This field is required.")
+            .required("Please Enter Contact Number.")
             .max(11, "Maximum length 11 allowed"),
     });
 
@@ -108,13 +112,14 @@ const AddEditUsers = ({ getUserData, onHide, editable, UsersRowData }) => {
                     onHide();
                 }
             } else {
+
                 const res = await dispatch(handlePostRequest(data, "api/v1/user/", true, true));
 
                 if (res?.status === 200) {
                     await getUserData();
                     formik.resetForm();
                     onHide();
-                    
+
                 }
             }
             // data.preventDefault
@@ -136,111 +141,112 @@ const AddEditUsers = ({ getUserData, onHide, editable, UsersRowData }) => {
         e.preventDefault();
         onHide();
     };
-   //const handleSubmit = (event) => {
+    //const handleSubmit = (event) => {
     //event.preventDefault();
     // if(!currentuser.permissions.includes('create_user')){
     //     setError('You do not have the necessary permission to create a new user.');
     //     return;
     // }
     // setError('');
-   //}
+    //}
 
     return (
         <>
             {
-                 loading ? 
-              (
-                <ProgressSpinner style={{ display: "flex", justifyContent: "center", alignItem: "center", height: "50vh" }} strokeWidth="2" stroke-miterlimit="10" />
-            ) : ( 
-                <form onSubmit={formik.handleSubmit}>
-                    {error && <p style={{ color: 'red' }}>{error}</p>}
-                    <div className="grid p-p-3">
-                        <div className="col-12 md:col-12 lg:col-12 xl:col-12">
-                            <div className="flex flex-column">
-                                <label className="mb-2">Name</label>
-                                <InputText keyfilter="alpha" maxLength={25} minLength={5} placeholder="Enter Name" id="name" name="name" value={formik?.values?.name?.replace(/\s\s+/g, " ")} onChange={formik.handleChange} className={classNames({ "p-invalid": isFormFieldValid("name") }, "w-full md:w-10 inputClass")} />
-                                {getFormErrorMessage("name")}
-                            </div>
-                        </div>
-                        <div className="col-12 md:col-12 lg:col-12 xl:col-12">
-                            <div className="flex flex-column">
-                                <label className="mb-2">Role</label>
-                                <Dropdown
-                                    id="roleId"
-                                    placeholder="Select Role"
-                                    options={userRoles}
-                                    optionLabel="name"
-                                    name="roleId"
-                                    optionValue="_id"
-                                    value={formik.values.roleId}
-                                    onChange={formik.handleChange}
-                                    className={classNames({ "p-invalid": isFormFieldValid("roleId") }, "w-full md:w-10 inputClass")}
-                                    
-                                />
-                                {getFormErrorMessage("roleId")}
-                            </div>
-                        </div>
-                        <div className="col-12 md:col-12 lg:col-12 xl:col-12">
-                            <div className="flex flex-column">
-                                <label className="mb-2">Email</label>
-                                <InputText
-                                    placeholder="Enter Email"
-                                    id="email"
-                                    name="email"
-                                    value={formik?.values?.email?.replace(/\s\s+/g, " ")}
-                                    onChange={formik.handleChange}
-                                    className={classNames({ "p-invalid": isFormFieldValid("email") }, "w-full md:w-10 inputClass")}
-                                    maxLength={50}
-                               />
-                                {getFormErrorMessage("email")}
-                            </div>
-                        </div>
-                        <div className={editable ? "dNone" : "col-12 md:col-12 lg:col-12 xl:col-12"}>
-                            <div className="flex flex-column">
-                                <label className="mb-2">Password</label>
-                                <InputText
-                                    type="password" 
-                                    disabled={editable}
-                                    id="password"
-                                    name="password"
-                                    placeholder="Enter Password"
-                                     value={formik?.values?.password} 
-                                     onChange={formik.handleChange} 
-                                     className={classNames({ "p-invalid": isFormFieldValid("password") }, "w-full md:w-10 inputClass ")}
-                                     maxLength={15}
-                                     //   toggleMask 
-                                      />
-                                {getFormErrorMessage("password")}
-                            </div>
-                        </div>
-                        
-                        <div className="col-12 md:col-12 lg:col-12 xl:col-12">
-                            <div className="flex flex-column">
-                                <label className="mb-2">Contact Number</label>
-                                <InputText
-                                    type="text"
-                                    placeholder="Enter Contact Number"
-                                    id="contact"
-                                    name="contact"
-                                    value={formik?.values?.contact}
-                                    onChange={formik.handleChange}
-                                    className={classNames({ "p-invalid": isFormFieldValid("contact") }, "w-full md:w-10 inputClass")}
-                                     keyfilter="int"
-                                     maxLength={11}
-                                />
-                                {getFormErrorMessage("contact")}
-                            </div>
-                        </div>
+                loading ?
+                    (
+                        <ProgressSpinner style={{ display: "flex", justifyContent: "center", alignItem: "center", height: "50vh" }} strokeWidth="2" stroke-miterlimit="10" />
+                    ) : (
+                        <form onSubmit={formik.handleSubmit}>
+                            {error && <p style={{ color: 'red' }}>{error}</p>}
+                            <div className="grid p-p-3">
+                                <div className="col-12 md:col-12 lg:col-12 xl:col-12">
+                                    <div className="flex flex-column">
+                                        <label className="mb-2">Name</label>
+                                        <InputText maxLength={25} minLength={5} placeholder="Enter Name" id="name" name="name" value={formik?.values?.name?.replace(/\s\s+/g, " ")} onChange={formik.handleChange} className={classNames({ "p-invalid": isFormFieldValid("name") }, "w-full md:w-10 inputClass")} keyfilter={/^[a-zA-Z\s]*$/} />
+                                        {getFormErrorMessage("name")}
+                                    </div>
+                                </div>
+                                <div className="col-12 md:col-12 lg:col-12 xl:col-12">
+                                    <div className="flex flex-column">
+                                        <label className="mb-2">Role</label>
+                                        <Dropdown
+                                            id="roleId"
+                                            placeholder="Select Role"
+                                            options={userRoles}
+                                            optionLabel="name"
+                                            name="roleId"
+                                            optionValue="_id"
+                                            value={formik.values.roleId}
+                                            onChange={formik.handleChange}
+                                            className={classNames({ "p-invalid": isFormFieldValid("roleId") }, "w-full md:w-10 inputClass")}
 
-                        <div className="col-12 text-center">
-                            <Button label="Cancel" onClick={(e) => handleCancel(e)} className="Cancelbtn p-mr-3" />
-                            <Button disabled={loading}  iconPos="right" label={editable ? "Update" : "Save"} autoFocus className="Savebtn p-mr-3" />
-                        </div>
+                                        />
+                                        {getFormErrorMessage("roleId")}
+                                    </div>
+                                </div>
+                                <div className="col-12 md:col-12 lg:col-12 xl:col-12">
+                                    <div className="flex flex-column">
+                                        <label className="mb-2">Email</label>
+                                        <InputText
+                                            placeholder="Enter Email"
+                                            id="email"
+                                            name="email"
+                                            value={formik?.values?.email?.replace(/\s\s+/g, " ")}
+                                            onChange={formik.handleChange}
+                                            className={classNames({ "p-invalid": isFormFieldValid("email") }, "w-full md:w-10 inputClass")}
+                                            maxLength={50}
+                                        />
+                                        {getFormErrorMessage("email")}
+                                    </div>
+                                </div>
+                                <div className={editable ? "dNone" : "col-12 md:col-12 lg:col-12 xl:col-12"}>
+                                    <div className="flex flex-column">
+                                        <label className="mb-2">Password</label>
+                                        <Password
+                                            type="password"
+                                            disabled={editable}
+                                            id="password"
+                                            name="password"
+                                            placeholder="Enter Password"
+                                            value={formik?.values?.password}
+                                            onChange={formik.handleChange}
+                                            className={classNames({ "p-invalid": isFormFieldValid("password") }, "w-full md:w-10 inputClass ")}
+                                            maxLength={15}
+                                            toggleMask
+                                        />
+                                        {getFormErrorMessage("password")}
+                                    </div>
+                                </div>
 
-                    </div>
-                </form>
-            )
-             } 
+                                <div className="col-12 md:col-12 lg:col-12 xl:col-12">
+                                    <div className="flex flex-column">
+                                        <label className="mb-2">Contact Number</label>
+                                        <InputText
+                                            type="text"
+                                            placeholder="Enter Contact Number"
+                                            id="contact"
+                                            name="contact"
+                                            value={formik?.values?.contact}
+                                            onChange={formik.handleChange}
+                                            className={classNames({ "p-invalid": isFormFieldValid("contact") }, "w-full md:w-10 inputClass")}
+                                            keyfilter="int"
+                                            maxLength={11}
+                                            minLength={11}
+                                        />
+                                        {getFormErrorMessage("contact")}
+                                    </div>
+                                </div>
+
+                                <div className="col-12 text-center">
+                                    <Button label="Cancel" onClick={(e) => handleCancel(e)} className="Cancelbtn p-mr-3" />
+                                    <Button disabled={loading} iconPos="right" label={editable ? "Update" : "Save"} autoFocus className="Savebtn p-mr-3" />
+                                </div>
+
+                            </div>
+                        </form>
+                    )
+            }
         </>
     );
 };

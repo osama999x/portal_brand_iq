@@ -53,26 +53,54 @@
     font-size: 24px !important;
     color: var(--Content-bg) !important;
 }
-
-.tab_ {
+.tab_Canceled {
+    background-color: #6f95ef !important;
+}
+.tab_Confirmed {
+    background-color: #6fd6ef !important;
+}
+.tab_Delivered {
     background-color: var(--tab-0);
 }
 
-.tab_1 {
+.tab_Pending {
     background-color: var(--tab-one);
 }
 
-.tab_2 {
+.tab_Rejected {
     background-color: var(--tab-Two);
 }
 
-.tab_3 {
+.tab_Returned {
     background-color: var(--tab-Thre);
 }
-
-.icon_style {
-    background: var(--tab-0-iconbg) !important;
+.tab_undefined  {
+    background-color: #42a5f5 !important;
 }
+.icon_style_Canceled {
+    background-color: hsl(180, 5%, 48%) !important;
+}
+.icon_style_Confirmed {
+    background-color: #213b25 !important;
+}
+.icon_style_Delivered {
+    background-color: #079aab !important;
+}
+.icon_style_Pending {
+    background-color: #4dad30 !important;
+}
+.icon_style_Rejected {
+    background-color: #b39122 !important;
+}
+.icon_style_Returned {
+    background-color: #734a95 !important;
+}
+.icon_style_undefined  {
+    background-color: #2679bd !important;
+}
+// .icon_style {
+//     background: var(--tab-0-iconbg) !important;
+// }
 
 .text-white-500 {
     color: var(--Content-bg) !important;
@@ -118,7 +146,7 @@
     -webkit-appearance: none;
     appearance: none;
     border-radius: 6px;
-    width: 190px;
+    width: 100%;
 }
 
 .p-dialog .p-dialog-header,
@@ -153,9 +181,13 @@
     padding: 0.41rem 1rem !important;
     margin-right: 16px;
 }
-
+.three_btn{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
 .Cancelbtn:hover,
-.Cancelbtn:focus,
+.Cancelbtn:focu s,
 .Cancelbtn:active {
     color: var(--sidebar-bgone) !important;
     border: 1px solid var(--sidebar-bgone) !important;
@@ -199,7 +231,7 @@
 .p-button-primary:active {
     color: var(--Content-bg) !important;
     border: 1px solid var(--sidebar-bgone) !important;
-    width: 135px !important;
+    width: none !important;
     outline: none;
     padding: 0.41rem 1rem !important;
     background-color: var(--sidebar-bgone) !important;
@@ -248,14 +280,14 @@
     border: 0;
     margin-bottom: 1.5rem;
     margin-top: 1.5rem;
-    width: 230px;
+    width: 180px;
 }
 
 .p-tabview .p-tabview-nav li.p-highlight .p-tabview-nav-link {
     // background   : transparent !important;
     border-color: var(--sidebar-bgone);
     color: var(--sidebar-bgone);
-    width: 230px;
+    width: 180px;
     height: 75px;
     border-bottom: 5px solid #1cb4b4 !important;
 }
@@ -663,6 +695,12 @@ input[type="number"] {
     background-position: 50% 5px !important;
     background-size: 30px !important;
 }
+.p-tabview .p-tabview-nav .assignIcon {
+    background-image: url(../src/assets/ICONS/Role.svg) !important;
+    background-repeat: no-repeat !important;
+    background-position: 50% 5px !important;
+    background-size: 30px !important;
+}
 
 .p-tabview .p-tabview-nav .categoryIcon {
     background-image: url(../src/assets/ICONS/Category.svg) !important;
@@ -871,4 +909,47 @@ input[type="number"] {
     display: none;
 }.p-avatar img {
     position: unset !important;
+}
+
+.pi-angle-down:before {
+    
+    font-size: 2rem !important;
+    
+}
+@media screen and (max-width: 600px) {
+    .my-modal .p-dialog-content {
+      height: 400px;
+    }
+  }
+  
+  @media screen and (min-width: 601px) and (max-width: 1024px) {
+    .my-modal .p-dialog-content {
+      height: 600px;
+    }
+  }
+  
+  @media screen and (min-width: 1025px) {
+    .my-modal .p-dialog-content {
+      height: 800px;
+    }
+  }
+ .Edit_Icon .p-button{
+    padding: 1px 6px !important;
+ }
+ .Save__Button {
+    width: 150px !important;
+    padding: 12px 15px !important;
+    font-size: 0.81rem !important;
+    border-radius: 4rem !important;
+    background: #1cb4b5 !important;
+    border: none !important;
+    cursor: pointer;
+    margin-top: 21px;
+}
+// .layout-topbar .layout-topbar-button {
+//     width: 0rem;
+// }
+.layout-topbar .layout-topbar-button:focus {
+
+    box-shadow:none !important;
 }

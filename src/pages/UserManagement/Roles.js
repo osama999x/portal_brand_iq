@@ -3,12 +3,14 @@ import { DataTable } from 'primereact/datatable';
 import { Button } from 'primereact/button';
 import { Column } from 'primereact/column';
 import { Dialog } from 'primereact/dialog';
-import { ConfirmDialog, confirmDialog } from 'primereact/confirmdialog';
+import { confirmDialog } from 'primereact/confirmdialog';
 import { Toast } from 'primereact/toast';
-import {handleGetRequest} from '../../service/GetTemplate';
+import { handleGetRequest } from '../../service/GetTemplate';
 import { handleDeleteRequest } from '../../service/DeleteTemplete';
 import { useDispatch } from "react-redux";
 import AddEditRoles from './AddEditRoles';
+import Edit from '../../assets/ICONS/icon_edit.png';
+import Delete from '../../assets/ICONS/icon_delete.png';
 
 const Roles = () => {
     const dispatch = useDispatch();
@@ -22,7 +24,7 @@ const Roles = () => {
     const [deleteModal, setDeleteModal] = useState(false);
     const [position, setPosition] = useState('center');
     const [userData, setUserData] = useState([]);
-    const [loading,setloading] = useState(false);
+    const [loading, setloading] = useState(false);
     var selectedDeleteId;
     const dialogFuncMap = {
         'displayBasic': setDisplayBasic,
@@ -41,7 +43,7 @@ const Roles = () => {
         setEditable(false);
         setVisibleEdit(false);
     }
-    const renderFooter = (name, canDel) => {    
+    const renderFooter = (name, canDel) => {
         return (
             <div className="grid">
                 <div className="col-12 text-center">
@@ -54,9 +56,9 @@ const Roles = () => {
     }
     const getRoleData = async () => {
         setloading(true);
-        const res = await handleGetRequest("api/v1/role/all",false);
+        const res = await handleGetRequest("api/v1/role/all", false);
         if (res) {
-        setUserData(res);
+            setUserData(res);
         }
         setloading(false);
     };
@@ -69,8 +71,8 @@ const Roles = () => {
         // setloading(true);
         const data = {};
         data["roleId"] = selectedDeleteId;
-        
-        const res = await dispatch(handleDeleteRequest(data, `api/v1/role/`,false ,false));
+
+        const res = await dispatch(handleDeleteRequest(data, `api/v1/role/`, true, true));
         if (res?.status === 200) {
             getRoleData();
             // setloading(false); 
@@ -78,25 +80,29 @@ const Roles = () => {
             // setShowMessage('A password reset link has been sent to the user email address: "' + userEmailAddress+'"')
 
         }
-        else { 
+        else {
             // setloading(false); 
             // setSeverities("error")
             // setShowMessage('Please update user email address. "'+ userEmailAddress+'" is not registered ')
-           
+
         }
-    
+
     }
     useEffect(() => {
         if (visibleDelete === true) {
             RequestResetPassword();
         }
-        
+
     }, [visibleDelete]);
     const actionTemplate = (rowData) => {
         return (
             <div className="Edit_Icon">
-                <Button tooltip="Edit" icon="pi pi-pencil" tooltipOptions={{ position: "top" }} className="edit p-mr-2" onClick={() => editUsers(rowData)} />
-                <Button tooltip="Delete" icon="pi pi-trash" tooltipOptions={{ position: "top" }} className="delete p-mr-2 p-ml-3" onClick={() =>confirm2(rowData) }/>
+                <Button tooltip="Edit" tooltipOptions={{ position: "top" }} className="edit p-mr-2" onClick={() => editUsers(rowData)} >
+                    <img src={Edit} />
+                </Button>
+                <Button tooltip="Delete" tooltipOptions={{ position: "top" }} className="delete p-mr-2 p-ml-3" onClick={() => confirm2(rowData)} >
+                    <img src={Delete} />
+                </Button>
             </div>
         );
     };
@@ -106,7 +112,7 @@ const Roles = () => {
     //     return <React.Fragment>{rolesName.replace(/,/g, ', ')}</React.Fragment>;
 
     // }
-    
+
     const editUsers = (rowData) => {
         setVisibleEdit(true);
         setEditable(true);
@@ -121,7 +127,7 @@ const Roles = () => {
             icon: 'pi pi-trash',
             acceptClassName: 'Savebtn',
             rejectClassName: 'Cancelbtn',
-            accept,
+            accept: () => RequestResetPassword(selectedDeleteId),
             reject
         });
     };
@@ -134,15 +140,14 @@ const Roles = () => {
     const reject = () => {
         setVisibleDelete(false);
 
-        // toast.current.show({ severity: 'info', summary: 'Rejected', detail: 'You have rejected', life: 3000 });
     }
     const toast = useRef(null);
     return (
         <>
             <Toast ref={toast} />
-            <Dialog header={editable ? "EDIT" : "ADD NEW ROLE"} visible={visibleEdit} style={{ width: '40vw' }}  onHide={() => onHide('displayBasic')}>
-            <AddEditRoles getRoleData={getRoleData} editable={editable} onHide={onHide} UsersRowData={usersRowData} />
-                {/* <AddNew /> */}
+            <Dialog header={editable ? "Edit" : "Add New Role"} visible={visibleEdit} style={{ width: '40vw' }} onHide={() => onHide('displayBasic')}>
+                <AddEditRoles getRoleData={getRoleData} editable={editable} onHide={onHide} UsersRowData={usersRowData} />
+
             </Dialog>
 
             <div className="grid">
@@ -162,10 +167,12 @@ const Roles = () => {
                 </div>
                 <div className="col-12 md:col-12 lg:col-12 xl:col-12">
                     <div className="innr-Body">
-                        <DataTable globalFilter={globalFilter} rows={7} paginator responsiveLayout="scroll" value={userData}>
+                        <DataTable
+                            paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
+                            currentPageReportTemplate="Showing {first} to {last} of {totalRecords} Records"
+                            globalFilter={globalFilter} rows={7} paginator responsiveLayout="scroll" value={userData}>
                             <Column field="name" header="User Role" />
-                            <Column field="description" header="Description" />
-                            {/* <Column body={PermissionsTemplate} header="Assign Rights" /> */}
+                            <Column field="description" header="Description" style={{ width: '250px', height: '57px' }} />
                             <Column body={actionTemplate} header="Action" />
                         </DataTable>
                     </div>

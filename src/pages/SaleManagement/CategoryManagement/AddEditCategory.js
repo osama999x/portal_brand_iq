@@ -13,6 +13,7 @@ import { ProgressSpinner } from "primereact/progressspinner";
 //import { toast } from "react-toastify";
 //import MultiImage from "../../../components/MultiImage";
 import { InputTextarea } from 'primereact/inputtextarea';
+import MultiImage from "../../../components/MultiImage";
 
 
 
@@ -31,7 +32,7 @@ const AddEditCategory = ({ getCategoryData, onHide, editable, categoryRowData, }
         data["roleId"] = categoryRowData;
         setLoading(true);
         const res = await handleGetRequest(`api/v1/category/getOne?categoryId=${categoryRowData}`, true);
-        
+
         setLoading(false);
         if (res) {
             const keyData = res;
@@ -47,9 +48,9 @@ const AddEditCategory = ({ getCategoryData, onHide, editable, categoryRowData, }
         if (categoryRowData !== undefined && categoryRowData !== null && editable === true) {
             getUsersByID();
         }
-        
+
     }, []);
-    
+
 
     const validationSchema = Yup.object().shape({
         name: Yup.string()?.required("This field is required.")?.matches(onlyalphabetSRegex, "This field should contain alphabets only"),
@@ -62,42 +63,44 @@ const AddEditCategory = ({ getCategoryData, onHide, editable, categoryRowData, }
             description: "",
             name: "",
             icon: "",
+            thumbnail: "",
             // permissionsId: "",
         },
         onSubmit: async (data) => {
-        
-            
+
+
             if (editable === true) {
                 onHide()
-                    // toast.configure();
-                    
+                // toast.configure();
+
                 data["icon"] = fileUploadData;
-                data["categoryId"] = categoryRowData;             
+                data["categoryId"] = categoryRowData;
                 const res = await dispatch(handlePatchRequest(data, "api/v1/category/", true, true));
-                
+
                 if (res?.status === 200) {
-                   
+
                     await getCategoryData();
-                    
+
                     formik.resetForm();
                     onHide();
-                    
-                    
+
+
                 }
-            
-              
+
+
             } else {
-                data["icon"]= fileUploadData;
-                  //toast.configure();
-                  data["categoryId"] = categoryRowData;
+                data["icon"] = fileUploadData;
+                data["thumbnail"] = fileUploadData
+                //toast.configure();
+                data["categoryId"] = categoryRowData;
                 const res = await dispatch(handlePostRequest(data, "api/v1/category/", true, true));
                 if (res?.status === 200) {
                     await getCategoryData();
                     formik.resetForm();
-                    
+
                     onHide();
                 }
-                
+
             }
         },
     });
@@ -107,14 +110,14 @@ const AddEditCategory = ({ getCategoryData, onHide, editable, categoryRowData, }
     };
 
     const handleCancel = (e) => {
-         e.preventDefault();
-         onHide();
+        e.preventDefault();
+        onHide();
     };
     const handleImages = (images) => {
         setfileUploadData(images);
     };
 
-   
+
 
     return (
         <>
@@ -122,26 +125,46 @@ const AddEditCategory = ({ getCategoryData, onHide, editable, categoryRowData, }
                 <ProgressSpinner style={{ display: "flex", justifyContent: "center", alignItem: "center", height: "50vh" }} strokeWidth="2" stroke-miterlimit="10" />
             ) : (
                 <form onSubmit={formik.handleSubmit}>
-                    
+
                     <div className="grid p-p-3">
                         <div className="col-12 md:col-12 lg:col-12 xl:col-12">
                             <div className="flex flex-column">
-                                <label className="mb-2">Name</label>
-                                <InputText keyfilter="alpha" placeholder="Enter Name" id="name" name="name" value={formik?.values?.name?.replace(/\s\s+/g, " ")} onChange={formik.handleChange} className={classNames({ "p-invalid": isFormFieldValid("name") }, "w-full md:w-10 inputClass")} />
+                                <label className="mb-2">Category Name</label>
+                                <InputText
+                                    maxLength={35}
+                                    placeholder="Enter Category Name"
+                                    id="name"
+                                    name="name"
+                                    value={formik?.values?.name?.replace(/\s\s+/g, " ")}
+                                    onChange={(e) => {
+                                        const input = e.target.value;
+                                        const regex = /^[a-zA-Z\s]*$/;
+                                        if (regex.test(input)) {
+                                            formik.handleChange(e);
+                                        }
+                                    }}
+                                    className={classNames({ "p-invalid": isFormFieldValid("name") }, "w-full md:w-10 inputClass")}
+                                />
                                 {getFormErrorMessage("name")}
                             </div>
                         </div>
                         <div className="col-12 md:col-12 lg:col-12 xl:col-12">
                             <div className="flex flex-column">
-                                <label className="mb-2">Image</label>
+                                <label className="mb-2">Main Image</label>
                                 <AddEditImage handleImages={handleImages} editable={editable} EditIconImage={formik?.values.icon} />
+                            </div>
+                        </div>
+                        <div className="col-12 md:col-12 lg:col-12 xl:col-12">
+                            <div className="flex flex-column">
+                                <label className="mb-2">Thumbnail</label>
+                                <AddEditImage handleImages={handleImages} editable={editable} EditIconImage={formik?.values.thumbnail} />
                             </div>
                         </div>
                         <div className="col-12 md:col-12 lg:col-12 xl:col-12">
                             <div className="flex flex-column">
                                 <label className="mb-2">Description</label>
                                 <InputTextarea
-                                rows={5} cols={30}
+                                    rows={5} cols={30}
                                     placeholder="Enter Description"
                                     id="description"
                                     name="description"
@@ -152,12 +175,12 @@ const AddEditCategory = ({ getCategoryData, onHide, editable, categoryRowData, }
                                 {getFormErrorMessage("description")}
                             </div>
                         </div>
-                        
+
 
                         <div className="col-12 text-center">
-                                <Button label="Cancel" onClick={(e) => handleCancel(e)} className="Cancelbtn p-mr-3" />
-                                <Button  type="submit" disabled={loading}  iconPos="right" label={editable ? "Update" : "Save"} autoFocus className="Savebtn p-mr-3" />
-                                
+                            <Button label="Cancel" onClick={(e) => handleCancel(e)} className="Cancelbtn p-mr-3" />
+                            <Button type="submit" disabled={loading} iconPos="right" label={editable ? "Update" : "Save"} autoFocus className="Savebtn p-mr-3" />
+
                         </div>
                     </div>
                 </form>

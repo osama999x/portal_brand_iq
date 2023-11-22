@@ -19,7 +19,7 @@ import { ProgressSpinner } from "primereact/progressspinner";
 import { Checkbox } from "primereact/checkbox";
 import moment from "moment/moment";
 
-const AddEditPromotionManagement = ({ onHide }) => {    
+const AddEditPromotionManagement = ({ onHide }) => {
     let { search } = useLocation();
     const query = new URLSearchParams(search);
     const promotionRowData = query.get("promotionid");
@@ -71,20 +71,20 @@ const AddEditPromotionManagement = ({ onHide }) => {
             // data["banner"] = fileUploadData;
             // data["promotionId"] = promotion;
 
-            // console.log("data", data)
+
             // setLoading(true);
             // setloadingIcon("pi pi-spin pi-spinner");
 
 
 
-            
+
             setLoading(true);
             if (editable === true) {
 
-            //     data["banner"] = fileUploadData;
-            // data["promotion"] = promotion;
+                //     data["banner"] = fileUploadData;
+                // data["promotion"] = promotion;
                 const res = await dispatch(handlePatchRequest(data, "api/v1/promotion/updatePromotion", true, true));
-                
+
                 if (res?.status === 200) {
                     await getPromotionData();
                     //formik.resetForm();
@@ -93,12 +93,12 @@ const AddEditPromotionManagement = ({ onHide }) => {
                 onHide();
             } else {
                 data["campaignId"] = campaignID;
-                
+
                 // data["image"] = fileUploadData;
                 //data["campaignId"] = promotion;
                 data["expireDate"] = moment().format("MM/DD/YYYY")
                 const res = await dispatch(handlePostRequest(data, "api/v1/promotion/addPromotion", true, true));
-                
+
                 if (res?.status === 200) {
                     await getPromotionData();
                     history.push("./managepromotion");
@@ -116,9 +116,9 @@ const AddEditPromotionManagement = ({ onHide }) => {
 
     const getPromotionData = async () => {
         setLoading(true);
-        
+
         const res = await handleGetRequest(`api/v1/promotion/all`, true)
-    
+
         if (res) {
             setPromotion(res?.promotion);
             const keyData = res;
@@ -131,15 +131,14 @@ const AddEditPromotionManagement = ({ onHide }) => {
         }
         promotion.map((objects, index) => {
             Object.keys(objects).forEach((keys) => {
-               
+
                 // promotion[index][keys] = 
             })
 
         })
 
-        // console.log("keyData",res?.promotion)
     };
-    
+
     // const handleImages = (images) => {
     //     setfileUploadData(images);
     // };
@@ -153,14 +152,14 @@ const AddEditPromotionManagement = ({ onHide }) => {
     // const getCampaignID = async () => {
     //     const response = await handleGetRequest("api/v1/promotion/all", false);
     //     if (response) {
-            
+
     //         //for (let i=0; i <= campaignID.length; i++) 
     //         setCampaignID(response[1]?._id);
-    //         //console.log(response[0]?._id)
-            
+    //       
+
     //     }
     // };
-    //console.log("resssponese", campaignID)
+
 
     const getAllSubCategories = async () => {
         const response = await handleGetRequest("api/v1/subcategory/all", false);
@@ -182,11 +181,11 @@ const AddEditPromotionManagement = ({ onHide }) => {
     }, []);
 
     useEffect(() => {
-        if (formik.values.subcategory.length > 0 ) {
+        if (formik.values.subcategory.length > 0) {
             getAllProducts();
         }
-        
-    },[formik.values.subcategory]);
+
+    }, [formik.values.subcategory]);
 
     useEffect(() => {
         if (promotionRowData !== undefined && promotionRowData !== null && editable === true) {
@@ -240,16 +239,14 @@ const AddEditPromotionManagement = ({ onHide }) => {
     // const handleInputChange = (e, index) => {
     //     const { name, value } = e.target;
     //     if (name === "discount") {
-    //         // console.log("name: ", name)
-    //         // console.log("value", value)
+
     //         const promotionDetails = [...promotion];
     //         promotionDetails[index][name] = parseInt(value);
     //         setPromotion(promotionDetails);
     //         CheckValidations(e, index);
     //     }
     //     else {
-    //         // console.log("name: ", name)
-    //         // console.log("value", value)
+
     //         const promotionDetails = [...promotion];
     //         promotionDetails[index][name] = value;
     //         setPromotion(promotionDetails);
@@ -323,7 +320,7 @@ const AddEditPromotionManagement = ({ onHide }) => {
 
                         <React.Fragment>
                             <div className="card-body">
-                            {/* <div className="col-12 flex innr_padding mt-3 mb-3"> */}
+                                {/* <div className="col-12 flex innr_padding mt-3 mb-3"> */}
                                 <div className="grid">
                                     <div className="col-12 md:col-4 xl:col-4 lg:col-4">
                                         <div className="flex flex-column">
@@ -418,14 +415,14 @@ const AddEditPromotionManagement = ({ onHide }) => {
                                     <div className="col-12 md:col-4 xl:col-4 lg:col-4">
                                         <div className="flex flex-column">
                                             <label className="mb-2">Discount %</label>
-                                            <InputText 
+                                            <InputText
                                                 type="number"
                                                 name="discount"
                                                 id="discount"
-                                                
+
                                                 //value={x.discount}
                                                 value={formik.values.discount}
-                                                onChange={formik.handleChange} 
+                                                onChange={formik.handleChange}
                                                 className={classNames({ "p-invalid": isFormFieldValid("discount") }, "w-full md:w-10 inputClass")} />
                                             {getFormErrorMessage("discount")}
                                         </div>
@@ -445,7 +442,7 @@ const AddEditPromotionManagement = ({ onHide }) => {
                                     </div>
 
                                 </div>
-                            {/* </div> */}
+                                {/* </div> */}
                             </div>
                         </React.Fragment>
 

@@ -10,6 +10,8 @@ import { handleGetRequest } from '../../service/GetTemplate';
 import { handleDeleteRequest } from '../../service/DeleteTemplete';
 import { useDispatch } from 'react-redux';
 import AddTaxType from './AddTaxType';
+import Edit from '../../../src/assets/ICONS/icon_edit.png'
+import Delete from '../../../src/assets/ICONS/icon_delete.png'
 
 
 
@@ -24,7 +26,6 @@ const ManageTax = () => {
     const [visibleDelete, setVisibleDelete] = useState(false);
     const [globalFilter, setGlobalFilter] = useState(null);
     const [addEditTax, setaddEditTax] = useState(null);
-    const [taxHeadId, setTaxHeadId] = useState();
     const [selectedDeleteId, setSelectedDeleteId] = useState('')
 
     // const [displayBasic2, setDisplayBasic2] = useState(false);
@@ -34,7 +35,7 @@ const ManageTax = () => {
         'displayBasic': setDisplayBasic,
         // 'displayBasic2': setDisplayBasic2,
         // 'deleteModal': setDeleteModal,
-        'displayBasic3':setDisplayBasic3,
+        'displayBasic3': setDisplayBasic3,
     }
     const onClick = (name, position) => {
         dialogFuncMap[`${name}`](true);
@@ -55,14 +56,13 @@ const ManageTax = () => {
     }, []);
 
     const TaxHeadDelete = async () => {
-        const data = {};    
-        console.log("in box")
+        const data = {};
         data["taxHeadId"] = selectedDeleteId;
         // const data = {
         //     "taxHeadId" : selectedDeleteId
         // };
 
-        const res = await dispatch(handleDeleteRequest(data, `api/v1/tax/head`, false, false));
+        const res = await dispatch(handleDeleteRequest(data, `api/v1/tax/head`, true, true));
         if (res.status === 200) {
             getTaxData();
 
@@ -72,7 +72,7 @@ const ManageTax = () => {
 
     }
     useEffect(() => {
-        if (visibleDelete === true && selectedDeleteId !=="") {
+        if (visibleDelete === true && selectedDeleteId !== "") {
             TaxHeadDelete();
         }
 
@@ -88,8 +88,12 @@ const ManageTax = () => {
     const actionTemplate = (rowData) => {
         return (
             <div className="Edit_Icon">
-                <Button tooltip="Edit" icon="pi pi-pencil" tooltipOptions={{ position: "top" }} className="edit p-mr-2" onClick={() => editUsers(rowData)} />
-                <Button tooltip="Delete" icon="pi pi-trash" tooltipOptions={{ position: "top" }} className="delete p-mr-2 p-ml-3" onClick={() => { confirm2(rowData) }} />
+                <Button tooltip="Edit" tooltipOptions={{ position: "top" }} className="edit p-mr-2" onClick={() => editUsers(rowData)} >
+                    <img src={Edit} />
+                </Button>
+                <Button tooltip="Delete" tooltipOptions={{ position: "top" }} className="delete p-mr-2 p-ml-3" onClick={() => { confirm2(rowData) }} >
+                    <img src={Delete} />
+                </Button>
             </div>
         );
     };
@@ -98,8 +102,8 @@ const ManageTax = () => {
         setDisplayBasic(true);
         setaddEditTax(true);
         setTaxRowData(rowData._id);
-    
-       
+
+
     };
     const confirm2 = (rowData) => {
         setSelectedDeleteId(rowData._id)
@@ -108,7 +112,7 @@ const ManageTax = () => {
         // setTaxRowData(rowData._id);
         // setTaxTypeRowData(rowData._id);
         confirmDialog({
-            message: 'Are you sure you want to delete this item?',
+            message: 'Are you sure you want to delete this tax type?',
             header: 'Delete Confirmation',
             icon: 'pi pi-trash',
             acceptClassName: 'Savebtn',
@@ -119,7 +123,7 @@ const ManageTax = () => {
     };
     const accept = () => {
         setVisibleDelete(true)
-       // RequestToDel();
+        // RequestToDel();
         //toast.current.show({ severity: 'info', summary: 'Confirmed', detail: 'You have accepted', life: 3000 });
     }
 
@@ -137,13 +141,13 @@ const ManageTax = () => {
     return (
         <>
             <Toast ref={toast} />
-            <Dialog header={addEditTax ? "EDIT" : "ADD NEW TAX"} visible={displayBasic}  style={{ width: '40vw' }} onHide={onHide}>
+            <Dialog header={addEditTax ? "Edit" : "Add New Tax"} visible={displayBasic} style={{ width: '40vw' }} onHide={onHide}>
                 <AddEdit onHide={onHide} getTaxpData={getTaxData} addEditTax={addEditTax} TaxRowData={TaxRowData} />
-                
+
             </Dialog>
-            <Dialog header= "ADD NEW TAXTYPE"  visible={displayBasic3} style={{ width: '40vw' }} onHide={onHide}>
-                
-                <AddTaxType onHide={onHide} getTaxData={getTaxData}  TaxTypeRowData={TaxTypeRowData} />
+            <Dialog header="Add New Tax Type" visible={displayBasic3} style={{ width: '40vw' }} onHide={onHide}>
+
+                <AddTaxType onHide={onHide} getTaxData={getTaxData} TaxTypeRowData={TaxTypeRowData} />
             </Dialog>
 
             <div className="grid">
@@ -153,17 +157,18 @@ const ManageTax = () => {
                             <input type="text" placeholder="Search" class="p-inputtext p-component p-filled" onInput={(e) => setGlobalFilter(e.target.value)} />
                             <i class="pi pi-search"></i>
                         </span>
-                        <button className="p-button p-button-primary p-component mr-2" onClick={() =>{
+                        <button className="p-button p-button-primary p-component mr-2" onClick={() => {
                             setaddEditTax(false)
-                            onClick('displayBasic')}}>
+                            onClick('displayBasic')
+                        }}>
                             <span className="p-button-icon p-c p-button-icon-left pi pi-plus"></span>
                             <span className="p-button-label p-c">Add New</span>
                             <span className="p-ink"></span>
                         </button>
-                    
-                        <button className="p-button p-button-primary p-component" onClick={() => onClick('displayBasic3')}>
+
+                        <button className="p-button p-button-primary p-component mr-2" onClick={() => onClick('displayBasic3')}>
                             <span className="p-button-icon p-c p-button-icon-left pi pi-plus"></span>
-                            <span className="p-button-label p-c">Add TaxType</span>
+                            <span className="p-button-label p-c">Add Tax Type</span>
                             <span className="p-ink"></span>
                         </button>
 
@@ -172,6 +177,8 @@ const ManageTax = () => {
                 <div className="col-12 md:col-12 lg:col-12 xs:col-12">
                     <div className="innr-Body">
                         <DataTable
+                            paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
+                            currentPageReportTemplate="Showing {first} to {last} of {totalRecords} Records"
                             globalFilter={globalFilter}
                             rows={7}
                             paginator
@@ -179,8 +186,8 @@ const ManageTax = () => {
                             value={taxdata}>
                             {/* <Column field="_id" header="Tax Head ID" /> */}
                             <Column body={TaxTypeTemplate} header="Tax Type" />
-                            <Column field="taxHead" header="Tax Head" />
-                            <Column field="description" header="Description" />
+                            <Column field="taxHead" header="Tax Head ID" />
+                            <Column field="description" header="Description" style={{ width: '250px', height: '57px' }} />
                             {/* <Column field="Conatct-Number" header="Conatct Number" /> */}
                             <Column body={actionTemplate} header="Action" />
                         </DataTable>

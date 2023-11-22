@@ -26,13 +26,13 @@ const AddEdit = ({ onHide, getMemberBenifitdata, addeditable, benifitRowData }) 
         setloading(false);
         if (res) {
             const keyData = res;
-            console.log("object KEY DAT",keyData);
+
             Object.keys(keyData).forEach((key) => {
                 if (formik.initialValues.hasOwnProperty(key)) {
                     formik.setFieldValue(key, keyData[key]);
                 }
-                
-                formik.setFieldValue("membershipCategory",res?.membershipCategory?._id )
+
+                formik.setFieldValue("membershipCategory", res?.membershipCategory?._id)
             });
         }
     }
@@ -67,7 +67,7 @@ const AddEdit = ({ onHide, getMemberBenifitdata, addeditable, benifitRowData }) 
                 data["image"] = fileUploadData;
                 data["membershipBenifitId"] = benifitRowData;
                 const res = await dispatch(handlePostRequest(data, "api/v1/membershipBenifit", true, true));
-                // console.log("Coupan Add Response", res);
+
                 if (res?.status === 200 || res?.status === 201) {
                     await getMemberBenifitdata();
                 }
@@ -93,7 +93,7 @@ const AddEdit = ({ onHide, getMemberBenifitdata, addeditable, benifitRowData }) 
 
     const getCategorydata = async () => {
         const res = await handleGetRequest("api/v1/membership/all", false);
-        // console.log("first Category Response",res)
+
         if (res) {
             setCategoryOption(res);
         }
@@ -120,7 +120,7 @@ const AddEdit = ({ onHide, getMemberBenifitdata, addeditable, benifitRowData }) 
                             <Dropdown
                                 name='membershipCategory'
                                 id='membershipCategory'
-                                className={classNames({"p-invalid": isFormFieldValid("membershipCategory") }, "w-full md:w-10 inputClass")}
+                                className={classNames({ "p-invalid": isFormFieldValid("membershipCategory") }, "w-full md:w-10 inputClass")}
                                 value={formik.values.membershipCategory}
                                 onChange={formik.handleChange}
                                 optionLabel="membershipCategory"
@@ -149,6 +149,7 @@ const AddEdit = ({ onHide, getMemberBenifitdata, addeditable, benifitRowData }) 
                         <div className="flex flex-column">
                             <label htmlFor="fromDate">Description</label>
                             <InputTextarea
+                                rows={5} cols={30}
                                 id="description"
                                 name="description"
                                 value={formik.values.description}

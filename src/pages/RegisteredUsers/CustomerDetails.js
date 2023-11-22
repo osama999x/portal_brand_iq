@@ -13,21 +13,24 @@ import { ProgressSpinner } from "primereact/progressspinner";
 import { useHistory, useLocation } from "react-router-dom";
 import { Dialog } from "primereact/dialog";
 import OrderDispatch from "../OrderManagement/OrderDispatch";
+import { baseURL } from '../../utilities/Config';
+import { Image } from 'primereact/image';
+
 
 
 const CustomerDetails = () => {
-    let { search ,state} = useLocation();
+    let { search, state } = useLocation();
     const query = new URLSearchParams(search);
     const customerRowData = query.get("orderid");
-    
-    const editable = customerRowData?true:false;
+
+    const editable = customerRowData ? true : false;
 
     const [loading, setLoading] = useState(false);
     const [fileUploadData, setfileUploadData] = useState("");
     // const [loadingIcon, setloadingIcon] = useState("pi pi-save");
 
     // const [customerData, setCustomerData] = useState();
-    
+
     const [displayDialog, setDisplayDialog] = useState(false);
     const [orderHitorey, setOrderHistory] = useState();
 
@@ -38,16 +41,15 @@ const CustomerDetails = () => {
         const data = {};
         data["roleId"] = customerRowData;
         setLoading(true);
-        const res = await handleGetRequest("api/v1/customer/registeredCustomer",true);
-        if (res)
-        {   var customerById = res.filter(function (el)
-            {
-              return el._id == customerRowData;
+        const res = await handleGetRequest("api/v1/customer/registeredCustomer", true);
+        if (res) {
+            var customerById = res.filter(function (el) {
+                return el._id == customerRowData;
             })
-            
-            formik.setFieldValue("customerName",customerById[0].customerName);
-            formik.setFieldValue("address",customerById[0].address);
-            formik.setFieldValue("contact",customerById[0].contact);
+
+            formik.setFieldValue("customerName", customerById[0].customerName);
+            formik.setFieldValue("address", customerById[0].address);
+            formik.setFieldValue("contact", customerById[0].contact);
             setLoading(false);
         }
     };
@@ -55,20 +57,20 @@ const CustomerDetails = () => {
         setLoading(true);
         const res = await handleGetRequest(`api/v1/order/customerOrderHistory?customerId=${customerRowData}`, false);
         if (res) {
-        
+
             setOrderHistory(res);
         }
         setLoading(false);
     }
-    
+
     useEffect(() => {
         if (customerRowData !== undefined && customerRowData !== null && editable === true) {
             getCustomerById();
             getOrderHistoryByCustomerId();
         }
     }, []);
-    
-    const getOrderData = () =>{
+
+    const getOrderData = () => {
         history.push("./ordermanagement")
     }
 
@@ -91,13 +93,13 @@ const CustomerDetails = () => {
         validationSchema: validationSchema,
         initialValues: {
             customerName: "",
-            address:"",
-            contact:"",
-            email:""
+            address: "",
+            contact: "",
+            email: ""
             // permissionsId: "",
         },
 
-      
+
         onSubmit: async (data) => {
             // setLoading(true);
             // setloadingIcon("pi pi-spin pi-spinner");
@@ -115,7 +117,7 @@ const CustomerDetails = () => {
                 // if (res?.status === 200) {
                 //     await getOrderData();
                 //     formik.resetForm();
-                    // onHide();
+                // onHide();
                 // }
             }
             // setLoading(false);
@@ -128,13 +130,35 @@ const CustomerDetails = () => {
         const status = capitalizeFirstLetter(rowData?.status);
         return <span className={`${status}`}>{status}</span>;
     };
+    // function capitalizeFirstLetter(string) {
+    //     return string.charAt(0).toUpperCase() + string.slice(1);
+    // }
     function capitalizeFirstLetter(string) {
-        return string.charAt(0).toUpperCase() + string.slice(1);
+        if (string) {
+            return string.charAt(0).toUpperCase() + string.slice(1);
+        }
+        return '';
     }
     const orderDateTemplete = (rowData) => {
         return (
             <React.Fragment>
                 <span>{Moment(rowData?.placedOn).format("MMM DD, YYYY h:mm a")}</span>
+            </React.Fragment>
+        );
+    };
+    // const imageTemplete = (rowData) => {
+    //     return (
+    //         <React.Fragment>
+    //             <span>{Moment(rowData?.thumbnail)}</span>
+    //         </React.Fragment>
+    //     );
+    // };
+    const imageTemplate = (rowData) => {
+
+        return (
+            <React.Fragment>
+
+                <Image src={`${baseURL}${rowData.thumbnail}`} zoomSrc={`http://20.212.227.60:3007/${rowData.thumbnail}`} alt="Image" width="80" height="60" preview />
             </React.Fragment>
         );
     };
@@ -147,9 +171,14 @@ const CustomerDetails = () => {
             </React.Fragment>
         );
     };
+    const handleBack = (e) => {
+        e.preventDefault();
+        history.push("./ordermanagement")
+        onHide();
+    };
     return (
         <>
-         <Dialog header="ORDER DISPATAH" visible={displayDialog} style={{ width: "40vw" }} closable={true}  onHide={() => onHide('displayDialog')}>
+            <Dialog header="Order Dispatah" visible={displayDialog} style={{ width: "40vw" }} closable={true} onHide={() => onHide('displayDialog')}>
                 <OrderDispatch id={state?.id} />
             </Dialog>
             {loading ? (
@@ -167,7 +196,7 @@ const CustomerDetails = () => {
                                         {/* <span className="pr-5">
                                             <b>o</b>
                                         </span> */}
-                                       <b> Customer Details</b>
+                                        <b> Customer Details</b>
                                     </label>
                                 </div>
                                 <div className="col-12 md:col-4 xl:col-4 lg:col-4">
@@ -193,7 +222,7 @@ const CustomerDetails = () => {
                                         {/* <span className="pr-5">
                                             <b>o</b>
                                         </span> */}
-                                       <b> Items Details</b>
+                                        <b> Items Details</b>
                                     </label>
                                 </div>
                                 <div className="col-6 innr_padding mt-3 mb-3">
@@ -202,8 +231,10 @@ const CustomerDetails = () => {
                                             <div className="innr-Body">
                                                 <DataTable rows={5} responsiveLayout="scroll" value={orderHitorey} >
                                                     <Column body={OrderIdClickable} header="Order ID" />
-                                                    <Column body={statusTemplete} header="Status" />
+                                                    <Column body={imageTemplate} header="Image" />
+                                                    {/* <Column body={statusTemplete} header="Status" /> */}
                                                     <Column body={orderDateTemplete} header="Placed On" />
+
                                                     {/* <Column field="price" header="Price" /> */}
                                                 </DataTable>
                                             </div>
@@ -212,10 +243,14 @@ const CustomerDetails = () => {
                                 </div>
                             </div>
                             <div className="grid">
-                                <div className="col-12 text-right pt-4">
-                                    {/* <Button autoFocus className="Savebtn" label="Process" onClick={() => onClick("displayBasic")}></Button> */}
-                                    <Button autoFocus className="Savebtn" label="Process" onClick={handleDialog} ></Button>
+                                <div className="col-12 text-center pt-4">
+                                    <div className="three_btn">
+                                        <Button label="Back" onClick={(e) => handleBack(e)} className="Cancelbtn p-mr-3" />
 
+                                        {/* <Button autoFocus className="Savebtn" label="Process" onClick={() => onClick("displayBasic")}></Button> */}
+                                        <Button autoFocus className="Savebtn" label="Process" onClick={handleDialog} ></Button>
+
+                                    </div>
                                 </div>
                             </div>
                         </div>

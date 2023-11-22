@@ -69,10 +69,11 @@ const addedit = ({ addEditMember, getMembershipData, MemberRowData, onHide }) =>
 
 
     const statusOption = [
-        { name: 'Gold', membershipCategory: "Gold" },
         { name: 'Silver', membershipCategory: "Silver" },
+        { name: 'Gold', membershipCategory: "Gold" },
+        { name: 'Diamond', membershipCategory: "Diamond" },
         { name: 'Platinum', membershipCategory: "Platinum" },
-        { name: 'Diamond', membershipCategory: "Diamond" }
+
     ];
 
     return (

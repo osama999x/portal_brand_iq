@@ -21,15 +21,31 @@ const OTPView = () => {
     const [loading, setloading] = useState(false);
     const [loadingIcon, setloadingIcon] = useState("");
     const [otp, setOtp] = useState(['', '', '', '']);
-    const[storedEmail,setStoredEmail] = useState();
-    //const handleOtpChange = (e, index) => { const newOtp = [...otp]; newOtp[index] = e.target.value; setOtp(newOtp); console.log(e.target.value,newOtp)};
+    const [storedEmail, setStoredEmail] = useState();
 
-    const handleOtpChange = (e, index) => { const newOtp = [...otp]; newOtp[index] = e.target.value; setOtp(newOtp); const nextIndex = index + 1; if (nextIndex < 4 && e.target.value.length === 1) { const nextInput = document.querySelector(`#otp-${nextIndex}`); nextInput.focus(); } };
+
+    const handleOtpChange = (e, index) => {
+        const pastedValue = e.target.value;
+        const newOtp = [...otp];
+        const otpLength = newOtp.length;
+        for (let i = 0; i < otpLength; i++) {
+            if (index + i < otpLength) {
+                newOtp[index + i] = pastedValue[i] || '';
+            }
+        }
+        //newOtp[index] = e.target.value;
+        setOtp(newOtp);
+        const nextIndex = index + pastedValue.length;
+        if (nextIndex < otpLength) {
+            const nextInput = document.querySelector(`#otp-${nextIndex}`);
+            nextInput.focus();
+        }
+    };
     // const aplhaNumericSRegex = /^[a-zA-Z0-9]+@+[a-zA-Z0-9]+.+[A-z]/
 
 
     const validationSchema = Yup.object().shape({
-          //email: Yup.string().email("Invalid email address format").required("This field is required."),
+        //email: Yup.string().email("Invalid email address format").required("This field is required."),
         //   OTP: Yup.string().required("This field is required."),
     })
 
@@ -44,29 +60,29 @@ const OTPView = () => {
             OTP: ''
         },
         onSubmit: async (body) => {
-             
+
             const data = {
                 "email": email,
                 "otp": otp.join(""),
-               
+
             }
-        
+
             setloadingIcon("pi pi-spin pi-spinner");
             const response = await dispatch(handlePostRequest(data, "api/v1/user/resetpassword/verify", true, true));
-            if (response?.status=== 200) {
+            if (response?.status === 200) {
             }
             //setStoredEmail(data.email);
             //params(data.email)
             setloading(false);
             setloadingIcon("");
             formik.resetForm();
-            
-            history.push("/resetpass/"+data.email);
-            
+
+            history.push("/resetpass/" + data.email);
+
 
         }
     });
-    
+
     const isFormFieldValid = (name) => !!(formik.touched[name] && formik.errors[name]);
     const getFormErrorMessage = (name) => {
         return isFormFieldValid(name) && <small className="p-error">{formik.errors[name]}</small>;
@@ -97,34 +113,34 @@ const OTPView = () => {
                                     {getFormErrorMessage('email')}
                                 </div>
                             </div> */}
-                            
+
                             <div className='mt-2'>
-                                
-                            <label  className="form-control" >OTP</label>
-                            <div className="otp-input">
-                                 {otp.map((char, index) => ( <InputText key={index}
-                                  id={`otp-${index}`} type="number" size="2" maxLength="4" 
-                                  value={char} 
-                                  //separator={<span>-</span>}
-                                  //name="OTP"
-                                  
-                                  onChange={e => handleOtpChange(e, index)} /> ))} 
-                                 </div>
-                                 
 
-                            <div className="btn_class">
-                                <div className="p-mt-2">
-                                    <Button type="submit"
-                                        className="Login_button"
-                                        label="Submit"
-                                        icon={loadingIcon || ""}
-                                        iconPos="right"
-                                        disabled={loading}
-                                        />
+                                <label className="form-control" >OTP</label>
+                                <div className="otp-input">
+                                    {otp.map((char, index) => (<InputText key={index}
+                                        id={`otp-${index}`} type="number" size="2" maxLength="4"
+                                        value={char}
+                                        //separator={<span>-</span>}
+                                        //name="OTP"
+
+                                        onChange={e => handleOtpChange(e, index)} />))}
                                 </div>
-                            </div>
 
-                                        </div>
+
+                                <div className="btn_class">
+                                    <div className="p-mt-2">
+                                        <Button type="submit"
+                                            className="Login_button"
+                                            label="Submit"
+                                            icon={loadingIcon || ""}
+                                            iconPos="right"
+                                            disabled={loading}
+                                        />
+                                    </div>
+                                </div>
+
+                            </div>
 
                         </form>
                     </div>

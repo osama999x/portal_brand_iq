@@ -4,8 +4,8 @@ import React, { useState, useEffect } from 'react';
 import { FaShippingFast } from "react-icons/fa";
 import { Chart } from 'primereact/chart';
 import { handleGetRequest } from '../service/GetTemplate';
-import { Dropdown } from 'primereact/dropdown';
-import classNames from "classnames";
+import moment from 'moment';
+
 
 
 const Dashboard = (props) => {
@@ -32,8 +32,8 @@ const Dashboard = (props) => {
 
         const res = await handleGetRequest("api/v1/webLog/all", false, true)
             .then(res => {
-                let lables = res.map((item) => `${item.dateofMonth}/${item.month}`);
-                let values = res.map((item) => item.noOfVisit);
+                let lables = res && res.map((item) => `${item.dateofMonth}/${item.month}`);
+                let values = res && res.map((item) => item.noOfVisit);
 
                 let data = {
                     labels:
@@ -68,6 +68,7 @@ const Dashboard = (props) => {
     // Get Line chart Data
     const getOrderData = async () => {
         const res = await handleGetRequest("api/v1/order/dashboard", false, true);
+        console.log("reseee", res)
         setOrderData(res);
         if (res?.status === 200) {
             setOrderData(res);
@@ -78,11 +79,20 @@ const Dashboard = (props) => {
 
     }, []);
 
+
+    function getMonthName(monthNumber) {
+        const date = new Date();
+        date.setMonth(monthNumber - 1);
+
+        return date.toLocaleString('en-US', { month: 'long' });
+    }
     // integrate delivered chart
     const getDeliverdData = async () => {
         const res = await handleGetRequest("api/v1/order/orderReport", false, true);
+        console.log("data", res)
         setNewYear(res);
-        let lable = res.map((item) => item.month);
+        let lable = res && res.map((item) => (item?.year && `${getMonthName(item.month)}/${item.year}`));
+
         //let year = res.map((item)=>item.year);
         // /${item.year}`);
         let value = res.map((item) => item.totalDelivered);
@@ -173,61 +183,44 @@ const Dashboard = (props) => {
 
     return (
         <>
+
+
             <div className="grid">
-                <div className="col-12 lg:col-6 xl:col-3">
+                {orderData && orderData.map((item) => (
+                    <div className="col-12 lg:col-6 xl:col-3">
+                        <div className={`card mb-0 tab_${item?.status} m_height`}>
+                            <div className="flex justify-content-between mb-3">
+                                <div>
+                                    <span className="block text-500 font-medium mb-3 tab_text">{item?.status != undefined ? item?.status : "Total Order"}</span>
+                                    <div className="text-900 font-medium text-xl numbr_size">{item?.order != undefined ? item?.order : item.totalOrder}</div>
+                                </div>
+                                <div className={`flex align-items-center justify-content-center bg-blue-100 border-round icon_style_${item?.status} icon_size`}>
+                                    <i className="pi pi-shopping-cart text-white-500 text-xl" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                ))
+
+                }
+                {/* <div className="col-12 lg:col-6 xl:col-3">
                     <div className="card mb-0 tab_ m_height">
                         <div className="flex justify-content-between mb-3">
                             <div>
-                                <span className="block text-500 font-medium mb-3 tab_text">Total Orders:</span>
-                                <div className="text-900 font-medium text-xl numbr_size">{orderData[4]?.totalOrder}</div>
+                                <span className="block text-500 font-medium mb-3 tab_text">{item?.status}</span>
+                                <div className="text-900 font-medium text-xl numbr_size">{item?.order}</div>
                             </div>
                             <div className="flex align-items-center justify-content-center bg-blue-100 border-round icon_style icon_size">
                                 <i className="pi pi-shopping-cart text-white-500 text-xl" />
                             </div>
                         </div>
                     </div>
-                </div>
-                <div className="col-12 lg:col-6 xl:col-3">
-                    <div className="card mb-0 tab_1 m_height">
-                        <div className="flex justify-content-between mb-3">
-                            <div>
-                                <span className="block text-500 font-medium mb-3 tab_text">Delivered:</span>
-                                <div className="text-900 font-medium text-xl numbr_size">{orderData[1]?.order}</div>
-                            </div>
-                            <div className="flex align-items-center justify-content-center bg-blue-100 border-round icon_size icon_style1">
-                                {/* <i className="pi pi-car text-white-500 text-xl" /> */}
-                                <FaShippingFast className=' text-white-500 text-xl' />
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div className="col-12 lg:col-6 xl:col-3">
-                    <div className="card mb-0 tab_2 m_height">
-                        <div className="flex justify-content-between mb-3">
-                            <div>
-                                <span className="block text-500 font-medium mb-3 tab_text">Order Confirm :</span>
-                                <div className="text-900 font-medium text-xl numbr_size">{orderData[0]?.order}</div>
-                            </div>
-                            <div className="flex align-items-center justify-content-center bg-blue-100 border-round icon_size icon_style2">
-                                <i className="pi pi-car text-white-500 text-xl" />
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div className="col-12 lg:col-6 xl:col-3">
-                    <div className="card mb-0 tab_3 m_height">
-                        <div className="flex justify-content-between mb-3">
-                            <div>
-                                <span className="block text-500 font-medium mb-3 tab_text">Rejected:</span>
-                                <div className="text-900 font-medium text-xl numbr_size">{orderData[3]?.order}</div>
-                            </div>
-                            <div className="flex align-items-center justify-content-center bg-blue-100 border-round icon_size icon_style3">
-                                <i className="pi pi-map-marker text-white-500 text-xl" />
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                </div> */}
+
             </div>
+
+
             <div className="grid mt-5">
                 <div className="col-12 lg:col-6 xl:col-6">
                     <div className="card">

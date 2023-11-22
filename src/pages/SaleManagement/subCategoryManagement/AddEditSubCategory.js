@@ -19,9 +19,10 @@ import { ProgressSpinner } from "primereact/progressspinner";
 //import { config } from "react-transition-group";
 import { toast } from "react-toastify";
 import { InputTextarea } from 'primereact/inputtextarea';
+import MultiImage from "../../../components/MultiImage";
 
 
-const AddEditSubCategory = ({ getSubcategorydata, onHide, subEditable, subCatRowData }) => {
+const AddEditSubCategory = ({ updatedData, getSubcategorydata, onHide, subEditable, subCatRowData }) => {
     const [loading, setLoading] = useState(false);
     const [fileUploadData, setfileUploadData] = useState("");
     // const [loadingIcon, setloadingIcon] = useState("pi pi-save");
@@ -31,7 +32,7 @@ const AddEditSubCategory = ({ getSubcategorydata, onHide, subEditable, subCatRow
     // const aplhaNumericSRegex = /^[0-9a-zA-Z]*$/;
     // /[a-z\d\-_\s]+/i;    
 
-    useEffect(() => { console.log('sId here', subCatRowData) }, [])
+    // useEffect(() => { console.log('sId here', subCatRowData) }, [])
     // const history = useHistory();
     const dispatch = useDispatch();
 
@@ -39,16 +40,16 @@ const AddEditSubCategory = ({ getSubcategorydata, onHide, subEditable, subCatRow
         const data = {};
 
         data["roleId"] = subCatRowData;
-        
+
         setLoading(true);
         const res = await handleGetRequest(`api/v1/subcategory/getOne?subcategoryId=${subCatRowData}`, true);
 
-        
+
         setLoading(false);
         if (res) {
             const keyData = res;
             const category = keyData?.category;
-            
+
             Object.keys(keyData).forEach((key) => {
                 if (formik.initialValues.hasOwnProperty(key)) {
                     formik.setFieldValue(key, keyData[key]);
@@ -96,7 +97,8 @@ const AddEditSubCategory = ({ getSubcategorydata, onHide, subEditable, subCatRow
             description: "",
             name: "",
             icon: "",
-            categoryId: ""
+            categoryId: updatedData?.name,
+            thumbnail: "",
             // permissionsId: "",
         },
 
@@ -122,11 +124,13 @@ const AddEditSubCategory = ({ getSubcategorydata, onHide, subEditable, subCatRow
         // },
         onSubmit: async (data) => {
 
-            
+
             // return
             if (subEditable === true) {
                 data["icon"] = fileUploadData;
                 data["subcategoryId"] = subCatRowData;
+                // data["categoryId"] = updatedData?._id;
+
                 const res = await dispatch(handlePatchRequest(data, "api/v1/subcategory/", true, true));
                 if (res?.status === 200) {
                     await getSubcategorydata();
@@ -136,9 +140,13 @@ const AddEditSubCategory = ({ getSubcategorydata, onHide, subEditable, subCatRow
                 }
             } else {
                 data["icon"] = fileUploadData;
+                data["thumbnail"] = fileUploadData;
                 data["subcategoryId"] = subCatRowData;
-                
-            
+                data["categoryId"] = updatedData?._id
+
+
+
+
                 const res = await dispatch(handlePostRequest(data, "api/v1/subcategory/", true, true));
                 // toast.configure();
                 if (res?.status === 200) {
@@ -170,6 +178,9 @@ const AddEditSubCategory = ({ getSubcategorydata, onHide, subEditable, subCatRow
         e.onSubmit();
         onHide();
     }
+
+
+
     return (
         <>
             {loading ? (
@@ -180,22 +191,35 @@ const AddEditSubCategory = ({ getSubcategorydata, onHide, subEditable, subCatRow
                         <div className="col-12 md:col-12 lg:col-12 xl:col-12">
                             <div className="flex flex-column">
                                 <label className="mb-2">Category</label>
+                                <InputText
+                                    disabled
+                                    id="categoryId"
+                                    name="categoryId"
+                                    className={classNames({ "p-invalid": isFormFieldValid("categoryId") }, "w-full md:w-10 inputClass")}
+                                    value={formik.values.categoryId}
+                                    options={category} onChange={formik.handleChange} />
+                                {getFormErrorMessage("categoryId")}
+                            </div>
+                        </div>
+                        {/* <div className="col-12 md:col-12 lg:col-12 xl:col-12">
+                            <div className="flex flex-column">
+                                <label className="mb-2">Category</label>
                                 <Dropdown id="categoryId"
                                     name="categoryId"
                                     placeholder="Select Category" className={classNames({ "p-invalid": isFormFieldValid("categoryId") }, "w-full md:w-10 inputClass")} value={formik.values.categoryId} options={category} onChange={formik.handleChange} optionValue="_id" optionLabel="name" />
                                 {getFormErrorMessage("categoryId")}
                             </div>
-                        </div>
+                        </div> */}
                         <div className="col-12 md:col-12 lg:col-12 xl:col-12">
                             <div className="flex flex-column">
                                 <label className="mb-2">Sub-Category</label>
-                                <InputText keyfilter="alphanumber" placeholder="Enter Sub-Category" id="name" name="name" value={formik?.values?.name?.replace(/\s\s+/g, " ")} onChange={formik.handleChange} className={classNames({ "p-invalid": isFormFieldValid("name") }, "w-full md:w-10 inputClass")} />
+                                <InputText maxLength={35} placeholder="Enter Sub-Category" id="name" name="name" value={formik?.values?.name?.replace(/\s\s+/g, " ")} onChange={formik.handleChange} className={classNames({ "p-invalid": isFormFieldValid("name") }, "w-full md:w-10 inputClass")} />
                                 {getFormErrorMessage("name")}
                             </div>
                         </div>
                         <div className="col-12 md:col-12 lg:col-12 xl:col-12">
                             <div className="flex flex-column">
-                                <label className="mb-2">Picture</label>
+                                <label className="mb-2">Main Image</label>
                                 <AddEditImage handleImages={handleImages} subEditable={subEditable} EditIconImage={formik?.values.icon}
                                 />
                                 {/* <ImageUpload handleImages={handleImages} className="w-full md:w-10 inputClass"/> */}
@@ -203,15 +227,21 @@ const AddEditSubCategory = ({ getSubcategorydata, onHide, subEditable, subCatRow
                         </div>
                         <div className="col-12 md:col-12 lg:col-12 xl:col-12">
                             <div className="flex flex-column">
+                                <label className="mb-2">Thumbnail</label>
+                                <AddEditImage handleImages={handleImages} subEditable={subEditable} EditIconImage={formik?.values.thumbnail} />
+                            </div>
+                        </div>
+                        <div className="col-12 md:col-12 lg:col-12 xl:col-12">
+                            <div className="flex flex-column">
                                 <label className="mb-2">Description</label>
-                                <InputTextarea  rows={5} cols={30} placeholder="Enter Description" id="description" name="description" value={formik?.values?.description?.replace(/\s\s+/g, " ")} onChange={formik.handleChange} className={classNames({ "p-invalid": isFormFieldValid("description") }, "w-full md:w-10 inputClass")} />
+                                <InputTextarea rows={5} cols={30} placeholder="Enter Description" id="description" name="description" value={formik?.values?.description?.replace(/\s\s+/g, " ")} onChange={formik.handleChange} className={classNames({ "p-invalid": isFormFieldValid("description") }, "w-full md:w-10 inputClass")} />
                                 {getFormErrorMessage("description")}
                             </div>
                         </div>
 
                         <div className="col-12 text-center">
                             <Button label="Cancel" onClick={(e) => handleCancel(e)} className="Cancelbtn p-mr-3" />
-                            <Button type="submit" disabled={loading} iconPos="right"  label={subEditable ? "Update" : "Save"} autoFocus className="Savebtn p-mr-3" />
+                            <Button type="submit" disabled={loading} iconPos="right" label={subEditable ? "Update" : "Save"} autoFocus className="Savebtn p-mr-3" />
                         </div>
 
                     </div>

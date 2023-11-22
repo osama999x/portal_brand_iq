@@ -4,9 +4,7 @@ import { Dropdown } from 'primereact/dropdown';
 
 const Edit = () => {
     const [selectedCategory, setSelectedCategory] = useState();
-    const [selectedThreshold, setselectedThreshold] = useState();
-    const [checked1, setChecked1] = useState();
-    const [city, setCity] = useState(null);
+   ;
 
 
     const category = [

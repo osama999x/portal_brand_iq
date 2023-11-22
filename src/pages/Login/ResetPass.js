@@ -9,19 +9,20 @@ import { useHistory, useParams } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { handlePostRequest } from '../../service/PostTemplate';
 import * as Yup from "yup";
+import { Password } from 'primereact/password';
 // import Forgot from '../forgot/Forgot';
 
 
 const ResetPass = () => {
     const params = useParams();
-    const {email} = params;  
+    const { email } = params;
     const [loading, setloading] = useState(false);
     const [loadingIcon, setloadingIcon] = useState("");
 
     const validationSchema = Yup.object().shape({
         //email: Yup.string().email("Invalid email address format").required("This field is required."),
         password: Yup.string().required("This field is required."),
-        reEnterPassword: Yup.string().required("This field is required."),
+        newPassword: Yup.string().required("This field is required."),
     });
     const dispatch = useDispatch();
     const history = useHistory();
@@ -30,22 +31,23 @@ const ResetPass = () => {
         initialValues: {
             //email:'',
             password: "",
-            reEnterPassword:""
+            newPassword: ""
         },
         onSubmit: async () => {
-             const data = {
-                "email":email,
-                "password":formik.values.password,
-                "reEnterPassword":formik.values.reEnterPassword
+            const data = {
+                "email": email,
+                "password": formik.values.password,
+                "newPassword": formik.values.newPassword
                 // password:data.password,
                 // reEnterPassword:data.reEnterPassword
-             }  
-             
-             
-             
-             
+            }
+
+
+
+
             setloadingIcon("pi pi-spin pi-spinner");
-            const response = await dispatch(handlePostRequest(data, "api/v1/customer/resetpassword/forgot", true, true));
+            const response = await dispatch(handlePostRequest(data, "api/v1/user/forgetPassword", true, true));
+
             if (response?.data?.data?.email === data["email"]) {
 
             }
@@ -66,10 +68,7 @@ const ResetPass = () => {
 
         <div className="resetbg_body">
 
-            {/* <div className="header__login">
-                <h2>Welcome to</h2>
-                <h3>Z-Store</h3>
-            </div> */}
+            
 
             <div className="login_container">
                 <div className="row d-flex justify-content-center">
@@ -96,30 +95,31 @@ const ResetPass = () => {
 
                                 <div className="pt-2">
                                     <label className="form-control" htmlFor="password">New Password</label>
-                                    <InputText type="password"
+                                    <Password type="password"
                                         name="password"
                                         id="password"
                                         placeholder="Enter Password"
                                         value={formik.values.password}
                                         onChange={formik.handleChange}
-                                        className="password__class"
+                                        //className="password__class"
                                         toggleMask
+
                                     />
                                     {getFormErrorMessage('password')}
 
                                 </div>
                                 <div className="pt-2">
                                     <label className="form-control" htmlFor="password">Confirm Password</label>
-                                    <InputText type="password"
-                                        name="reEnterPassword"
-                                        id="reEnterPassword"
+                                    <Password type="password"
+                                        name="newPassword"
+                                        id="newPassword"
                                         placeholder="Confirm  Password"
-                                        value={formik.values.reEnterPassword}
+                                        value={formik.values.newPassword}
                                         onChange={formik.handleChange}
-                                        className="password__class"
+                                        //className="password__class"
                                         toggleMask
                                     />
-                                    {getFormErrorMessage('reEnterPassword')}
+                                    {getFormErrorMessage('newPassword')}
 
                                 </div>
                             </div>

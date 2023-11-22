@@ -5,17 +5,17 @@ import { handleGetRequest } from '../../../service/GetTemplate';
 const FeedbackModal = ({ onHide, editable, categoryRowData }) => {
     const [loading, setloading] = useState(false);
 
-    const [rating, setRating] = useState(null);  
+    const [rating, setRating] = useState(null);
     const [feedbackDetail, setFeedbackDetail] = useState([]);
 
-  const getFeedbackData = async () => {
+    const getFeedbackData = async () => {
         setloading(true);
         const res = await handleGetRequest(``, false);
-        // console.log("data Object",res);
+
         if (res) {
             setFeedbackDetail(res);
-            // console.log("show File data",res);
-            
+
+
         }
         setloading(false);
     };
@@ -27,7 +27,7 @@ const FeedbackModal = ({ onHide, editable, categoryRowData }) => {
         <div>
             <h4 className="Feedback">CUSTOMER FEEDBACK</h4>
             <p>{feedbackDetail?.comments}</p>
-            <Rating stars={6} value={4} onChange={(e) => setRating(e.value)} disabled={true}/>
+            <Rating stars={6} value={4} onChange={(e) => setRating(e.value)} disabled={true} />
         </div>
     )
 }

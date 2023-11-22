@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { NavLink } from 'react-router-dom';
 import { CSSTransition } from 'react-transition-group';
 import classNames from 'classnames';
-import {Ripple} from "primereact/ripple";
+import { Ripple } from "primereact/ripple";
 import { Badge } from 'primereact/badge';
 
 const AppSubmenu = (props) => {
@@ -35,14 +35,14 @@ const AppSubmenu = (props) => {
     }
 
     const onKeyDown = (event) => {
-        if (event.code === 'Enter' || event.code === 'Space'){
+        if (event.code === 'Enter' || event.code === 'Space') {
             event.preventDefault();
             event.target.click();
         }
     }
 
     const renderLinkContent = (item) => {
-        let submenuIcon = item.items && <i className="pi pi-fw pi-angle-down menuitem-toggle-icon"></i>;
+        let submenuIcon = item.items;
         let badge = item.badge && <Badge value={item.badge} />
 
         return (
@@ -51,7 +51,7 @@ const AppSubmenu = (props) => {
                 <span>{item.label}</span>
                 {submenuIcon}
                 {badge}
-                <Ripple/>
+                <Ripple />
             </React.Fragment>
         );
     }
@@ -77,9 +77,9 @@ const AppSubmenu = (props) => {
 
     let items = props.items && props.items.map((item, i) => {
         let active = activeIndex === i;
-        let styleClass = classNames(item.badgeStyleClass, {'layout-menuitem-category': props.root, 'active-menuitem': active && !item.to });
+        let styleClass = classNames(item.badgeStyleClass, { 'layout-menuitem-category': props.root, 'active-menuitem': active && !item.to });
 
-        if(props.root) {
+        if (props.root) {
             return (
                 <li className={styleClass} key={i} role="none">
                     {props.root === true && <React.Fragment>
@@ -101,15 +101,15 @@ const AppSubmenu = (props) => {
         }
     });
 
-    return items ? <ul className={props.className} role="menu">{items}</ul> : null;
+    return items ? (<ul className={props.className} role="menu">{items}</ul>) : null;
 }
 
 export const AppMenu = (props) => {
 
     return (
         <div className="layout-menu-container">
-            <AppSubmenu items={props.model} className="layout-menu"  onMenuItemClick={props.onMenuItemClick} root={true} role="menu" />
-           
+            <AppSubmenu items={props.model} className="layout-menu" onMenuItemClick={props.onMenuItemClick} root={true} role="menu" />
+
         </div>
     );
 }

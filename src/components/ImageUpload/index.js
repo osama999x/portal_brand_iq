@@ -4,8 +4,10 @@ import { Toast } from "primereact/toast";
 import { Badge } from "primereact/badge";
 import { Panel } from "primereact/panel";
 import "./ImageUpload.css";
+import { toast } from "react-toastify";
 
 function ImagesUpload({ handleImages }) {
+    const [images, setImages] = useState([]);
     const toastBC = React.useRef(null);
     const upload = React.useRef(null);
     const [files, setfiles] = useState([]);
@@ -43,21 +45,57 @@ function ImagesUpload({ handleImages }) {
 
     const onFileChange = async (e) => {
         e.preventDefault();
+        for (var file of e.target.files) {
+            if (!(file && file.type.match('image.*'))) {
+                // Handle the selected image file
+                console.log("Not image found");
+                return;
+            }
+        }
         setloading(true);
-        await getBase64(e.target.files[0]);
+        getBase64(e.target.files[0]);
         setloading(false);
     };
 
-    async function getBase64(file) {
+    function getBase64(file) {
         var reader = new FileReader();
         reader.readAsDataURL(file);
+
+        // const checkDimensions = (imgUrl,newfiles) => {
+        //  const fileList = files;
+        //  const newImages=[]
+        //     const img = new Image();
+        //     img.src = imgUrl
+
+        //     img.onload = () => {
+        //         const width = img.naturalWidth;
+        //         const height = img.naturalHeight;
+        //         if((width > 1500 && width < 1950) && (height > 480 && height < 752)) {
+        //             newImages.push({
+        //                 name: fileList.name,
+        //                 src: imgUrl,
+
+        //             });
+        //             setImages([...images, ...newImages]);
+        //             setfiles(newfiles);
+        //         }else {
+        //             toast.warn(
+        //                     `The image does not have the required resolution of width 1500 to 1950  and height 480 to 752. Please select a different image.`
+        //                 );
+        //             }
+        //     }
+        // }
+
         reader.onload = function () {
-            if (!files.some((file) => file?.fileBase64 === reader.result)) {
+            const fileDataUrl = reader.result;
+            if (!files.some((file) => file?.fileBase64 === fileDataUrl)) {
                 let newfiles = JSON.parse(JSON.stringify(files));
                 const filetype = file.type.split("/");
                 newfiles.push({ fileBase64: reader.result, fileName: file.name, fileSize: file.size, fileExtension: `.${filetype[1]}` });
-                setImgBase64(reader.result)
+                //setImgBase64(reader.result)
+                setImgBase64((imgBase64) => [...imgBase64, fileDataUrl])
                 // newfiles.push({ fileBase64: reader.result});
+                //checkDimensions(fileDataUrl,newfiles);
                 setfiles(newfiles);
             }
         };
@@ -84,12 +122,12 @@ function ImagesUpload({ handleImages }) {
     }, [files, handleImages]);
 
     return (
-        <Panel  header={header}>
+        <Panel header={header}>
             <Toast ref={toastBC} position="bottom-center" />
 
             <div className="formgrid grid ">
                 {files.length ? (
-                    files.map((file,i) => (
+                    files.map((file, i) => (
                         <React.Fragment key={i}>
                             <div className="field col-12 md:col-3" key={file?.fileBase64}>
                                 {file?.fileExtension === ".png" || file?.fileExtension === ".jpeg" ? (
@@ -123,7 +161,7 @@ function ImagesUpload({ handleImages }) {
                             </div>
 
                             {/* <InputTextarea value={file?.filedescr} placeholder="Description" onChange={(e) => handleChange(file?.fileBase64, e.target.value)} /> */}
-                            </React.Fragment>
+                        </React.Fragment>
                     ))
                 ) : (
                     <center style={{ height: "3vh" }}>{/* <h6 className="image-placeholder">Please Upload Images</h6> */}</center>

@@ -5,11 +5,12 @@ import { Column } from 'primereact/column';
 import { Dialog } from 'primereact/dialog';
 import { ConfirmDialog, confirmDialog } from 'primereact/confirmdialog';
 import { Toast } from 'primereact/toast';
-import {handleGetRequest} from '../../../service/GetTemplate';
+import { handleGetRequest } from '../../../service/GetTemplate';
 import { handleDeleteRequest } from '../../../service/DeleteTemplete';
 import { useDispatch } from "react-redux";
-import AddEditProduct from "./AddEditProduct"
-
+import AddEditProduct from "./AddEditProduct";
+import Edit from '../../../assets/ICONS/icon_edit.png';
+import Delete from '../../../assets/ICONS/icon_delete.png';
 
 const ProductManagement = () => {
     const dispatch = useDispatch();
@@ -19,34 +20,34 @@ const ProductManagement = () => {
     const [editable, setEditable] = useState(false);
     const [productRowData, setProductRowData] = useState("");
     const [productData, setProductData] = useState([]);
-    
-    const [loading,setloading] = useState(false);
+
+    const [loading, setloading] = useState(false);
     var selectedDeleteId;
 
     const onHide = () => {
         setEditable(false);
         setVisibleEdit(false);
     }
-    
-    
-    const getProductData = async () => {   
+
+
+    const getProductData = async () => {
         setloading(true);
-        const res = await handleGetRequest("api/v1/products/all",false);
-        
+        const res = await handleGetRequest("api/v1/products/all", false);
+
         if (res) {
             setProductData(res);
         }
         setloading(false);
     };
     useEffect(() => {
-         getProductData();
+        getProductData();
     }, []);
     const RequestResetPassword = async () => {
-         setloading(true);
+        setloading(true);
         let data = {};
         data["productId"] = selectedDeleteId;
-       
-        const res = await dispatch(handleDeleteRequest(data, `api/v1/products/`,true ,true));
+
+        const res = await dispatch(handleDeleteRequest(data, `api/v1/products/`, true, true));
         setloading(false);
         if (res?.status === 200) {
             getProductData();
@@ -55,27 +56,31 @@ const ProductManagement = () => {
             // setShowMessage('A password reset link has been sent to the user email address: "' + userEmailAddress+'"')
 
         }
-        else { 
+        else {
             // setloading(false); 
             // setSeverities("error")
             // setShowMessage('Please update user email address. "'+ userEmailAddress+'" is not registered ')
-           
+
         }
-    
+
     }
     // useEffect(() => {
     //     if (visibleDelete === true) {
     //         RequestResetPassword();
     //     }
-        
+
     // }, [visibleDelete]);
 
-  
+
     const actionTemplate = (rowData) => {
         return (
             <div className="Edit_Icon">
-                <Button tooltip="Edit" icon="pi pi-pencil" tooltipOptions={{ position: "top" }} className="edit p-mr-2" onClick={() => editUsers(rowData)} />
-                <Button tooltip="Delete" icon="pi pi-trash" tooltipOptions={{ position: "top" }} className="delete p-mr-2 p-ml-3" onClick={() =>confirm2(rowData)} />
+                <Button tooltip="Edit" tooltipOptions={{ position: "top" }} className="edit p-mr-2" onClick={() => editUsers(rowData)} >
+                    <img src={Edit} />
+                </Button>
+                <Button tooltip="Delete" tooltipOptions={{ position: "top" }} className="delete p-mr-2 p-ml-3" onClick={() => confirm2(rowData)} >
+                    <img src={Delete} />
+                </Button>
                 {/* <Button tooltip="Delete" icon="pi pi-trash" tooltipOptions={{ position: "top" }} className="delete p-mr-2 p-ml-3" onClick={confirm2} /> */}
             </div>
         );
@@ -111,9 +116,9 @@ const ProductManagement = () => {
         // toast.current.show({ severity: 'info', summary: 'Rejected', detail: 'You have rejected', life: 3000 });
     }
 
-    const CategoryTemplete = (rowData) =>{
+    const CategoryTemplete = (rowData) => {
         const categoryName = rowData?.category?.name;
-       
+
         return <React.Fragment>{categoryName}</React.Fragment>;
     }
     const SubCategoryTemplete = (rowData) => {
@@ -122,9 +127,12 @@ const ProductManagement = () => {
     }
     const priceTemplete = (rowData) => {
         const variantPrice = rowData?.variant[0]?.actualPrice;
+
         return <React.Fragment>{variantPrice}</React.Fragment>;
     }
-
+    const formatCurrency = (value) => {
+        return value.toLocaleString('en-US', { style: 'currency', currency: 'USD' });
+    };
     const serialTemplate = (rowData, props) => {
         return (
             <div>
@@ -132,14 +140,14 @@ const ProductManagement = () => {
             </div>
         )
     };
-   
+
     const toast = useRef(null);
     return (
         <>
             <Toast ref={toast} />
-            <Dialog header={editable ? "EDIT" : "ADD NEW PRODUCT"} visible={visibleEdit} style={{ width: '80vw' }}  onHide={onHide}>
-            {/* <Add></Add> */}
-            <AddEditProduct getProductData={getProductData} editable={editable} onHide={onHide} productRowData={productRowData} />
+            <Dialog header={editable ? "Edit" : "Add New Product"} visible={visibleEdit} style={{ width: '80vw' }} onHide={onHide}>
+                {/* <Add></Add> */}
+                <AddEditProduct getProductData={getProductData} editable={editable} onHide={onHide} productRowData={productRowData} />
             </Dialog>
 
             <div className="grid">
@@ -158,18 +166,21 @@ const ProductManagement = () => {
                     </div>
                 </div>
                 <div className="col-12 md:col-12 lg:col-12 xl:col-12">
-                
+
                     <div className="innr-Body">
-                        <DataTable globalFilter={globalFilter} rows={7} paginator responsiveLayout="scroll" value={productData}>
-                         {/* loading={loading}  */}
-                         
+                        <DataTable
+                            paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
+                            currentPageReportTemplate="Showing {first} to {last} of {totalRecords} Records"
+                            globalFilter={globalFilter} rows={7} paginator responsiveLayout="scroll" value={productData}>
+                            {/* loading={loading}  */}
+
                             {/* <Column field="_id" header="Product ID"  sortable/> */}
                             <Column body={serialTemplate} header="Product ID" />
-                            <Column field="name"  header="Product Name" sortable/>
-                            <Column body={CategoryTemplete}  header="Category" sortable />
-                            <Column body={SubCategoryTemplete}  header="Sub-Category" sortable />
-                            <Column body={priceTemplete}  header="Price" sortable />
-                            <Column body={actionTemplate} header="Action"/>
+                            <Column field="name" header="Product Name" sortable />
+                            <Column body={CategoryTemplete} header="Category" />
+                            <Column body={SubCategoryTemplete} header="Sub-Category" />
+                            <Column body={priceTemplete} header="Price" />
+                            <Column body={actionTemplate} header="Action" />
                         </DataTable>
                     </div>
                 </div>
