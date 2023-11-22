@@ -41,8 +41,8 @@ const OrderDispatch = ({ status, trackingId, id }) => {
 
 
     const validationSchema = Yup.object().shape({
-        courierType: Yup.string().required("This field is required."),
-        originCityCode: Yup.string().required("This field is required."),
+        // courierType: Yup.string().required("This field is required."),
+        // originCityCode: Yup.string().required("This field is required."),
         orderType: Yup.string().required("This field is required."),
         description: Yup.string().required("This field is required."),
         packing: Yup.string().required("This field is required."),
@@ -54,9 +54,9 @@ const OrderDispatch = ({ status, trackingId, id }) => {
     const formik = useFormik({
         validationSchema: validationSchema,
         initialValues: {
-            courierType: "",
+            // courierType: "",
             // orderStatusType: "",
-            originCityCode: "",
+            // originCityCode: "",
             orderType: "",
             description: "",
             packing: "",
@@ -68,7 +68,8 @@ const OrderDispatch = ({ status, trackingId, id }) => {
         onSubmit: async (data) => {
 
             // data["parcelId"] = selectedValue;
-            data["courierType"] = formik?.values?.courierType.toUpperCase()
+            // data["courierType"] ='POSTEX'
+            // formik?.values?.courierType.toUpperCase()
             data["orderStatus"] = selectedStatus;
             data["orderId"] = id;
 
@@ -200,14 +201,14 @@ const OrderDispatch = ({ status, trackingId, id }) => {
         <div>
             <form onSubmit={formik.handleSubmit}>
                 <div className="grid p-p-3">
-                    <div className="col-12 md:col-12 lg:col-12 xl:col-12">
+                    {/* <div className="col-12 md:col-12 lg:col-12 xl:col-12">
                         <div className="flex flex-column">
                             <label className="mb-2">Delivery Partner</label>
                             <Dropdown
 
                                 id="courierType"
                                 name="courierType"
-                                value={formik.values.courierType}
+                                value={'POSTEX'}
                                 onChange={formik.handleChange}
                                 className="w-full md:w-10 inputClass"
                                 options={DilveryOption}
@@ -217,7 +218,7 @@ const OrderDispatch = ({ status, trackingId, id }) => {
                             />
                             {getFormErrorMessage("courierType")}
                         </div>
-                    </div>
+                    </div> */}
 
 
 
@@ -241,7 +242,7 @@ const OrderDispatch = ({ status, trackingId, id }) => {
                         </div>
                     </div> */}
 
-                    <div className="col-12 md:col-12 lg:col-12 xl:col-12">
+                    {/* <div className="col-12 md:col-12 lg:col-12 xl:col-12">
                         <div className="flex flex-column">
                             <label className="mb-2">Ware House</label>
 
@@ -258,7 +259,7 @@ const OrderDispatch = ({ status, trackingId, id }) => {
                             />
                             {getFormErrorMessage("courierType")}
                         </div>
-                    </div>
+                    </div> */}
                     <div className="col-12 md:col-12 lg:col-12 xl:col-12">
                         <div className="flex flex-column">
                             <label className="mb-2">Order Type</label>

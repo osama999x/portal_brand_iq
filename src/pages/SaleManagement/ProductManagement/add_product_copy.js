@@ -114,7 +114,7 @@ const AddEditProduct = ({ getProductData, onHide, editable, productRowData }) =>
         subcategoryId: Yup.mixed().required("This field is required"),
         name: Yup.mixed().required("This field is required"),
         title: Yup.mixed().required("This field is required"),
-        metaDataString: Yup.mixed().required("This field is required"),
+        // metaDataString: Yup.mixed().required("This field is required"),
         metaDescriptionString: Yup.mixed().required("This field is required"),
         vendor: Yup.mixed().required("This field is required"),
         // name: Yup.mixed().required("This field is required"),
