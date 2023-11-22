@@ -169,7 +169,7 @@ const AddEditInventory = ({ productRowData, reviewsRowData, apprejdata, getRevie
 
                 <div className="col-12 md:col-12 xl:col-12 lg:col-12 text-center">
                     <Button
-                        label="Back"
+                        label="Submit"
                         onClick={onHide}
                         type="button"
                         className="Cancelbtn p-mr-3"
