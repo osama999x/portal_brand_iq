@@ -124,7 +124,7 @@ const AssignRole = ({ UsersRowData, editable, getPremissionData, handleSelectedU
                     module.push(data)
 
                 }
-                formik.resetForm();
+                // formik.resetForm();
             });
 
             const body = {
@@ -144,6 +144,7 @@ const AssignRole = ({ UsersRowData, editable, getPremissionData, handleSelectedU
                     await getPremissionData();
                 }
                 setSelectedRolePermissions(null)
+
                 formik.setFieldValue("roleId", "")
                 formik.resetForm()
             }

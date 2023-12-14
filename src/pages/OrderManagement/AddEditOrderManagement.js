@@ -118,7 +118,7 @@ const AddEditOrderManagement = () => {
         initialValues: {
             customerName: "",
             address: "",
-            contact: "",
+            contact: "03",
 
             // permissionsId: "",
         },

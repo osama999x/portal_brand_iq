@@ -14,7 +14,7 @@ import { ProgressSpinner } from "primereact/progressspinner";
 //import MultiImage from "../../../components/MultiImage";
 import { InputTextarea } from 'primereact/inputtextarea';
 import MultiImage from "../../../components/MultiImage";
-
+import { toast } from "react-toastify";
 
 
 const AddEditCategory = ({ getCategoryData, onHide, editable, categoryRowData, }) => {
@@ -55,6 +55,7 @@ const AddEditCategory = ({ getCategoryData, onHide, editable, categoryRowData, }
     const validationSchema = Yup.object().shape({
         name: Yup.string()?.required("This field is required.")?.matches(onlyalphabetSRegex, "This field should contain alphabets only"),
         description: Yup.string().required("This field is required.").nullable(),
+
     });
 
     const formik = useFormik({
@@ -66,8 +67,15 @@ const AddEditCategory = ({ getCategoryData, onHide, editable, categoryRowData, }
             thumbnail: "",
             // permissionsId: "",
         },
-        onSubmit: async (data) => {
+        onSubmit: async (data,{setErrors}) => {
 
+            if (!fileUploadData.icon) {
+                toast.error({ icon: "This field is required." });
+            }
+            if (!fileUploadData.thumbnail) {
+               toast.error({ thumbnail: "This field is required." });
+            }
+            if (Object.keys(formik.errors).length === 0) {
 
             if (editable === true) {
                 onHide()
@@ -102,7 +110,8 @@ const AddEditCategory = ({ getCategoryData, onHide, editable, categoryRowData, }
                 }
 
             }
-        },
+        }
+    },
     });
     const isFormFieldValid = (name) => !!(formik.touched[name] && formik.errors[name]);
     const getFormErrorMessage = (name) => {

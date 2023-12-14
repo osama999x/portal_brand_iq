@@ -22,9 +22,9 @@ import { InputText } from "primereact/inputtext";
 const AssignRole = () => {
 
     const dispatch = useDispatch();
-    const [loading, setloading] = useState(false);  
-    
-    
+    const [loading, setloading] = useState(false);
+
+
     const validationSchema = Yup.object().shape({
         name: Yup.string().required("This field is required."),
         description: Yup.string().required("This field is required.").nullable(),
@@ -35,14 +35,14 @@ const AssignRole = () => {
         initialValues: {
             customerName: "",
             address: "",
-            contact: "",
+            contact: "03",
 
             // permissionsId: "",
         },
 
 
         onSubmit: async (data) => {
-        
+
         },
     });
 
@@ -51,7 +51,7 @@ const AssignRole = () => {
     const getFormErrorMessage = (name) => {
         return isFormFieldValid(name) && <small className="p-error">{formik.errors[name]}</small>;
     };
- 
+
     return (
         <>
             <form onSubmit={formik.handleSubmit}>
@@ -66,14 +66,14 @@ const AssignRole = () => {
                                         <b> Customer Details</b>
                                     </label>
                                 </div>
-                            
+
                                 <div className="col-12 md:col-4 xl:col-4 lg:col-4">
                                     <div className="flex flex-column">
                                         <label className="mb-2">Delivery Address</label>
                                         <InputText  id="address" name="address" value={Formik?.values?.address} type="text" placeholder="Enter" className="w-full md:w-10 inputClass" />
                                     </div>
                                 </div>
-                                
+
                             </div>
                             <div className="grid">
                                 <div className="col-12 text-center pt-4">

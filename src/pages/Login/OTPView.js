@@ -70,6 +70,8 @@ const OTPView = () => {
             setloadingIcon("pi pi-spin pi-spinner");
             const response = await dispatch(handlePostRequest(data, "api/v1/user/resetpassword/verify", true, true));
             if (response?.status === 200) {
+
+            history.push("/resetpass/" + data.email);
             }
             //setStoredEmail(data.email);
             //params(data.email)
@@ -77,7 +79,6 @@ const OTPView = () => {
             setloadingIcon("");
             formik.resetForm();
 
-            history.push("/resetpass/" + data.email);
 
 
         }

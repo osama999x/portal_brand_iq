@@ -177,9 +177,9 @@ const AddEditProduct = ({ getProductData, onHide, editable, productRowData }) =>
                 data["description"] = htmlText;
                 delete data["metaDataString"];
                 delete data["metaDescriptionString"];
-                
+
                 const res = await dispatch(handlePatchRequest(data, "api/v1/products/", true, true));
-                
+
                 if (res?.status === 200) {
                     await getProductData();
                     formik.resetForm();
@@ -204,7 +204,7 @@ const AddEditProduct = ({ getProductData, onHide, editable, productRowData }) =>
                 delete data["metaDataString"];
                 delete data["metaDescriptionString"];
 
-                
+
                 const res = await dispatch(handlePostRequest(data, "api/v1/products/", true));
                 if (res?.status === 200) {
                     await getProductData();
@@ -252,15 +252,15 @@ const AddEditProduct = ({ getProductData, onHide, editable, productRowData }) =>
     };
     const handleInputChange = (e, index) => {
         const { name, value } = e.target;
-        
-    
+
+
         const variant = [...variantList];
         variant[index][name] = value;
         setVariantList(variant);
     };
 
     useEffect(() => {
-        
+
     }, [formik.values])
 
 
@@ -349,7 +349,7 @@ const AddEditProduct = ({ getProductData, onHide, editable, productRowData }) =>
                                         placeholder="Enter Meta Description"
                                         id="metaDescriptionString"
                                         name="metaDescriptionString"
-                                        value={formik?.values?.metaDescriptionString?.replace(/\s\s+/g, " ")}
+                                        value={formik?.values?.metaDescriptionString}
                                         onChange={formik.handleChange}
                                         className={classNames({ "p-invalid": isFormFieldValid("metaDescriptionString") }, "w-full md:w-10 inputClass")}
                                     />
@@ -514,7 +514,7 @@ const AddEditProduct = ({ getProductData, onHide, editable, productRowData }) =>
                    <div className="col-12 md:col-6 lg:col-6 xl:col-6">
                         <div className="flex flex-column">
                             <label className="mb-2">Tax Type</label>
-                            <Dropdown           id="tax_type"  
+                            <Dropdown           id="tax_type"
                                             name="tax_type"
                                             placeholder="Select Tax Type"className={classNames({ "p-invalid": isFormFieldValid("tax_type") }, "w-full md:w-10 inputClass")} value={formik.values.tax_type} options={taxType} onChange={formik.handleChange} optionValue="_id" optionLabel="taxType" />
                         </div>
@@ -522,7 +522,7 @@ const AddEditProduct = ({ getProductData, onHide, editable, productRowData }) =>
                     <div className="col-12 md:col-6 lg:col-6 xl:col-6">
                         <div className="flex flex-column">
                             <label className="mb-2">Tax Head</label>
-                            <Dropdown           id="tax_head"  
+                            <Dropdown           id="tax_head"
                                             name="tax_head"
                                             placeholder="Select Tax Head"className={classNames({ "p-invalid": isFormFieldValid("tax_head") }, "w-full md:w-10 inputClass")} value={formik.values.tax_head} options={taxType} onChange={formik.handleChange} optionValue="_id" optionLabel="taxType" />
                         </div>

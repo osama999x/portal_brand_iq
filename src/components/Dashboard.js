@@ -30,17 +30,17 @@ const Dashboard = (props) => {
 
     const getlinedata = async () => {
 
-        const res = await handleGetRequest("api/v1/webLog/all", false, true)
+        const res = await handleGetRequest("api/v1/order/hotSellingProducts", false, true)
             .then(res => {
-                let lables = res && res.map((item) => `${item.dateofMonth}/${item.month}`);
-                let values = res && res.map((item) => item.noOfVisit);
-
+                let lables = res && res.map((item) => `${item.productName}`);
+                let values = res && res.map((item) => item.count);
+console.log(values,'values')
                 let data = {
                     labels:
                         lables,
                     datasets: [
                         {
-                            label: 'Visits',
+                            label: 'Sold',
                             data: values,
                             fill: false,
                             borderColor: '#42A5F5',
@@ -96,7 +96,7 @@ const Dashboard = (props) => {
         //let year = res.map((item)=>item.year);
         // /${item.year}`);
         let value = res.map((item) => item.totalDelivered);
-        //let totaldiv = res.map((item) => item.totalDelivered); 
+        //let totaldiv = res.map((item) => item.totalDelivered);
         let data = {
             labels: lable,
             datasets: [

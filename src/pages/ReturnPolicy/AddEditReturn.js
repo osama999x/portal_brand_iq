@@ -115,7 +115,7 @@ const AddEditReturn = (props) => {
         initialValues: {
             customerName: "",
             address: "",
-            contact: "",
+            contact: "03",
             quantity: "",
             price: "",
 

@@ -977,7 +977,7 @@ const AddEditProduct = ({ getProductData, onHide, editable, productRowData }) =>
                 <Column field="name" header="Name" />
                 <Column field="actualPrice" header="Actual Price" />
                 <Column
-                    //hidden={!formik.values.isDiscount} 
+                    //hidden={!formik.values.isDiscount}
                     field="discountedPrice" header="Dicounted Price" />
                 <Column field="quantity" header="Quantity" />
                 <Column header="Action" body={(data, props) => {
@@ -1098,7 +1098,7 @@ const AddEditProduct = ({ getProductData, onHide, editable, productRowData }) =>
                             }
                         })} />
                         <Column
-                            //hidden={!formik.values.isDiscount} 
+                            //hidden={!formik.values.isDiscount}
                             field="discountedPrice" header="Discounted Price" body={(data, props) => customEditInput({
                                 value: data.discountedPrice, onChange: (e) => {
                                     let value = e.target.value;
@@ -1517,6 +1517,7 @@ const AddEditProduct = ({ getProductData, onHide, editable, productRowData }) =>
                                 <div className="flex flex-column">
                                     <label className="mb-2">Images</label>
                                     <div className="flex flex-row">
+                                    {console.log(oldImages, 'old imagesssssssssssssssssss')}
                                         {
                                             oldImages.map((item, index) => {
                                                 return <div key={`${index} images`} className="relative">

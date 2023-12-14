@@ -92,9 +92,9 @@ const CustomerDetails = () => {
     const formik = useFormik({
         validationSchema: validationSchema,
         initialValues: {
-            customerName: "",
+            customerName: "Customer Name",
             address: "",
-            contact: "",
+            contact: "03",
             email: ""
             // permissionsId: "",
         },

@@ -32,16 +32,14 @@ const Addedit = ({ onHide, getCoupandata, addEditCoupan, coupanRowData }) => {
     }
 
     const validationSchema = Yup.object().shape({
-        // couponCode:Yup.string().required("This field is required"),
-        // image: Yup.mixed().required("This field is required."),
-        // expireDate: Yup.string().required("This field is required"),
-        // orderPriceLimit: Yup.mixed().required("This field is required."),
-        // couponValue: Yup.mixed().required("This field is required."),
-        // // activeFrom: Yup.mixed().required("This field is required."),
-        // // activeTo: Yup.mixed().required("This field is required."),
-        // // isActive: Yup.mixed().required("This field is required."),
-
-
+        couponCode:Yup.string().required("This field is required"),
+        image: Yup.mixed().optional("This field is Optional."),
+        expireDate: Yup.string().required("This field is required"),
+        orderPriceLimit: Yup.mixed().required("This field is required."),
+        couponValue: Yup.mixed().required("This field is required."),
+        // activeFrom: Yup.mixed().required("This field is required."),
+        // activeTo: Yup.mixed().required("This field is required."),
+        // isActive: Yup.mixed().required("This field is required."),
     });
     const formik = useFormik({
         validationSchema: validationSchema,
@@ -112,7 +110,6 @@ const Addedit = ({ onHide, getCoupandata, addEditCoupan, coupanRowData }) => {
 
     return (
         <div>
-
             <form onSubmit={formik.handleSubmit}>
                 <div className="grid">
                     <div className="col-12 md:col-12 lg:col-12 xs:col-12">
@@ -215,7 +212,7 @@ const Addedit = ({ onHide, getCoupandata, addEditCoupan, coupanRowData }) => {
                                 optionLabel="name"
                                 optionValue="cpn"
                             />
-                        </div> 
+                        </div>
                      {getFormErrorMessage("couponType")}
                     </div>  */}
                     {/* <div className="col-12 md:col-12 lg:col-12 xs:col-12">

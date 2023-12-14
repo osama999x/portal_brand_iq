@@ -44,13 +44,13 @@ const AddEditDelivery = ({ getdeliverydata, onHide, editable, deliveryRowData, }
             organizationName: "",
             city: "",
             mailingAdress: "",
-            contactNumber: "",
+            contactNumber: "03",
             website: "",
             orderTrackingLink: "",
             name: "",
             fatherName: "",
             cnic: "",
-            contactNumber: "",
+            contactNumber: "03",
             image: "",
         },
 
@@ -59,12 +59,12 @@ const AddEditDelivery = ({ getdeliverydata, onHide, editable, deliveryRowData, }
             setloading(true);
             if (editable === true) {
                 //const data = {}
-                data["image"] = fileUploadData; 
+                data["image"] = fileUploadData;
                 data["deliveryPartnerId"] = deliveryRowData;
 
                 const res = await dispatch(handlePatchRequest(data, "api/v1/deliverypartner", true, true));
-                 
-                
+
+
                 if (res?.status === 200) {
                     await getdeliverydata();
                     formik.resetForm();
@@ -78,7 +78,7 @@ const AddEditDelivery = ({ getdeliverydata, onHide, editable, deliveryRowData, }
                 if (res?.status === 200) {
                     await getdeliverydata();
                     formik.resetForm();
-                   
+
                 }
                 onHide();
             }

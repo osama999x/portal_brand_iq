@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { InputText } from "primereact/inputtext";
-import { useHistory } from "react-router-dom";
+
 import { useFormik } from "formik";
 import classNames from "classnames";
 import { Dropdown } from "primereact/dropdown";
@@ -17,32 +17,35 @@ import { useDispatch } from "react-redux";
 // import moment from "moment";
 import { ProgressSpinner } from "primereact/progressspinner";
 import { Password } from 'primereact/password';
-
+import { toast } from "react-toastify";
 const AddEditUsers = ({ getUserData, onHide, editable, UsersRowData }) => {
 
+
     const [loading, setLoading] = useState(false);
-    // const [loadingIcon, setloadingIcon] = useState("pi pi-save");
+    const [loadingIcon, setloadingIcon] = useState("pi pi-save");
     const [userRoles, setUserRoles] = useState([]);
     const [userId, setUserId] = useState();
     const [error, setError] = useState('');
-
+    const [dataChange , setDataChange] =useState(null)
 
     // const onlyalphabetSRegex = /^(?!\s)[A-Za-z0-9\s]+$/;
     //  const aplhaNumericSRegex = /^[a-zA-Z0-9]+@+[a-zA-Z0-9]+.+[A-z]/
     // const validEmail = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/i;
     const validEmail = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
-    const history = useHistory();
+
     const dispatch = useDispatch();
-    const nameRegex = /^[a-zA-Z\s]*$/;
 
 
+
+  const [keydata ,setKeyData]= useState(null)
     const getUsersByID = async () => {
         const data = {};
         data["userID"] = UsersRowData;
         setLoading(true);
         const res = await dispatch(handlePostRequest(data, "api/v1/user/userDetails"));
-        console.log("role", res)
+
         const keyData = res?.data?.data;
+        setKeyData(keyData)
         setUserId(res.userId);
         setLoading(false);
         const roles = keyData?.role?._id;
@@ -52,8 +55,8 @@ const AddEditUsers = ({ getUserData, onHide, editable, UsersRowData }) => {
                 formik.setFieldValue(key, keyData[key]);
             }
         });
-        console.log("kwysdata", keyData)
-        formik.setFieldValue("roleId", keyData.role)
+
+        formik.setFieldValue("role", keyData.role)
     };
     const getUsersRole = async () => {
         const res = await handleGetRequest("api/v1/role/all", false);
@@ -75,11 +78,13 @@ const AddEditUsers = ({ getUserData, onHide, editable, UsersRowData }) => {
 
 
 
+
+
     const validationSchema = Yup.object().shape({
 
         name: Yup.string()?.required("Please Enter Name."),
         // .matches(onlyalphabetSRegex,"This field should contain alphabets only"),
-        roleId: Yup.string()?.required("Please Select Role"),
+        role: Yup.string()?.required("Please Select Role"),
         email: Yup.string().required("Please Enter Email.").matches(validEmail, "Invalid email address format"),
         password: AddEditUsers ? Yup.string() : Yup.string().required("Please Enter Password."),
 
@@ -92,28 +97,62 @@ const AddEditUsers = ({ getUserData, onHide, editable, UsersRowData }) => {
         validationSchema: validationSchema,
         initialValues: {
             name: "",
-            roleId: "",
+            role: "",
             email: "",
             //password: "",
-            contact: "",
+            contact: "03",
         },
+
         onSubmit: async (data) => {
 
-            // setLoading(true);
-            // setloadingIcon("pi pi-spin pi-spinner");
+
+            const keys = Object.keys(formik.initialValues);
+
+
             if (editable === true) {
+                const updatedObject = {
+                    ...data,
+                    roleId: data.role,
+                    // Omit the old key if you want
+                    // ...other keys
+                  };
 
-                data["userId"] = UsersRowData;
-                const res = await dispatch(handlePatchRequest(data, "api/v1/user/", true, true));
+                delete updatedObject.role;
+                updatedObject["userId"] = UsersRowData;
+                let key
+                keys.map(async(key) => {
+                     key =key
+                  });
 
-                if (res?.status === 200) {
-                    await getUserData();
-                    formik.resetForm();
-                    onHide();
-                }
+                  if (
+                    keydata[key] !== data[key]) {
+                    setDataChange(true)
+                    setLoading(true);
+                    setloadingIcon("pi pi-spin pi-spinner");
+                     const res = await dispatch(handlePatchRequest(updatedObject, "api/v1/user/", true, true));
+                     if (res?.status === 200) {
+                         await getUserData();
+                         formik.resetForm();
+                         onHide();
+                         setLoading(false);
+                 setloadingIcon("");
+                     }
+                    }
+                    else{
+                        setDataChange(false)
+                    toast.warning('No change')
+                    }
+
             } else {
 
-                const res = await dispatch(handlePostRequest(data, "api/v1/user/", true, true));
+                const updateObject = {
+                    ...data,
+                    roleId: data.role,
+
+                  };
+                  delete updateObject.role;
+
+                const res = await dispatch(handlePostRequest(updateObject, "api/v1/user/", true, true));
 
                 if (res?.status === 200) {
                     await getUserData();
@@ -141,14 +180,9 @@ const AddEditUsers = ({ getUserData, onHide, editable, UsersRowData }) => {
         e.preventDefault();
         onHide();
     };
-    //const handleSubmit = (event) => {
-    //event.preventDefault();
-    // if(!currentuser.permissions.includes('create_user')){
-    //     setError('You do not have the necessary permission to create a new user.');
-    //     return;
-    // }
-    // setError('');
-    //}
+
+
+
 
     return (
         <>
@@ -171,18 +205,18 @@ const AddEditUsers = ({ getUserData, onHide, editable, UsersRowData }) => {
                                     <div className="flex flex-column">
                                         <label className="mb-2">Role</label>
                                         <Dropdown
-                                            id="roleId"
+                                            id="role"
                                             placeholder="Select Role"
                                             options={userRoles}
                                             optionLabel="name"
-                                            name="roleId"
+                                            name="role"
                                             optionValue="_id"
-                                            value={formik.values.roleId}
+                                            value={formik.values.role}
                                             onChange={formik.handleChange}
-                                            className={classNames({ "p-invalid": isFormFieldValid("roleId") }, "w-full md:w-10 inputClass")}
+                                            className={classNames({ "p-invalid": isFormFieldValid("role") }, "w-full md:w-10 inputClass")}
 
                                         />
-                                        {getFormErrorMessage("roleId")}
+                                        {getFormErrorMessage("role")}
                                     </div>
                                 </div>
                                 <div className="col-12 md:col-12 lg:col-12 xl:col-12">
@@ -240,7 +274,7 @@ const AddEditUsers = ({ getUserData, onHide, editable, UsersRowData }) => {
 
                                 <div className="col-12 text-center">
                                     <Button label="Cancel" onClick={(e) => handleCancel(e)} className="Cancelbtn p-mr-3" />
-                                    <Button disabled={loading} iconPos="right" label={editable ? "Update" : "Save"} autoFocus className="Savebtn p-mr-3" />
+                                    <Button disabled={ loading}    icon={loadingIcon || ""} iconPos="right" label={editable ? "Update" : "Save"} autoFocus className="Savebtn p-mr-3" />
                                 </div>
 
                             </div>

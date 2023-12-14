@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Button } from 'primereact/button';
 import { InputText } from 'primereact/inputtext';
-// import { Password } from 'primereact/password';
 import { useFormik } from 'formik';
 import "./login.css";
 import logo from "../../../src/assets/Logo.svg";
@@ -12,23 +11,22 @@ import { handlePostRequest } from '../../service/PostTemplate';
 import * as Yup from "yup";
 import { handleGetRequest } from '../../service/GetTemplate';
 import { Password } from "primereact/password";
-// import Forgot from '../forgot/Forgot';
-
 
 const Login = (props) => {
-
     const [loading, setloading] = useState(false);
     const [loadingIcon, setloadingIcon] = useState("");
-    const aplhaNumericSRegex = /^[a-zA-Z0-9]+@+[a-zA-Z0-9]+.+[A-z]/
+    const [loginFailed, setLoginFailed] = useState(false);
+
+    const aplhaNumericSRegex = /^[a-zA-Z0-9]+@+[a-zA-Z0-9]+.+[A-z]/;
+
     const validationSchema = Yup.object().shape({
         email: Yup.string().email("Invalid email address format").required("This field is required."),
-        // matches(aplhaNumericSRegex, "Invalid email address format"),
         password: Yup.string().required("This field is required."),
     });
 
-
     const dispatch = useDispatch();
     const history = useHistory();
+
     const formik = useFormik({
         validationSchema: validationSchema,
         initialValues: {
@@ -36,26 +34,27 @@ const Login = (props) => {
             password: ''
         },
         onSubmit: async (data) => {
-            // setFormData(data);
-            // setShowMessage(true);
             setloadingIcon("pi pi-spin pi-spinner");
-            const response = await dispatch(handlePostRequest(data, "api/v1/user/login", true, true));
+            setloading(true);
 
+            const response = await dispatch(handlePostRequest(data, "api/v1/user/login", true, true));
 
             if (response?.data?.data?.email === data["email"]) {
                 localStorage.setItem("login", true);
-                getPremissionById(response?.data?.data?.role);
+                getPermissionById(response?.data?.data?.role);
                 history.push("/");
+            } else {
+                setLoginFailed(true);
+                setTimeout(() => {
+                    setLoginFailed(false);
+                    setloading(false);
+                    setloadingIcon("");
+                }, 6000);
             }
-            setloading(false);
-            setloadingIcon(true);
-            // formik.resetForm();
         }
     });
 
-    const getPremissionById = async (data) => {
-
-
+    const getPermissionById = async (data) => {
         const response = await handleGetRequest(`api/v1/rolePermission/getByRole?roleId=${data}`, true);
 
         localStorage.setItem("permissions", JSON.stringify(response));
@@ -71,10 +70,11 @@ const Login = (props) => {
     const getFormErrorMessage = (name) => {
         return isFormFieldValid(name) && <small className="p-error">{formik.errors[name]}</small>;
     };
+
     const forgetpassword1 = (e) => {
-        // e.preventDefault();
         history.push('/forgetpassword');
     }
+
     return (
         <div className="bg_body">
             <div className="header__login">
@@ -91,14 +91,15 @@ const Login = (props) => {
                             <div className="Form-inputfield">
                                 <div>
                                     <label className="form-control" htmlFor="email">Email</label>
-                                    <InputText name="email"
+                                    <InputText
+                                        name="email"
                                         id="email"
-                                        //className="img_email"
                                         placeholder="Enter Email"
                                         value={formik.values.email}
-                                        onChange={formik.handleChange} autoFocus />
+                                        onChange={formik.handleChange}
+                                        autoFocus
+                                    />
                                     {getFormErrorMessage('email')}
-                                    {/* <img src={email}/> */}
                                 </div>
                                 <div className="pt-2">
                                     <label className="form-control" htmlFor="password">Password</label>
@@ -109,7 +110,6 @@ const Login = (props) => {
                                         placeholder="Enter Password"
                                         value={formik.values.password}
                                         onChange={formik.handleChange}
-                                        //className="password__class"
                                         toggleMask
                                         feedback={false}
                                     />
@@ -117,35 +117,22 @@ const Login = (props) => {
                                 </div>
                             </div>
                             <div className="form-check pt-2 text-right">
-                                {/* <input
-                                    type="checkbox"
-                                    className="form-check-remember"
-                                    id="rememberPassword"
-                                    name="checkbox"
-                                //   checked={rememberPassword}
-                                //   onChange={(event) => handleChechbox(event)}
-                                // required
-                                />
-                                <label className="form-check-label" htmlFor="rememberPassword">
-                                    Remember me
-                                </label> */}
                                 <span
                                     className="forgot_password"
                                     onClick={forgetpassword1}
                                 >
                                     Forgot password ?
                                 </span>
-
-                                {/* <span className="forgot_password"><a href=''>Forgot Password?</a></span> */}
                             </div>
                             <div className="btn_class">
                                 <div className="p-mt-2">
-                                    <Button type="submit"
+                                    <Button
+                                        type="submit"
                                         className="Login_button"
                                         label="LOGIN"
                                         icon={loadingIcon || ""}
                                         iconPos="right"
-                                        disabled={loading}
+                                        disabled={loading || loginFailed}
                                     />
                                 </div>
                             </div>

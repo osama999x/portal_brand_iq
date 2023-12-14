@@ -46,7 +46,7 @@ const OrderDispatch = ({ status, trackingId, id }) => {
         orderType: Yup.string().required("This field is required."),
         description: Yup.string().required("This field is required."),
         packing: Yup.string().required("This field is required."),
-        weight: Yup.string().required("This field is required."),
+        weight: Yup.number().required("This field is required."),
 
 
     });
@@ -60,7 +60,7 @@ const OrderDispatch = ({ status, trackingId, id }) => {
             orderType: "",
             description: "",
             packing: "",
-            weight: "",
+            weight: 0,
 
         },
 
@@ -300,7 +300,7 @@ const OrderDispatch = ({ status, trackingId, id }) => {
                     </div>
                     <div className="col-12 md:col-12 lg:col-12 xs:col-12">
                         <div className="flex flex-column">
-                            <label htmlFor="fromDate">Weight</label>
+                            <label htmlFor="fromDate">Weight (kg/gram)</label>
                             <InputText
                                 id="weight"
                                 name="weight"

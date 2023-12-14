@@ -122,7 +122,9 @@ function AddEditImage({ handleImages, editable, EditIconImage }) {
 
                     <>
                         <div className="field col-12 md:col-3" >
+
                             {
+                                EditIconImage &&
                                 <img src={`${baseURL}${EditIconImage}`} width="60px" alt="img" preview />
                             }
                         </div>

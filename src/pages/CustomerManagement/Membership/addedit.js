@@ -13,11 +13,18 @@ import { Dropdown } from "primereact/dropdown";
 const addedit = ({ addEditMember, getMembershipData, MemberRowData, onHide }) => {
     const [loading, setloading] = useState(false);
     const dispatch = useDispatch();
+
     const validationSchema = Yup.object().shape({
         membershipCategory: Yup.mixed().required("This field is required."),
         thresholdFrom: Yup.mixed().required("This field is required."),
-        thresholdTo: Yup.mixed().required("This field is required."),
+        thresholdTo: Yup.mixed()
+            .required("This field is required.")
+            .test('is-greater', 'Threshold To must be greater than Threshold From', function (value) {
+                const { thresholdFrom } = this.parent;
+                return value > thresholdFrom;
+            }),
     });
+
     const formik = useFormik({
         validationSchema: validationSchema,
         initialValues: {

@@ -80,8 +80,7 @@ const AddEditRoles = ({ getRoleData, onHide, editable, UsersRowData }) => {
         // matches(onlyalphabetSRegex, "This field should contain alphabets only"),
         //permissionsId: Yup.mixed().required("This field is required."),
         description: Yup.string()
-            .required("This field is required.")
-            .nullable(),
+            .required("This field is required.").max(15),
     });
 
     const formik = useFormik({
@@ -142,7 +141,7 @@ const AddEditRoles = ({ getRoleData, onHide, editable, UsersRowData }) => {
                         <div className="col-12 md:col-12 lg:col-12 xl:col-12">
                             <div className="flex flex-column">
                                 <label className="mb-2">User Role</label>
-                                <InputText keyfilter="alpha" maxLength={25} placeholder="Enter Role" id="name" name="name" value={formik?.values?.name?.replace(/\s\s+/g, " ")} onChange={formik.handleChange} className={classNames({ "p-invalid": isFormFieldValid("name") }, "w-full md:w-10 inputClass")} />
+                                <InputText  maxLength={25} placeholder="Enter Role" id="name" name="name" value={formik?.values?.name?.replace(/\s\s+/g, " ")} onChange={formik.handleChange} className={classNames({ "p-invalid": isFormFieldValid("name") }, "w-full md:w-10 inputClass" ) }  keyfilter={/^[a-zA-Z\s]*$/} />
                                 {getFormErrorMessage("name")}
                             </div>
                         </div>

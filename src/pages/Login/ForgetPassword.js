@@ -46,14 +46,18 @@ const ForgetPassword = ({setStoredEmail}) => {
             // setShowMessage(true);
             setloadingIcon("pi pi-spin pi-spinner");
             const response = await dispatch(handlePostRequest(data, "api/v1/user/resetpassword/otp", true, true));
-             if (response?.data?.data?.email === data["email"]) 
-            //if(response?.status === 200)
-            {
-                // localStorage.setItem("login", true);
-               
+            //  if (response?.data?.data?.email === data["email"])
+             if (response?.status === 200) {
+                // OTP sending was successful
+
+                setStoredEmail(data.email);
+                history.push("/otpview/"+data.email);
+            } else {
+                // OTP sending failed
+                console.error("OTP not sent. Handle the error or display a message.");
             }
             setStoredEmail(data.email);
-            history.push("/otpview/"+data.email);
+
             setloading(false);
             setloadingIcon("");
             // formik.resetForm();
@@ -95,7 +99,7 @@ const ForgetPassword = ({setStoredEmail}) => {
 
         <div className="forgotbg_body">
 
-            
+
 
             <div className="login_container">
                 <div className="row d-flex justify-content-center">
