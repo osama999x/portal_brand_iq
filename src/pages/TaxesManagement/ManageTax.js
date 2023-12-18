@@ -185,8 +185,9 @@ const ManageTax = () => {
                             responsiveLayout="scroll"
                             value={taxdata}>
                             {/* <Column field="_id" header="Tax Head ID" /> */}
-                            <Column body={TaxTypeTemplate} header="Tax Type" />
                             <Column field="taxHead" header="Tax Head ID" />
+                            <Column body={TaxTypeTemplate} header="Tax Type" />
+
                             <Column field="description" header="Description" style={{ width: '250px', height: '57px' }} />
                             {/* <Column field="Conatct-Number" header="Conatct Number" /> */}
                             <Column body={actionTemplate} header="Action" />

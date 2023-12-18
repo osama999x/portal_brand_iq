@@ -1165,7 +1165,7 @@ const AddEditProduct = ({ getProductData, onHide, editable, productRowData }) =>
 
 
                     <div className="col-12 text-right">
-                        <Button onClick={handleAddSizeSubmit} iconPos="right" label={"Add Size"} className=" p-mr-3" />
+                        <Button onClick={handleAddSizeSubmit} iconPos="right" label={"Add Size"} className="Savebtn p-mr-3" />
 
                     </div>
 

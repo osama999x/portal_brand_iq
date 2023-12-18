@@ -185,6 +185,7 @@ const PromotionManagement = () => {
                             paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
                             currentPageReportTemplate="Showing {first} to {last} of {totalRecords} Records"
                             globalFilter={globalFilter}
+
                             rows={7}
                             paginator
                             responsiveLayout="scroll"

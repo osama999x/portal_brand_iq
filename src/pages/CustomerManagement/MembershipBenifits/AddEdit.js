@@ -41,10 +41,13 @@ const AddEdit = ({ onHide, getMemberBenifitdata, addeditable, benifitRowData }) 
         membershipCategory: Yup.mixed().required("This field is required."),
         expireDate: Yup.mixed().required("This field is required."),
         description: Yup.mixed().required("This field is required."),
-        label: Yup.mixed().required("This field is required."),
+        label: Yup.string()
+            .matches(/^\d{1,3}%$/, 'Label must be in the format of 5%, 18%, 100%, etc.')
+            .required("This field is required."),
         // image: Yup.mixed().required("This field is required."),
-
     });
+
+
     const formik = useFormik({
         validationSchema: validationSchema,
         initialValues: {
