@@ -12,14 +12,13 @@ import { useDispatch } from "react-redux";
 import { ProgressSpinner } from "primereact/progressspinner";
 //import { toast } from "react-toastify";
 //import MultiImage from "../../../components/MultiImage";
-import { InputTextarea } from 'primereact/inputtextarea';
-import MultiImage from "../../../components/MultiImage";
+import { InputTextarea } from "primereact/inputtextarea";
 import { toast } from "react-toastify";
 
-
-const AddEditCategory = ({ getCategoryData, onHide, editable, categoryRowData, }) => {
+const AddEditCategory = ({ getCategoryData, onHide, editable, categoryRowData }) => {
     const [loading, setLoading] = useState(false);
-    const [fileUploadData, setfileUploadData] = useState("");
+    const [iconFileData, setIconFileData] = useState("");
+    const [thumbnailFileData, setThumbnailFileData] = useState("");
 
     const onlyalphabetSRegex = /[a-z\d\-_\s]+/i;
     // /^(?!\s)[A-Za-z0-9\s]+$/;
@@ -48,14 +47,11 @@ const AddEditCategory = ({ getCategoryData, onHide, editable, categoryRowData, }
         if (categoryRowData !== undefined && categoryRowData !== null && editable === true) {
             getUsersByID();
         }
-
     }, []);
-
 
     const validationSchema = Yup.object().shape({
         name: Yup.string()?.required("This field is required.")?.matches(onlyalphabetSRegex, "This field should contain alphabets only"),
         description: Yup.string().required("This field is required.").nullable(),
-
     });
 
     const formik = useFormik({
@@ -67,51 +63,59 @@ const AddEditCategory = ({ getCategoryData, onHide, editable, categoryRowData, }
             thumbnail: "",
             // permissionsId: "",
         },
-        onSubmit: async (data,{setErrors}) => {
-
-            if (!fileUploadData.icon) {
-                toast.error({ icon: "This field is required." });
-            }
-            if (!fileUploadData.thumbnail) {
-               toast.error({ thumbnail: "This field is required." });
-            }
-            if (Object.keys(formik.errors).length === 0) {
-
+        onSubmit: async (data, { setErrors }) => {
             if (editable === true) {
-                onHide()
-                // toast.configure();
-
-                data["icon"] = fileUploadData;
-                data["categoryId"] = categoryRowData;
-                const res = await dispatch(handlePatchRequest(data, "api/v1/category/", true, true));
-
-                if (res?.status === 200) {
-
-                    await getCategoryData();
-
-                    formik.resetForm();
-                    onHide();
-
-
+                if (iconFileData === "" && data.icon === "") {
+                    toast.error("Icon field is required.");
+                    return;
                 }
-
-
+                if (thumbnailFileData === "" && data.thumbnail === "") {
+                    toast.error("Thumbnail field is required.");
+                    return;
+                }
             } else {
-                data["icon"] = fileUploadData;
-                data["thumbnail"] = fileUploadData
-                //toast.configure();
-                data["categoryId"] = categoryRowData;
-                const res = await dispatch(handlePostRequest(data, "api/v1/category/", true, true));
-                if (res?.status === 200) {
-                    await getCategoryData();
-                    formik.resetForm();
-
-                    onHide();
+                if (iconFileData === "") {
+                    toast.error("Icon field is required.");
+                    return;
                 }
-
+                if (thumbnailFileData === "") {
+                    toast.error("Thumbnail field is required.");
+                    return;
+                }
             }
-        }
-    },
+
+            if (Object.keys(formik.errors).length === 0) {
+                if (editable === true) {
+                    onHide();
+                    // toast.configure();
+
+                    data["categoryId"] = categoryRowData;
+                    data["icon"] = iconFileData;
+                    data["thumbnail"] = thumbnailFileData;
+
+                    const res = await dispatch(handlePatchRequest(data, "api/v1/category/", true, true));
+
+                    if (res?.status === 200) {
+                        await getCategoryData();
+
+                        formik.resetForm();
+                        onHide();
+                    }
+                } else {
+                    data["icon"] = iconFileData;
+                    data["thumbnail"] = thumbnailFileData;
+                    //toast.configure();
+                    data["categoryId"] = categoryRowData;
+                    const res = await dispatch(handlePostRequest(data, "api/v1/category/", true, true));
+                    if (res?.status === 200) {
+                        await getCategoryData();
+                        formik.resetForm();
+
+                        onHide();
+                    }
+                }
+            }
+        },
     });
     const isFormFieldValid = (name) => !!(formik.touched[name] && formik.errors[name]);
     const getFormErrorMessage = (name) => {
@@ -122,19 +126,18 @@ const AddEditCategory = ({ getCategoryData, onHide, editable, categoryRowData, }
         e.preventDefault();
         onHide();
     };
-    const handleImages = (images) => {
-        setfileUploadData(images);
+    const handleIconImages = (images) => {
+        setIconFileData(images);
     };
-
-
-
+    const handleThumbnailImages = (images) => {
+        setThumbnailFileData(images);
+    };
     return (
         <>
             {loading ? (
                 <ProgressSpinner style={{ display: "flex", justifyContent: "center", alignItem: "center", height: "50vh" }} strokeWidth="2" stroke-miterlimit="10" />
             ) : (
                 <form onSubmit={formik.handleSubmit}>
-
                     <div className="grid p-p-3">
                         <div className="col-12 md:col-12 lg:col-12 xl:col-12">
                             <div className="flex flex-column">
@@ -160,20 +163,21 @@ const AddEditCategory = ({ getCategoryData, onHide, editable, categoryRowData, }
                         <div className="col-12 md:col-12 lg:col-12 xl:col-12">
                             <div className="flex flex-column">
                                 <label className="mb-2">Main Image</label>
-                                <AddEditImage handleImages={handleImages} editable={editable} EditIconImage={formik?.values.icon} />
+                                <AddEditImage handleImages={handleIconImages} editable={editable} EditIconImage={formik?.values.icon} />
                             </div>
                         </div>
                         <div className="col-12 md:col-12 lg:col-12 xl:col-12">
                             <div className="flex flex-column">
                                 <label className="mb-2">Thumbnail</label>
-                                <AddEditImage handleImages={handleImages} editable={editable} EditIconImage={formik?.values.thumbnail} />
+                                <AddEditImage handleImages={handleThumbnailImages} editable={editable} EditIconImage={formik?.values.thumbnail} />
                             </div>
                         </div>
                         <div className="col-12 md:col-12 lg:col-12 xl:col-12">
                             <div className="flex flex-column">
                                 <label className="mb-2">Description</label>
                                 <InputTextarea
-                                    rows={5} cols={30}
+                                    rows={5}
+                                    cols={30}
                                     placeholder="Enter Description"
                                     id="description"
                                     name="description"
@@ -185,11 +189,9 @@ const AddEditCategory = ({ getCategoryData, onHide, editable, categoryRowData, }
                             </div>
                         </div>
 
-
                         <div className="col-12 text-center">
                             <Button label="Cancel" onClick={(e) => handleCancel(e)} className="Cancelbtn p-mr-3" />
                             <Button type="submit" disabled={loading} iconPos="right" label={editable ? "Update" : "Save"} autoFocus className="Savebtn p-mr-3" />
-
                         </div>
                     </div>
                 </form>

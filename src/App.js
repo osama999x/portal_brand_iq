@@ -7,9 +7,9 @@ import { AppTopbar } from "./AppTopbar";
 import { AppMenu } from "./AppMenu";
 import { AppConfig } from "./AppConfig";
 // import Login from "./pages/Login/Login";
-import Forget from './pages/Login/ForgetPassword';
-import OTP from './pages/Login/OTPView';
-import ResetPass from './pages/Login/ResetPass';
+import Forget from "./pages/Login/ForgetPassword";
+import OTP from "./pages/Login/OTPView";
+import ResetPass from "./pages/Login/ResetPass";
 import Dashboard from "./components/Dashboard";
 // import Login from "./pages/Login/Login";
 import UserMangement from "./pages/UserManagement/Index";
@@ -62,9 +62,10 @@ import ReturnManage from "./pages/ReturnPolicy/ManageReturn";
 import SubCategoryManagement from "./pages/SaleManagement/subCategoryManagement/subCategoryManagement";
 import ReviewsDetail from "./pages/ReviewsManagement/ReviewsDetail";
 import AssignRole from "./pages/AssignRole/AssignRole";
+import axios from "axios";
+import { baseURL } from "./utilities/Config";
 
 const App = () => {
-
     const [storedEmail, setStoredEmail] = useState("");
     const [layoutMode, setLayoutMode] = useState("static");
     const [layoutColorMode, setLayoutColorMode] = useState("light");
@@ -81,19 +82,21 @@ const App = () => {
     const copyTooltipRef = useRef();
     const location = useLocation();
     const [isLogin, SetIsLogin] = useState();
-    const [sideBar, setSideBar] = useState([])
+    const [sideBar, setSideBar] = useState([]);
 
-    const authState = useSelector(state => state.authenticationSlice)
+    const authState = useSelector((state) => state.authenticationSlice);
 
-    const [dynamicMenu, setDynamicMenu] = useState([{
-        items: [{ label: "Dashboard", icon: "pi pi-table", to: "/" }],
-    }])
+    const [dynamicMenu, setDynamicMenu] = useState([
+        {
+            items: [{ label: "Dashboard", icon: "pi pi-table", to: "/" }],
+        },
+    ]);
 
     useEffect(() => {
         if (authState?.permissions) {
-            getPermissions()
+            getPermissions();
         }
-    }, [authState?.permissions])
+    }, [authState?.permissions]);
 
     // const handleMenuItemClick = (item) => {
     //     if (item?.item?.label && item?.item?.icon) {
@@ -123,9 +126,6 @@ const App = () => {
     useEffect(() => {
         copyTooltipRef && copyTooltipRef.current && copyTooltipRef.current.updateTargetEvents();
     }, [location]);
-
-
-
 
     const onInputStyleChange = (inputStyle) => {
         setInputStyle(inputStyle);
@@ -217,38 +217,40 @@ const App = () => {
         // console.log("permissions: ", permissions)
         const perms = JSON.parse(permissions && permissions);
 
-        let result = perms?.modules && perms?.modules.map((item) => {
-            // console.log("UTREEEN", item)
-            return {
-                label: item.module?.label,
-                to: item?.module?.route,
-                items: mapChilds(item.sub_Modules),
-                icon: item?.module?.icon,
-            }
+        let result =
+            perms?.modules &&
+            perms?.modules.map((item) => {
+                // console.log("UTREEEN", item)
+                return {
+                    label: item.module?.label,
+                    to: item?.module?.route,
+                    items: mapChilds(item.sub_Modules),
+                    icon: item?.module?.icon,
+                };
+            });
 
-        });
-
-        result = result.filter((item) => item.items.length === 0)
+        result = result.filter((item) => item.items.length === 0);
         setDynamicMenu((prev) => {
-            return [...prev, {
-                items: result
-            }]
+            return [
+                ...prev,
+                {
+                    items: result,
+                },
+            ];
         });
         // console.log("result", result)
-    }
+    };
 
     const mapChilds = (list) => {
         // console.log("list", list)
-        return list
-            .map(item => {
-                return {
-                    label: item.name,
-                    route: item.route,
-                    icon: item.icon,
-                };
-            });
+        return list.map((item) => {
+            return {
+                label: item.name,
+                route: item.route,
+                icon: item.icon,
+            };
+        });
     };
-
 
     // console.log("dynamicMenu: ", dynamicMenu)
     // const getPremissions = async () => {
@@ -337,8 +339,17 @@ const App = () => {
     });
 
     useEffect(() => {
-        getPermissions()
-    }, [])
+        getPermissions();
+    }, []);
+
+    useEffect(() => {
+        let loggedInUser = localStorage.getItem("userData");
+        if (loggedInUser) {
+            loggedInUser = JSON.parse(loggedInUser);
+            console.log(loggedInUser);
+            // axios.post(`${baseURL}api/v1/user/userDetails`, { userID: loggedInUser?.adminUser?._id }).then((data) => {});
+        }
+    }, []);
 
     function loginResponse(args) {
         setSideBar(args);
@@ -400,7 +411,6 @@ const App = () => {
                                 {/* <Route exact path="/productsupload" render={() => <UploadBulkProducts />} /> */}
                                 <Route exact path="/feedback" render={() => <Feedback />} />
                                 <Route exact path="/customercare" render={() => <CustomerCare />} />
-
 
                                 {/* <Route exact path="/assignrole" render={() => <AssignRole />} /> */}
                             </Switch>

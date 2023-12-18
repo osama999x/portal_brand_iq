@@ -19,21 +19,14 @@ function AddEditImage({ handleImages, editable, EditIconImage }) {
     const header = () => {
         return (
             <>
-                <input
-                    type="file"
-                    accept="image/png, image/gif, image/jpeg"
-                    style={{ display: "none" }}
-                    ref={upload}
-                    onChange={(e) => onFileChange(e)}
-                />
+                <input type="file" accept="image/png, image/gif, image/jpeg" style={{ display: "none" }} ref={upload} onChange={(e) => onFileChange(e)} />
                 <Button
                     onClick={(e) => {
                         e.preventDefault();
                         upload.current.click();
                     }}
                     label="Choose File"
-                >
-                </Button>
+                ></Button>
             </>
         );
     };
@@ -41,7 +34,7 @@ function AddEditImage({ handleImages, editable, EditIconImage }) {
     const onFileChange = async (e) => {
         e.preventDefault();
         for (var file of e.target.files) {
-            if (!(file && file.type.match('image.*'))) {
+            if (!(file && file.type.match("image.*"))) {
                 // Handle the selected image file
                 console.log("Not image found");
                 return;
@@ -73,7 +66,6 @@ function AddEditImage({ handleImages, editable, EditIconImage }) {
         //         };
         //     };
 
-
         // };
         // const setfiles = (singleFile, imgUrl) => {
         //     // Implement your logic to handle the files and imgUrl here
@@ -85,9 +77,9 @@ function AddEditImage({ handleImages, editable, EditIconImage }) {
             // if (!files.some((file) => file?.fileBase64 === reader.result)) {
             // let newfiles = JSON.parse(JSON.stringify(files));
             const filetype = file.type.split("/");
-            let singleFile = ({ fileBase64: reader.result, fileName: file.name, fileSize: file.size, fileExtension: `.${filetype[1]}` });
+            let singleFile = { fileBase64: reader.result, fileName: file.name, fileSize: file.size, fileExtension: `.${filetype[1]}` };
             // newfiles.push({ fileBase64: reader.result, fileName: file.name, fileSize: file.size, fileExtension: `.${filetype[1]}` });
-            setImgBase64(fileDataUrl)
+            setImgBase64(fileDataUrl);
             // newfiles.push({ fileBase64: reader.result});
 
             setfiles(singleFile, fileDataUrl);
@@ -98,18 +90,16 @@ function AddEditImage({ handleImages, editable, EditIconImage }) {
 
     const handleRemove = (b64) => {
         // let newArr = files.filter((file) => JSON.stringify(files?.fileBase64) !== JSON.stringify(b64));
-        setfiles();
+        setfiles("");
     };
     const handleIconRemove = () => {
         setIcon(false);
     };
 
-
     // const handleClear = () => {
     //     setIcon(false)
     //     setfiles();
     // };
-
     useEffect(() => {
         handleImages(imgBase64);
     }, [files, handleImages]);
@@ -119,15 +109,8 @@ function AddEditImage({ handleImages, editable, EditIconImage }) {
 
             <div className="formgrid grid ">
                 {icon && !files ? (
-
                     <>
-                        <div className="field col-12 md:col-3" >
-
-                            {
-                                EditIconImage &&
-                                <img src={`${baseURL}${EditIconImage}`} width="60px" alt="img" preview />
-                            }
-                        </div>
+                        <div className="field col-12 md:col-3">{EditIconImage && <img src={`${baseURL}${EditIconImage}`} width="60px" alt="img" />}</div>
                         <div className="field col-12 md:col-5 mt-2">
                             <p>{icon}</p>
                         </div>
@@ -142,22 +125,13 @@ function AddEditImage({ handleImages, editable, EditIconImage }) {
                                 <i className="pi pi-trash "></i>
                             </Button>
                         </div>
-
                     </>
-
                 ) : (
                     <center style={{ height: "3vh" }}>{/* <h6 className="image-placeholder">Please Upload Images</h6> */}</center>
                 )}
                 {files ? (
-
                     <>
-                        <div className="field col-12 md:col-3">
-                            {files?.fileExtension === ".png" || files?.fileExtension === ".jpeg" ? (
-                                <img src={files?.fileBase64} width="60px" alt="img" preview />
-                            ) : null
-
-                            }
-                        </div>
+                        <div className="field col-12 md:col-3">{files?.fileExtension === ".png" || files?.fileExtension === ".jpeg" ? <img src={files?.fileBase64} width="60px" alt="img" /> : null}</div>
                         <div className="field col-12 md:col-1">
                             <Button
                                 className="p-button-danger p-button-outlined p-button-sm"
@@ -169,9 +143,7 @@ function AddEditImage({ handleImages, editable, EditIconImage }) {
                                 <i className="pi pi-trash "></i>
                             </Button>
                         </div>
-
                     </>
-
                 ) : (
                     <center style={{ height: "3vh" }}>{/* <h6 className="image-placeholder">Please Upload Images</h6> */}</center>
                 )}

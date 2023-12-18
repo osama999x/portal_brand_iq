@@ -1,22 +1,21 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { DataTable } from 'primereact/datatable';
-import { Button } from 'primereact/button';
-import { Column } from 'primereact/column';
-import { Dialog } from 'primereact/dialog';
-import { confirmDialog } from 'primereact/confirmdialog';
-import { Toast } from 'primereact/toast';
-import { handleGetRequest } from '../../../service/GetTemplate';
-import { handleDeleteRequest } from '../../../service/DeleteTemplete';
+import React, { useState, useEffect, useRef } from "react";
+import { DataTable } from "primereact/datatable";
+import { Button } from "primereact/button";
+import { Column } from "primereact/column";
+import { Dialog } from "primereact/dialog";
+import { confirmDialog } from "primereact/confirmdialog";
+import { Toast } from "primereact/toast";
+import { handleGetRequest } from "../../../service/GetTemplate";
+import { handleDeleteRequest } from "../../../service/DeleteTemplete";
 import { useDispatch } from "react-redux";
-import AddEditCategory from './AddEditCategory';
-import { Image } from 'primereact/image';
-import AddEditSubCategory from '../subCategoryManagement/AddEditSubCategory';
-import { baseURL } from '../../../utilities/Config';
-import Edit from '../../../assets/ICONS/icon_edit.png';
-import Delete from '../../../assets/ICONS/icon_delete.png';
+import AddEditCategory from "./AddEditCategory";
+import { Image } from "primereact/image";
+import AddEditSubCategory from "../subCategoryManagement/AddEditSubCategory";
+import { baseURL } from "../../../utilities/Config";
+import Edit from "../../../assets/ICONS/icon_edit.png";
+import Delete from "../../../assets/ICONS/icon_delete.png";
 // import { FileUpload } from 'primereact/fileupload';
 // import AddEditUsers from './AddEditUsers';
-
 
 const CategoryManagement = () => {
     const dispatch = useDispatch();
@@ -34,7 +33,6 @@ const CategoryManagement = () => {
     const [subcategorydata, setSubcategorydata] = useState([]);
     const [updatedData, setUpdatedData] = useState([]);
 
-
     useEffect(() => {
         getCategoryData();
     }, []);
@@ -45,7 +43,7 @@ const CategoryManagement = () => {
         setVisibleEdit(false);
         setSubEditable(false);
         setSubVisibleEdit(false);
-    }
+    };
     // const onSubHide = () => {
     //     setSubEditable(false);
     //     setSubVisibleEdit(false);
@@ -58,49 +56,38 @@ const CategoryManagement = () => {
         }
     };
 
-
     const getSubcategorydata = async () => {
         //setloading(true);
         const res = await handleGetRequest("api/v1/subcategory/all", false);
 
         if (res) {
             await setSubcategorydata(res);
-
         }
         //setloading(false);
     };
     useEffect(async () => {
         getSubcategorydata();
-
     }, []);
 
-
     const deleteCategory = async () => {
-
-
         const data = {};
         data["categoryId"] = selectedDeleteId;
         const res = await dispatch(handleDeleteRequest(data, `api/v1/category/`, true, true));
 
         // setloading(false);
         if (res?.status === 200) {
-
             getCategoryData();
             //window.location.reload();
         }
         //getcategorydata();
-    }
+    };
     // useEffect(() => {
     //     if (visibleDelete === true) {
     //         RequestResetPassword();
     //     }
     // }, [visibleDelete]);
 
-
-
     const deleteSubCategory = async () => {
-
-
         const data = {};
         data["subcategoryId"] = selectedDeleteId;
 
@@ -108,12 +95,11 @@ const CategoryManagement = () => {
 
         // setloading(false);
         if (res?.status === 200) {
-
             getSubcategorydata();
             //window.location.reload();
         }
         //getcategorydata();
-    }
+    };
     // useEffect(() => {
     //     if (visibleDelete === true) {
     //         RequestResetPassword();
@@ -124,14 +110,13 @@ const CategoryManagement = () => {
         setVisibleEdit(true);
         setEditable(true);
         setCategoryRowData(rowData._id);
-
     };
 
     const subEditUsers = (rowData) => {
         setSubEditable(true);
         setSubVisibleEdit(true);
-        setSubCatRowData(rowData._id);
-    }
+        setSubCatRowData(rowData);
+    };
 
     // Accept Reject Dialog
 
@@ -139,85 +124,71 @@ const CategoryManagement = () => {
     var count = 0;
 
     const confirm2 = (rowData) => {
-
         count = count + 1;
         selectedDeleteId = rowData._id;
         confirmDialog({
-            message: 'Are you sure you want to delete this item?',
-            header: 'Delete Confirmation',
-            icon: 'pi pi-trash',
-            acceptClassName: 'Savebtn',
-            rejectClassName: 'Cancelbtn',
+            message: "Are you sure you want to delete this item?",
+            header: "Delete Confirmation",
+            icon: "pi pi-trash",
+            acceptClassName: "Savebtn",
+            rejectClassName: "Cancelbtn",
             accept,
-            reject
+            reject,
         });
     };
 
     //Category
     const confirm = (rowData) => {
-
         count = count + 2;
         selectedDeleteId = rowData._id;
         confirmDialog({
-            message: 'Are you sure you want to delete this category?',
-            header: 'Delete Confirmation',
-            icon: 'pi pi-trash',
-            acceptClassName: 'Savebtn',
-            rejectClassName: 'Cancelbtn',
+            message: "Are you sure you want to delete this category?",
+            header: "Delete Confirmation",
+            icon: "pi pi-trash",
+            acceptClassName: "Savebtn",
+            rejectClassName: "Cancelbtn",
             accept,
-            reject
+            reject,
         });
     };
 
-
     const accept = () => {
-
         if (count === 2) {
-
             deleteCategory();
             setVisibleDelete(true);
-        }
-        else if (count === 1) {
-
+        } else if (count === 1) {
             // RequestResetPassword();
             deleteSubCategory();
             setVisibleDelete(true);
             // toast.current.show({ severity: 'info', summary: 'Confirmed', detail: 'You have accepted', life: 3000 });
         }
-    }
+    };
 
     const reject = () => {
-
         if (count === 2) {
-
             setVisibleEdit(false);
             setSubVisibleEdit(false);
-        }
-
-        else if (count === 1) {
-
+        } else if (count === 1) {
             setVisibleEdit(false);
             setSubVisibleEdit(false);
             // toast.current.show({ severity: 'info', summary: 'Rejected', detail: 'You have rejected', life: 3000 });
         }
-
-    }
+    };
     const toast = useRef(null);
 
     // Expanded Data Table
     const getIdAndBoolean = (data) => {
-        setUpdatedData(data)
-        setSubVisibleEdit(true)
-    }
-
+        setUpdatedData(data);
+        setSubVisibleEdit(true);
+    };
 
     const actionTemplateCategory = (rowData) => {
         return (
             <div className="Edit_Icon">
-                <Button tooltip="Edit" tooltipOptions={{ position: "top" }} className="edit p-mr-2" onClick={() => editUsers(rowData)} >
+                <Button tooltip="Edit" tooltipOptions={{ position: "top" }} className="edit p-mr-2" onClick={() => editUsers(rowData)}>
                     <img src={Edit} />
                 </Button>
-                <Button tooltip="Delete" tooltipOptions={{ position: "top" }} className="delete p-mr-2 p-ml-3" onClick={() => confirm(rowData)} >
+                <Button tooltip="Delete" tooltipOptions={{ position: "top" }} className="delete p-mr-2 p-ml-3" onClick={() => confirm(rowData)}>
                     <img src={Delete} />
                 </Button>
             </div>
@@ -225,22 +196,13 @@ const CategoryManagement = () => {
     };
 
     const serialTemplate = (rowData, props) => {
-        return (
-            <div>
-                {props.rowIndex + 1}
-            </div>
-        )
+        return <div>{props.rowIndex + 1}</div>;
     };
     const allowExpansion = (rowData) => {
-
-        return <>
-            {rowData.length > 0};
-        </>
-
+        return <>{rowData.length > 0};</>;
     };
 
     const imageTemplate = (rowData) => {
-
         return (
             <React.Fragment>
                 {/* {rowData?.image} */}
@@ -260,13 +222,12 @@ const CategoryManagement = () => {
     };
 
     const actionTemplateSubcategory = (rowData) => {
-
         return (
             <div className="Edit_Icon">
-                <Button tooltip="Edit" tooltipOptions={{ position: "top" }} className="edit p-mr-2" onClick={() => subEditUsers(rowData)} >
+                <Button tooltip="Edit" tooltipOptions={{ position: "top" }} className="edit p-mr-2" onClick={() => subEditUsers(rowData)}>
                     <img src={Edit} />
                 </Button>
-                <Button tooltip="Delete" tooltipOptions={{ position: "top" }} className="delete p-mr-2 p-ml-3" onClick={() => confirm2(rowData)} >
+                <Button tooltip="Delete" tooltipOptions={{ position: "top" }} className="delete p-mr-2 p-ml-3" onClick={() => confirm2(rowData)}>
                     <img src={Delete} />
                 </Button>
                 {/* <Button tooltip="Delete" icon="pi pi-trash" tooltipOptions={{ position: "top" }} className="delete p-mr-2 p-ml-3" onClick={confirm2} /> */}
@@ -297,13 +258,18 @@ const CategoryManagement = () => {
                             <DataTable
                                 paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
                                 currentPageReportTemplate="Showing {first} to {last} of {totalRecords} Records"
-                                value={subcategorydata?.filter((item) => item.category?._id === data._id)} responsiveLayout="scroll">
-                                <Column body={(data, props) => {
-                                    return <div>{props.rowIndex + 1}</div>
-                                }} header="Serial" />
+                                value={subcategorydata?.filter((item) => item.category?._id === data._id)}
+                                responsiveLayout="scroll"
+                            >
+                                <Column
+                                    body={(data, props) => {
+                                        return <div>{props.rowIndex + 1}</div>;
+                                    }}
+                                    header="Serial"
+                                />
                                 <Column body={subImageTemplate} header="Image" />
                                 <Column field="name" header="Sub-Category Name" sortable />
-                                <Column field="description" header="Description" sortable style={{ width: '250px', height: '57px' }} />
+                                <Column field="description" header="Description" sortable style={{ width: "250px", height: "57px" }} />
                                 <Column body={actionTemplateSubcategory} header="Action" />
                             </DataTable>
                         </div>
@@ -311,7 +277,7 @@ const CategoryManagement = () => {
                 </div>
             </div>
         );
-    }
+    };
 
     // const headerBtn = (
     //     <div className="table-header-container">
@@ -320,25 +286,32 @@ const CategoryManagement = () => {
     //     </div>
     // );
 
-
     const onRowExpand = (event) => {
         setExpandedCatId(event.data._id);
-
-
-    }
+    };
     return (
         <>
-
-
             <Toast ref={toast} />
-            <Dialog header={editable ? "Edit" : "Add New Category"} visible={visibleEdit} style={{ width: '40vw' }} onHide={onHide}>
-                <AddEditCategory getCategoryData={getCategoryData} editable={editable} onHide={() => {
-                    onHide();
-                }} categoryRowData={categoryRowData}
+            <Dialog header={editable ? "Edit" : "Add New Category"} visible={visibleEdit} style={{ width: "40vw" }} onHide={onHide}>
+                <AddEditCategory
+                    getCategoryData={getCategoryData}
+                    editable={editable}
+                    onHide={() => {
+                        onHide();
+                    }}
+                    categoryRowData={categoryRowData}
                 />
             </Dialog>
-            <Dialog header={subEditable ? "Edit" : "Add New Sub-Category"} visible={subVisibleEdit} style={{ width: '40vw' }} onHide={onHide}>
-                <AddEditSubCategory updatedData={updatedData} getSubcategorydata={getSubcategorydata} subEditable={subEditable} onHide={() => { onHide(); }} subCatRowData={subCatRowData} />
+            <Dialog header={subEditable ? "Edit" : "Add New Sub-Category"} visible={subVisibleEdit} style={{ width: "40vw" }} onHide={onHide}>
+                <AddEditSubCategory
+                    updatedData={updatedData}
+                    getSubcategorydata={getSubcategorydata}
+                    subEditable={subEditable}
+                    onHide={() => {
+                        onHide();
+                    }}
+                    subCatRowData={subCatRowData}
+                />
             </Dialog>
 
             <div className="grid">
@@ -365,17 +338,23 @@ const CategoryManagement = () => {
                         <DataTable
                             paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
                             currentPageReportTemplate="Showing {first} to {last} of {totalRecords} Records"
-                            rows={7} paginator responsiveLayout="scroll" onRowExpand={onRowExpand} globalFilter={globalFilter} value={data} expandedRows={expandedRows} onRowToggle={(e) => {
+                            rows={7}
+                            paginator
+                            responsiveLayout="scroll"
+                            onRowExpand={onRowExpand}
+                            globalFilter={globalFilter}
+                            value={data}
+                            expandedRows={expandedRows}
+                            onRowToggle={(e) => {
                                 setExpandedRows(e.data);
                             }}
-
                             rowExpansionTemplate={rowExpansionTemplate}
                         >
-                            <Column expander={allowExpansion} style={{ width: '3em' }} />
+                            <Column expander={allowExpansion} style={{ width: "3em" }} />
                             <Column body={serialTemplate} header="Serial no" />
                             <Column body={imageTemplate} header="Image" />
                             <Column field="name" header="Category Name" sortable />
-                            <Column field="description" header="Description" style={{ width: '250px', height: '57px' }} />
+                            <Column field="description" header="Description" style={{ width: "250px", height: "57px" }} />
                             <Column body={actionTemplateCategory} header="Action" />
                         </DataTable>
                     </div>
@@ -383,6 +362,6 @@ const CategoryManagement = () => {
             </div>
         </>
     );
-}
+};
 
 export default CategoryManagement;
