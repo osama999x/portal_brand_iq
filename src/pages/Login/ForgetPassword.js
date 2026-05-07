@@ -17,13 +17,10 @@ const ForgetPassword = ({setStoredEmail}) => {
     const [loadingIcon, setloadingIcon] = useState("");
 
 
-    // const aplhaNumericSRegex = /^[a-zA-Z0-9]+@+[a-zA-Z0-9]+.+[A-z]/
-
 
     const validationSchema = Yup.object().shape({
         email: Yup.string().email("Invalid email address format").required("This field is required.")
-        // .matches(aplhaNumericSRegex, "Invalid email address format"),
-        // password: Yup.string().required("This field is required."),
+
     })
 
 
@@ -34,33 +31,21 @@ const ForgetPassword = ({setStoredEmail}) => {
         validationSchema: validationSchema,
         initialValues: {
             email: '',
-            // password: ''
         },
-        // validate: (data) => {
-        //     let errors = {};
-
-        //     return errors;
-        // },
         onSubmit: async (data) => {
-            // setFormData(data);
-            // setShowMessage(true);
             setloadingIcon("pi pi-spin pi-spinner");
             const response = await dispatch(handlePostRequest(data, "api/v1/user/resetpassword/otp", true, true));
-            //  if (response?.data?.data?.email === data["email"])
              if (response?.status === 200) {
-                // OTP sending was successful
 
                 setStoredEmail(data.email);
                 history.push("/otpview/"+data.email);
             } else {
-                // OTP sending failed
                 console.error("OTP not sent. Handle the error or display a message.");
             }
             setStoredEmail(data.email);
 
             setloading(false);
             setloadingIcon("");
-            // formik.resetForm();
 
 
         }

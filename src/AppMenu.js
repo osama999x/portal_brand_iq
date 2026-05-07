@@ -42,7 +42,8 @@ const AppSubmenu = (props) => {
     }
 
     const renderLinkContent = (item) => {
-        let submenuIcon = item.items;
+        // item.items is the submenu array; only treat as icon if it's a React node (e.g. PrimeReact icon), not an array
+        let submenuIcon = Array.isArray(item.items) ? null : item.items;
         let badge = item.badge && <Badge value={item.badge} />
 
         return (
@@ -83,7 +84,9 @@ const AppSubmenu = (props) => {
             return (
                 <li className={styleClass} key={i} role="none">
                     {props.root === true && <React.Fragment>
-                        <div className="layout-menuitem-root-text" aria-label={item.label}>{item.label}</div>
+                        {item.label != null && item.label !== '' && (
+                            <div className="layout-menuitem-root-text" aria-label={item.label}>{item.label}</div>
+                        )}
                         <AppSubmenu items={item.items} onMenuItemClick={props.onMenuItemClick} />
                     </React.Fragment>}
                 </li>

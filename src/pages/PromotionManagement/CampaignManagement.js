@@ -68,7 +68,7 @@ const CampaignManagement = () => {
                     icon="pi pi-arrow-circle-right"
                     tooltipOptions={{ position: "top" }}
                     className="promotion-button p-mr-2 p-ml-3"
-                    style={{ color: "#1cb4b5", fontSize: "1rem" }}
+                    style={{ color: "#111111", fontSize: "1rem" }}
                     onClick={() => forwardId(rowData)}
                 />
             </div>

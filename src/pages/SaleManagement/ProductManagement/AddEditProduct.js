@@ -77,8 +77,20 @@ const AddEditProduct = ({ getProductData, onHide, editable, productRowData }) =>
 
 
     const isEmpty = (val) => {
-        return val.length === 0;
+        if (val === null || val === undefined) return true;
+        if (Array.isArray(val)) return val.length === 0;
+        return String(val).length === 0;
     }
+
+    /* Normalise the `size` field from API — backend may return a plain string
+       ("S"), an embedded object ({name, actualPrice, _id, …}), or an array.  */
+    const getSizeName = (size) => {
+        if (!size && size !== 0) return "";
+        if (typeof size === "string") return size;
+        if (Array.isArray(size)) return size[0]?.name ?? "";
+        if (typeof size === "object") return size.name ?? "";
+        return String(size);
+    };
 
 
 
@@ -161,6 +173,9 @@ const AddEditProduct = ({ getProductData, onHide, editable, productRowData }) =>
             title: "",
             description: "",
             longDescription: "",
+            sizeGuide: "",
+            sizeFit: "",
+            deliveryReturns: "",
             vendor: "",
             thumbnail: "",
             metaDataString: "",
@@ -251,6 +266,9 @@ const AddEditProduct = ({ getProductData, onHide, editable, productRowData }) =>
             "title": data.title,
             "description": data.description,
             "longDescription": data.longDescription,
+            "sizeGuide": data.sizeGuide,
+            "sizeFit": data.sizeFit,
+            "deliveryReturns": data.deliveryReturns,
             "isDiscount": data.isDiscount,
             "isDeal": false,
             "vendor": data.vendor,
@@ -574,25 +592,40 @@ const AddEditProduct = ({ getProductData, onHide, editable, productRowData }) =>
     }
 
     const productTypeComponent = () => {
-
-        return <div className="grid">
-            <div className="col-12">
-                <Checkbox inputId="cb1" disabled={editable} onChange={(e) => setHasVariants(e.checked)} checked={hasVariants}></Checkbox>
-
-
-
-                <label htmlFor="cb1" className="p-checkbox-label ml-3">Has variants</label>
+        const TYPES = [
+            { label: "Simple",         icon: "pi-box",       v: false, c: false, s: false },
+            { label: "Colors Only",    icon: "pi-palette",   v: true,  c: true,  s: false },
+            { label: "Sizes Only",     icon: "pi-th-large",  v: true,  c: false, s: true  },
+            { label: "Colors + Sizes", icon: "pi-sliders-h", v: true,  c: true,  s: true  },
+        ];
+        return (
+            <div className="product-type-selector">
+                <span className="product-type-label">Product Type</span>
+                <div className="product-type-pills">
+                    {TYPES.map((type) => {
+                        const isActive = type.v === hasVariants && type.c === hasColors && type.s === hasSizes;
+                        return (
+                            <button
+                                key={type.label}
+                                type="button"
+                                disabled={editable}
+                                className={`product-type-pill${isActive ? " active" : ""}`}
+                                onClick={() => {
+                                    setHasVariants(type.v);
+                                    setHasColors(type.c);
+                                    setHasSizes(type.s);
+                                    setSizes([]);
+                                    setVariants([]);
+                                }}
+                            >
+                                <i className={`pi ${type.icon}`} />
+                                {type.label}
+                            </button>
+                        );
+                    })}
+                </div>
             </div>
-            {hasVariants && <div className="col-12">
-                <Checkbox inputId="cb2" disabled={editable} onChange={(e) => setHasColors(e.checked)} checked={hasColors}></Checkbox>
-                <label htmlFor="cb2" className="p-checkbox-label ml-3">Has colors</label>
-            </div>}
-            {hasVariants && <div className="col-12">
-                <Checkbox inputId="cb3" disabled={editable} onChange={(e) => setHasSizes(e.checked)} checked={hasSizes}></Checkbox>
-                <label htmlFor="cb3" className="p-checkbox-label ml-3">Has sizes</label>
-            </div>}
-
-        </div>;
+        );
     }
 
 
@@ -762,6 +795,9 @@ const AddEditProduct = ({ getProductData, onHide, editable, productRowData }) =>
         formik.setFieldValue("title", product.title);
         formik.setFieldValue("description", product.description);
         formik.setFieldValue("longDescription", product.longDescription);
+        formik.setFieldValue("sizeGuide", product.sizeGuide || "");
+        formik.setFieldValue("sizeFit", product.sizeFit || "");
+        formik.setFieldValue("deliveryReturns", product.deliveryReturns || "");
         formik.setFieldValue("vendor", product.vendor);
         formik.setFieldValue("metaDataString", product.metaData.split(','));
         formik.setFieldValue("metaDescription", product.metaDescription);
@@ -792,10 +828,13 @@ const AddEditProduct = ({ getProductData, onHide, editable, productRowData }) =>
         formik.setFieldValue("title", product.title);
         formik.setFieldValue("description", product.description);
         formik.setFieldValue("longDescription", product.longDescription);
+        formik.setFieldValue("sizeGuide", product.sizeGuide || "");
+        formik.setFieldValue("sizeFit", product.sizeFit || "");
+        formik.setFieldValue("deliveryReturns", product.deliveryReturns || "");
         formik.setFieldValue("vendor", product.vendor);
         formik.setFieldValue("metaDataString", product.metaData.split(','))
         formik.setFieldValue("metaDescription", product.metaDescription);
-        formik.setFieldValue("sku", variant.sku.replace(variant.size, ""));
+        formik.setFieldValue("sku", variant.sku.replace(getSizeName(variant.size), ""));
         formik.setFieldValue("actualPrice", variant.actualPrice);
         //formik.setFieldValue("discountedPrice", variant.discountedPrice);
         formik.setFieldValue("discountedPrice", product.discountedPrice);
@@ -807,11 +846,11 @@ const AddEditProduct = ({ getProductData, onHide, editable, productRowData }) =>
         let temp = [];
         for (var item of product.variant) {
             temp.push({
-                "name": item.size,
+                "name": getSizeName(item.size),
                 "actualPrice": item.actualPrice,
                 "discountedPrice": item.discountedPrice,
                 "quantity": item.quantity
-            })
+            });
         }
         setSizes(temp)
 
@@ -831,6 +870,9 @@ const AddEditProduct = ({ getProductData, onHide, editable, productRowData }) =>
         formik.setFieldValue("title", product.title);
         formik.setFieldValue("description", product.description);
         formik.setFieldValue("longDescription", product.longDescription);
+        formik.setFieldValue("sizeGuide", product.sizeGuide || "");
+        formik.setFieldValue("sizeFit", product.sizeFit || "");
+        formik.setFieldValue("deliveryReturns", product.deliveryReturns || "");
         formik.setFieldValue("vendor", product.vendor);
         formik.setFieldValue("metaDataString", product.metaData.split(','));
         formik.setFieldValue("metaDescription", product.metaDescription);
@@ -875,6 +917,9 @@ const AddEditProduct = ({ getProductData, onHide, editable, productRowData }) =>
         formik.setFieldValue("title", product.title);
         formik.setFieldValue("description", product.description);
         formik.setFieldValue("longDescription", product.longDescription);
+        formik.setFieldValue("sizeGuide", product.sizeGuide || "");
+        formik.setFieldValue("sizeFit", product.sizeFit || "");
+        formik.setFieldValue("deliveryReturns", product.deliveryReturns || "");
         formik.setFieldValue("vendor", product.vendor);
         formik.setFieldValue("metaDataString", product.metaData.split(','));
         formik.setFieldValue("metaDescription", product.metaDescription);
@@ -888,45 +933,53 @@ const AddEditProduct = ({ getProductData, onHide, editable, productRowData }) =>
         formik.setFieldValue("tags", product.tags);
         formik.setFieldValue("isDiscount", product.isDiscount);
         let localVariants = [];
-        const grouped = product.variant.reduce((acc, item) => {
-            const key = `${item.colorName}-${item.colorHex}`;
-            if (!acc[key]) {
-                acc[key] = {
-                    items: []
-                };
+        const firstV = product.variant[0];
+        /* Detect if the backend already returns one doc per colour with an
+           embedded size array, e.g. size: [{name,actualPrice,_id,…}, …]      */
+        const sizeIsEmbeddedArray =
+            Array.isArray(firstV?.size) &&
+            firstV.size.length > 0 &&
+            typeof firstV.size[0] === "object";
+
+        if (sizeIsEmbeddedArray) {
+            /* New backend format — each variant doc already groups its sizes  */
+            localVariants = product.variant.map((item) => ({
+                colorName: item.colorName,
+                colorHex : item.colorHex,
+                sku      : item.sku,
+                image    : item.image || "",
+                size     : item.size.map((s) => ({
+                    name           : s.name,
+                    actualPrice    : s.actualPrice,
+                    discountedPrice: s.discountedPrice ?? "",
+                    quantity       : s.quantity,
+                })),
+            }));
+        } else {
+            /* Old flat format — one doc per size row, group by colour          */
+            const grouped = product.variant.reduce((acc, item) => {
+                const key = `${item.colorName}-${item.colorHex}`;
+                if (!acc[key]) acc[key] = { items: [] };
+                acc[key].items.push(item);
+                return acc;
+            }, {});
+
+            for (var key of Object.keys(grouped)) {
+                const first = grouped[key].items[0];
+                localVariants.push({
+                    colorName: first.colorName,
+                    colorHex : first.colorHex,
+                    sku      : first.sku.replace(getSizeName(first.size), ""),
+                    image    : first.image || "",
+                    size     : grouped[key].items.map((item) => ({
+                        name           : getSizeName(item.size),
+                        actualPrice    : item.actualPrice,
+                        discountedPrice: item.discountedPrice ?? "",
+                        quantity       : item.quantity,
+                    })),
+                });
             }
-            acc[key].items.push(item);
-            return acc;
-        }, {});
-
-        let keys = Object.keys(grouped);
-        for (var key of keys) {
-            let colorName = key.split('-')[0];
-            let colorHex = key.split('-')[1];
-
-            localVariants.push({
-                colorName: colorName,
-                colorHex: colorHex,
-                sku: grouped[key]['items'][0].sku.replace(grouped[key]['items'][0].size, ""),
-                image: "",
-                size: grouped[key]['items'].map((item) => {
-                    return {
-                        "name": item.size,
-                        "actualPrice": item.actualPrice,
-                        "discountedPrice": item.discountedPrice,
-                        "quantity": item.quantity
-                    }
-                })
-
-
-
-
-            })
-
         }
-
-
-
 
         setVariants(localVariants);
 
@@ -1014,316 +1067,483 @@ const AddEditProduct = ({ getProductData, onHide, editable, productRowData }) =>
     }
 
     const colorNoSizeComponent = () => {
-        return <div>
-            <div id="add-variant-form" >
-                <div className="grid">
-                    <div className="col-12 md:col-6 lg:col-6 xl:col-6">
-                        <div className="flex flex-column">
-                            <label className="mb-2">Color Name</label>
-                            <InputText placeholder="Color name" value={addVariant.colorName} onChange={(e) => onAddVariantsFieldsChange('colorName', e.target.value)} className="w-full md:w-10 inputClass" />
+        return (
+            <div className="variant-builder">
+                <div className="variant-entry-card">
+                    <div className="grid">
+                        <div className="col-12 md:col-4">
+                            <div className="flex flex-column">
+                                <label className="mb-2">Color Name</label>
+                                <InputText placeholder="e.g. Red" value={addVariant.colorName} onChange={(e) => onAddVariantsFieldsChange('colorName', e.target.value)} className="w-full inputClass" />
+                            </div>
+                        </div>
+                        <div className="col-12 md:col-4">
+                            <div className="flex flex-column">
+                                <label className="mb-2">Color</label>
+                                <div className="color-input-group">
+                                    <input
+                                        type="color"
+                                        value={addVariant.colorHex || "#000000"}
+                                        onChange={(e) => onAddVariantsFieldsChange('colorHex', e.target.value)}
+                                        className="color-picker-native"
+                                        title="Pick a color"
+                                    />
+                                    <InputText placeholder="#000000" value={addVariant.colorHex} onChange={(e) => onAddVariantsFieldsChange('colorHex', e.target.value)} className="color-hex-input inputClass" />
+                                </div>
+                            </div>
+                        </div>
+                        <div className="col-12 md:col-4">
+                            <div className="flex flex-column">
+                                <label className="mb-2">SKU</label>
+                                <InputText placeholder="e.g. RED-001" value={addVariant.sku} onChange={(e) => onAddVariantsFieldsChange('sku', e.target.value)} className="w-full inputClass" />
+                            </div>
+                        </div>
+                        <div className="col-12 md:col-4">
+                            <div className="flex flex-column">
+                                <label className="mb-2">Actual Price</label>
+                                <InputText placeholder="Actual price" type="number" min="1" value={addVariant.actualPrice} onChange={(e) => onAddVariantsFieldsChange('actualPrice', e.target.value)} className="w-full inputClass" />
+                            </div>
+                        </div>
+                        {formik.values.isDiscount && (
+                            <div className="col-12 md:col-4">
+                                <div className="flex flex-column">
+                                    <label className="mb-2">Discounted Price</label>
+                                    <InputText placeholder="Discounted price" type="number" min="0" value={addVariant.discountedPrice} onChange={(e) => onAddVariantsFieldsChange('discountedPrice', e.target.value)} className="w-full inputClass" />
+                                </div>
+                            </div>
+                        )}
+                        <div className="col-12 md:col-4">
+                            <div className="flex flex-column">
+                                <label className="mb-2">Quantity</label>
+                                <InputText placeholder="Quantity" type="number" min="0" value={addVariant.quantity} onChange={(e) => onAddVariantsFieldsChange('quantity', e.target.value)} className="w-full inputClass" />
+                            </div>
+                        </div>
+                        <div className="col-12 text-right">
+                            <Button type="button" onClick={handleAddVariantSubmit} disabled={loading} label="Add This Color" icon="pi pi-plus" className="add-color-btn" />
                         </div>
                     </div>
-                    <div className="col-12 md:col-6 lg:col-6 xl:col-6">
-                        <div className="flex flex-column">
-                            <label className="mb-2">Color Hex</label>
-                            <InputText placeholder="Color Hex" value={addVariant.colorHex} onChange={(e) => onAddVariantsFieldsChange('colorHex', e.target.value)} className="w-full md:w-10 inputClass" />
-                        </div>
-                    </div>
-                    <div className="col-12 md:col-6 lg:col-6 xl:col-6">
-                        <div className="flex flex-column">
-                            <label className="mb-2">Sku</label>
-                            <InputText placeholder="Sku"
-                                value={addVariant.sku}
-                                //value={formik?.values?.sku?.replace(/\s\s+/g, " ")}
-                                onChange={(e) => onAddVariantsFieldsChange('sku', e.target.value)} className="w-full md:w-10 inputClass" />
-                        </div>
-                    </div>
-                    <div className="col-12 md:col-6 lg:col-6 xl:col-6">
-                        <div className="flex flex-column">
-                            <label className="mb-2">Actual Price</label>
-                            <InputText placeholder="Actual price" type="number" min="1" value={addVariant.actualPrice} onChange={(e) => onAddVariantsFieldsChange('actualPrice', e.target.value)} className="w-full md:w-10 inputClass" />
-                        </div>
-                    </div>
-                    {formik.values.isDiscount && <div className="col-12 md:col-6 lg:col-6 xl:col-6">
-                        <div className="flex flex-column">
-                            <label className="mb-2">Discounted Price</label>
-                            <InputText placeholder="Discounted price" type='number' min="0" value={addVariant.discountedPrice} onChange={(e) => onAddVariantsFieldsChange('discountedPrice', e.target.value)} className="w-full md:w-10 inputClass" />
-                        </div>
-                    </div>}
-                    <div className="col-12 md:col-6 lg:col-6 xl:col-6">
-                        <div className="flex flex-column">
-                            <label className="mb-2">Quantity</label>
-                            <InputText placeholder="Quantity" type="number" min="0" value={addVariant.quantity} onChange={(e) => onAddVariantsFieldsChange('quantity', e.target.value)} className="w-full md:w-10 inputClass" />
-                        </div>
-                    </div>
-
-                    <div className="text-right col-12">
-                        <Button onClick={handleAddVariantSubmit} form="add-variant-form" disabled={loading} iconPos="right" label={"Add"} className="Savebtn p-mr-3" />
-
-                    </div>
-
-
                 </div>
+
+                {variants.length > 0 && (
+                    <div className="variant-cards mt-3">
+                        <span className="variant-cards-title">Added Colors ({variants.length})</span>
+                        {variants.map((v, idx) => (
+                            <div key={idx} className="variant-card" style={{ borderLeft: `4px solid ${v.colorHex || "#ccc"}` }}>
+                                <div className="variant-card-header">
+                                    <span className="color-dot" style={{ background: v.colorHex || "#ccc" }} />
+                                    <strong className="variant-color-name">{v.colorName}</strong>
+                                    <span className="variant-sku-badge">SKU: {v.sku}</span>
+                                    <Button
+                                        type="button"
+                                        icon="pi pi-trash"
+                                        className="p-button-text p-button-danger p-button-sm variant-remove-btn"
+                                        onClick={() => setVariants((prev) => prev.filter((_, i) => i !== idx))}
+                                        tooltip="Remove"
+                                    />
+                                </div>
+                                <div className="variant-edit-row">
+                                    <div className="size-edit-field">
+                                        <span className="size-edit-label">Price (₹)</span>
+                                        <input
+                                            type="number"
+                                            min="1"
+                                            value={v.actualPrice}
+                                            onChange={(e) => setVariants((prev) => prev.map((item, i) => i === idx ? { ...item, actualPrice: e.target.value } : item))}
+                                            className="size-edit-input"
+                                        />
+                                    </div>
+                                    {formik.values.isDiscount && (
+                                        <div className="size-edit-field">
+                                            <span className="size-edit-label">Disc. Price</span>
+                                            <input
+                                                type="number"
+                                                min="0"
+                                                value={v.discountedPrice || ""}
+                                                onChange={(e) => setVariants((prev) => prev.map((item, i) => i === idx ? { ...item, discountedPrice: e.target.value } : item))}
+                                                className="size-edit-input"
+                                            />
+                                        </div>
+                                    )}
+                                    <div className="size-edit-field">
+                                        <span className="size-edit-label">Qty</span>
+                                        <input
+                                            type="number"
+                                            min="0"
+                                            value={v.quantity}
+                                            onChange={(e) => setVariants((prev) => prev.map((item, i) => i === idx ? { ...item, quantity: e.target.value } : item))}
+                                            className="size-edit-input size-edit-input--sm"
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                )}
             </div>
-
-            <div className="col-12 md:col-12 lg:col-12 xl:col-12">
-                <div className="innr-Body">
-                    <DataTable responsiveLayout="scroll" value={variants}>
-                        <Column field="colorName" header="Color name" body={(data, props) => customEditInput({
-                            value: data.colorName, onChange: (e) => {
-                                let value = e.target.value;
-                                setVariants((prev) => {
-                                    prev[props.rowIndex].colorName = value;
-                                    return [...prev]
-                                })
-                            }
-                        })} />
-                        <Column field="colorHex" header="Color Hex" body={(data, props) => customEditInput({
-                            value: data.colorHex, onChange: (e) => {
-                                let value = e.target.value;
-                                setVariants((prev) => {
-                                    prev[props.rowIndex].colorHex = value;
-                                    return [...prev]
-                                })
-                            }
-                        })} />
-                        <Column field="sku" header="SKU" />
-                        <Column field="actualPrice" header="Actual Price" body={(data, props) => customEditInput({
-                            value: data.actualPrice, onChange: (e) => {
-                                let value = e.target.value;
-                                setVariants((prev) => {
-                                    prev[props.rowIndex].actualPrice = value;
-                                    return [...prev]
-                                })
-                            }
-                        })} />
-                        <Column
-                            //hidden={!formik.values.isDiscount}
-                            field="discountedPrice" header="Discounted Price" body={(data, props) => customEditInput({
-                                value: data.discountedPrice, onChange: (e) => {
-                                    let value = e.target.value;
-                                    setVariants((prev) => {
-                                        prev[props.rowIndex].discountedPrice = value;
-                                        return [...prev]
-                                    })
-                                }
-                            })} />
-
-                        <Column header="Action" body={(data, props) => {
-                            return (
-                                <Button onClick={(e) => {
-                                    e.preventDefault();
-
-                                    setVariants((prev) => {
-                                        prev.splice(props.rowIndex, 1);
-                                        return [...prev]
-                                    })
-                                }} icon="pi pi-trash" className="p-button-rounded p-button-text" aria-label="Delete" />
-
-                            )
-
-                        }} />
-
-                    </DataTable>
-                </div>
-            </div>
-
-
-
-        </div>;
-
+        );
     }
-    const noColorSizeComponent = (showAddButton) => {
+    const noColorSizeComponent = () => {
+        return (
+            <div className="variant-builder">
+                <div className="variant-entry-card">
+                    <h4 className="variant-entry-title">Size Variants</h4>
 
-        return <div>
-            <div id="add-variant-form" >
-                <div className="grid">
-                    <div className="col-12 md:col-6 lg:col-6 xl:col-6">
-                        <div className="flex flex-column">
-                            <label className="mb-2">Size</label>
-                            <InputText placeholder="Enter Size" value={addSize.name} onChange={(e) => onSizeFieldsChange('name', e.target.value)} className="w-full md:w-10 inputClass" />
+                    {sizes.length > 0 && (
+                        <div className="size-edit-list mb-3">
+                            <div className="size-edit-list-header">
+                                <span>Size</span>
+                                <span>Price (₹)</span>
+                                {formik.values.isDiscount && <span>Disc. Price</span>}
+                                <span>Qty</span>
+                                <span></span>
+                            </div>
+                            {sizes.map((s, i) => (
+                                <div key={i} className="size-edit-row">
+                                    <span className="size-name-badge">{s.name}</span>
+                                    <input
+                                        type="number"
+                                        min="1"
+                                        value={s.actualPrice}
+                                        onChange={(e) => setSizes((prev) => prev.map((item, idx) => idx === i ? { ...item, actualPrice: e.target.value } : item))}
+                                        className="size-edit-input"
+                                    />
+                                    {formik.values.isDiscount && (
+                                        <input
+                                            type="number"
+                                            min="0"
+                                            value={s.discountedPrice || ""}
+                                            onChange={(e) => setSizes((prev) => prev.map((item, idx) => idx === i ? { ...item, discountedPrice: e.target.value } : item))}
+                                            className="size-edit-input"
+                                        />
+                                    )}
+                                    <input
+                                        type="number"
+                                        min="0"
+                                        value={s.quantity}
+                                        onChange={(e) => setSizes((prev) => prev.map((item, idx) => idx === i ? { ...item, quantity: e.target.value } : item))}
+                                        className="size-edit-input size-edit-input--sm"
+                                    />
+                                    <button
+                                        type="button"
+                                        className="size-edit-remove"
+                                        onClick={() => setSizes((prev) => prev.filter((_, idx) => idx !== i))}
+                                        title="Remove"
+                                    >×</button>
+                                </div>
+                            ))}
                         </div>
-                    </div>
-                    <div className="col-12 md:col-6 lg:col-6 xl:col-6">
-                        <div className="flex flex-column">
-                            <label className="mb-2">Actual Price</label>
-                            <InputText placeholder="Actual Price" min="1" value={addSize.actualPrice} onChange={(e) => onSizeFieldsChange('actualPrice', e.target.value)} className="w-full md:w-10 inputClass" />
-                        </div>
-                    </div>
-                    {formik.values.isDiscount && <div className="col-12 md:col-6 lg:col-6 xl:col-6">
-                        <div className="flex flex-column">
-                            <label className="mb-2">Discounted Price</label>
-                            <InputText placeholder="Discounted Price" min='0' value={addSize.discountedPrice} onChange={(e) => onSizeFieldsChange('discountedPrice', e.target.value)} className="w-full md:w-10 inputClass" />
-                        </div>
-                    </div>}
-                    <div className="col-12 md:col-6 lg:col-6 xl:col-6">
-                        <div className="flex flex-column">
-                            <label className="mb-2">Quantity</label>
-                            <InputText placeholder="Quantity" min="0" value={addSize.quantity} onChange={(e) => onSizeFieldsChange('quantity', e.target.value)} className="w-full md:w-10 inputClass" />
-                        </div>
-                    </div>
+                    )}
 
-
-                    <div className="col-12 text-right">
-                        <Button onClick={handleAddSizeSubmit} iconPos="right" label={"Add Size"} className="Savebtn p-mr-3" />
-
-                    </div>
-
-                </div>
-            </div>
-
-            {sizes.length > 0 && <div className="col-12 md:col-12 lg:col-12 xl:col-12">
-                <div className="innr-Body">
-                    <DataTable responsiveLayout="scroll" value={sizes}>
-                        {/* loading={loading}  */}
-
-                        <Column field="name" header="Name" />
-                        <Column field="actualPrice" header="Actual Price" />
-                        <Column
-                            //hidden={!formik.values.isDiscount}
-                            field="discountedPrice" header="Dicounted Price" />
-
-                        <Column field="quantity" header="Quantity" />
-                        <Column header="Action" body={(data, props) => {
-                            return (
-                                <>
-
-                                    {<Button onClick={(e) => {
-                                        e.preventDefault();
-                                        setEditSize(data);
-                                        setEditSizeIndex(props.rowIndex)
-                                        onClick('showEditSizeDialog')
-
-
-
-
-                                    }} icon="pi pi-pencil" className="p-button-rounded p-button-text" aria-label="Edit" />}
-                                    {!editable && <Button onClick={(e) => {
-                                        e.preventDefault();
-                                        setSizes((prev) => {
-
-                                            prev = prev.splice(props.rowIndex, 1);
-
-                                            return [...prev]
-                                        })
-                                    }} icon="pi pi-trash" className="p-button-rounded p-button-text" aria-label="Delete" />}
-
-                                </>
-                            )
-                        }} />
-                    </DataTable>
-                </div>
-            </div>}
-        </div>;
-    }
-
-    //working
-    const colorSizeComponent = () => {
-        return <div>
-            <div id="add-variant-form" >
-                <div className="grid">
-                    <div className="col-12 md:col-6 lg:col-6 xl:col-6">
-                        <div className="flex flex-column">
-                            <label className="mb-2">Color Name</label>
-                            <InputText placeholder="Color name" value={addVariant.colorName} onChange={(e) => onAddVariantsFieldsChange('colorName', e.target.value)} className="w-full md:w-10 inputClass" />
-                        </div>
-                    </div>
-                    <div className="col-12 md:col-6 lg:col-6 xl:col-6">
-                        <div className="flex flex-column">
-                            <label className="mb-2">Color Hex</label>
-                            <InputText placeholder="Color hex" value={addVariant.colorHex} onChange={(e) => onAddVariantsFieldsChange('colorHex', e.target.value)} className="w-full md:w-10 inputClass" />
-                        </div>
-                    </div>
-                    <div className="col-12 md:col-6 lg:col-6 xl:col-6">
-                        <div className="flex flex-column">
-                            <label className="mb-2">Sku</label>
-                            <InputText placeholder="Sku" value={addVariant.sku} onChange={(e) => onAddVariantsFieldsChange('sku', e.target.value)} className="w-full md:w-10 inputClass" />
-                        </div>
-                    </div>
-
-                    <div className="col-12">
-                        <h3>Sizes</h3>
-                    </div>
-                    <div className="col-12">
-                        {noColorSizeComponent(false)}
-                    </div>
-
-
-
-                    <div className="col-12 text-right">
-                        <Button onClick={handleColorSizeSubmit} disabled={loading} iconPos="right" label={"Add Variant"} className="Savebtn p-mr-3" />
-
-                    </div>
-
-                </div>
-            </div>
-
-
-
-            <div className="col-12 md:col-12 lg:col-12 xl:col-12">
-                <div className="innr-Body">
-                    <DataTable onRowExpand={onRowExpand} expandedRows={expandedRows} onRowToggle={(e) => {
-
-                        setExpandedRows(e.data);
-                    }}
-
-                        rowExpansionTemplate={rowExpansionTemplate}
-
-                        responsiveLayout="scroll" value={variants}>
-                        {/* loading={loading}  */}
-
-                        <Column expander={allowExpansion} style={{ width: '3em' }} />
-
-                        <Column field="colorName" header="Color name" body={(data, props) => customEditInput({
-                            value: data.colorName, onChange: (e) => {
-                                let value = e.target.value;
-                                setVariants((prev) => {
-                                    prev[props.rowIndex].colorName = value;
-                                    return [...prev]
-                                })
-                            }
-                        })} />
-                        <Column field="colorHex" header="Color Hex"
-                            body={(data, props) => customEditInput({
-                                value: data.colorHex, onChange: (e) => {
-                                    let value = e.target.value;
-                                    setVariants((prev) => {
-                                        prev[props.rowIndex].colorHex = value;
-                                        return [...prev]
-                                    })
-                                }
-                            })}
+                    <div className="size-inline-row">
+                        <InputText
+                            placeholder="Size (S / M / L)"
+                            value={addSize.name}
+                            onChange={(e) => onSizeFieldsChange('name', e.target.value)}
+                            className="size-name-input inputClass"
+                            onKeyDown={(e) => e.key === 'Enter' && handleAddSizeSubmit(e)}
                         />
-                        <Column field="sku"
-
-                            header="SKU" />
-
-
-                        <Column header="Action" body={(data, props) => {
-                            return (
-                                <Button onClick={(e) => {
-                                    e.preventDefault();
-                                    setVariants((prev) => {
-
-                                        prev.splice(props.rowIndex, 1);
-
-                                        return [...prev]
-                                    })
-                                }} icon="pi pi-trash" className="p-button-rounded p-button-text" aria-label="Delete" />
-
-                            )
-
-                        }} />
-
-
-
-
-                    </DataTable>
+                        <InputText
+                            placeholder="Price"
+                            type="number"
+                            min="1"
+                            value={addSize.actualPrice}
+                            onChange={(e) => onSizeFieldsChange('actualPrice', e.target.value)}
+                            className="size-price-input inputClass"
+                            onKeyDown={(e) => e.key === 'Enter' && handleAddSizeSubmit(e)}
+                        />
+                        {formik.values.isDiscount && (
+                            <InputText
+                                placeholder="Disc. Price"
+                                type="number"
+                                min="0"
+                                value={addSize.discountedPrice}
+                                onChange={(e) => onSizeFieldsChange('discountedPrice', e.target.value)}
+                                className="size-price-input inputClass"
+                                onKeyDown={(e) => e.key === 'Enter' && handleAddSizeSubmit(e)}
+                            />
+                        )}
+                        <InputText
+                            placeholder="Qty"
+                            type="number"
+                            min="0"
+                            value={addSize.quantity}
+                            onChange={(e) => onSizeFieldsChange('quantity', e.target.value)}
+                            className="size-qty-input inputClass"
+                            onKeyDown={(e) => e.key === 'Enter' && handleAddSizeSubmit(e)}
+                        />
+                        <Button
+                            type="button"
+                            icon="pi pi-plus"
+                            onClick={handleAddSizeSubmit}
+                            className="p-button-rounded size-add-btn"
+                            tooltip="Add size (or press Enter)"
+                        />
+                    </div>
+                    <p className="size-inline-hint">
+                        <i className="pi pi-info-circle mr-1" />
+                        Press Enter or + to add. Click any price/qty above to edit directly.
+                    </p>
                 </div>
             </div>
+        );
+    }
 
-        </div>;
+    const colorSizeComponent = () => {
+        const canCopySizes = variants.length > 0 && variants[variants.length - 1].size?.length > 0;
 
+        return (
+            <div className="variant-builder">
+                {/* ── Entry form ── */}
+                <div className="variant-entry-card">
+                    <h4 className="variant-entry-title">Add Color Variant</h4>
+                    <div className="grid">
+                        <div className="col-12 md:col-4">
+                            <div className="flex flex-column">
+                                <label className="mb-2">Color Name</label>
+                                <InputText
+                                    placeholder="e.g. Red"
+                                    value={addVariant.colorName}
+                                    onChange={(e) => onAddVariantsFieldsChange('colorName', e.target.value)}
+                                    className="w-full inputClass"
+                                />
+                            </div>
+                        </div>
+                        <div className="col-12 md:col-4">
+                            <div className="flex flex-column">
+                                <label className="mb-2">Color</label>
+                                <div className="color-input-group">
+                                    <input
+                                        type="color"
+                                        value={addVariant.colorHex || "#000000"}
+                                        onChange={(e) => onAddVariantsFieldsChange('colorHex', e.target.value)}
+                                        className="color-picker-native"
+                                        title="Pick a color"
+                                    />
+                                    <InputText
+                                        placeholder="#FF0000"
+                                        value={addVariant.colorHex}
+                                        onChange={(e) => onAddVariantsFieldsChange('colorHex', e.target.value)}
+                                        className="color-hex-input inputClass"
+                                    />
+                                </div>
+                            </div>
+                        </div>
+                        <div className="col-12 md:col-4">
+                            <div className="flex flex-column">
+                                <label className="mb-2">SKU</label>
+                                <InputText
+                                    placeholder="e.g. RED-001"
+                                    value={addVariant.sku}
+                                    onChange={(e) => onAddVariantsFieldsChange('sku', e.target.value)}
+                                    className="w-full inputClass"
+                                />
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* ── Sizes for this color ── */}
+                    <div className="sizes-section">
+                        <div className="sizes-section-header">
+                            <span className="sizes-section-title">
+                                <i className="pi pi-th-large mr-2" />
+                                Sizes for this color
+                            </span>
+                            {canCopySizes && (
+                                <button
+                                    type="button"
+                                    className="copy-sizes-link"
+                                    onClick={() => setSizes([...variants[variants.length - 1].size])}
+                                >
+                                    <i className="pi pi-copy mr-1" />
+                                    Copy from {variants[variants.length - 1].colorName}
+                                </button>
+                            )}
+                        </div>
+
+                        {sizes.length > 0 && (
+                            <div className="size-edit-list">
+                                <div className="size-edit-list-header">
+                                    <span>Size</span>
+                                    <span>Price (₹)</span>
+                                    {formik.values.isDiscount && <span>Disc.</span>}
+                                    <span>Qty</span>
+                                    <span></span>
+                                </div>
+                                {sizes.map((s, i) => (
+                                    <div key={i} className="size-edit-row">
+                                        <span className="size-name-badge">{s.name}</span>
+                                        <input
+                                            type="number"
+                                            min="1"
+                                            value={s.actualPrice}
+                                            onChange={(e) => setSizes((prev) => prev.map((item, idx) => idx === i ? { ...item, actualPrice: e.target.value } : item))}
+                                            className="size-edit-input"
+                                        />
+                                        {formik.values.isDiscount && (
+                                            <input
+                                                type="number"
+                                                min="0"
+                                                value={s.discountedPrice || ""}
+                                                onChange={(e) => setSizes((prev) => prev.map((item, idx) => idx === i ? { ...item, discountedPrice: e.target.value } : item))}
+                                                className="size-edit-input"
+                                            />
+                                        )}
+                                        <input
+                                            type="number"
+                                            min="0"
+                                            value={s.quantity}
+                                            onChange={(e) => setSizes((prev) => prev.map((item, idx) => idx === i ? { ...item, quantity: e.target.value } : item))}
+                                            className="size-edit-input size-edit-input--sm"
+                                        />
+                                        <button
+                                            type="button"
+                                            className="size-edit-remove"
+                                            onClick={() => setSizes((prev) => prev.filter((_, idx) => idx !== i))}
+                                            title="Remove"
+                                        >×</button>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+
+                        <div className="size-inline-row">
+                            <InputText
+                                placeholder="Size (S / M / L)"
+                                value={addSize.name}
+                                onChange={(e) => onSizeFieldsChange('name', e.target.value)}
+                                className="size-name-input inputClass"
+                                onKeyDown={(e) => e.key === 'Enter' && handleAddSizeSubmit(e)}
+                            />
+                            <InputText
+                                placeholder="Price"
+                                type="number"
+                                min="1"
+                                value={addSize.actualPrice}
+                                onChange={(e) => onSizeFieldsChange('actualPrice', e.target.value)}
+                                className="size-price-input inputClass"
+                                onKeyDown={(e) => e.key === 'Enter' && handleAddSizeSubmit(e)}
+                            />
+                            {formik.values.isDiscount && (
+                                <InputText
+                                    placeholder="Disc. Price"
+                                    type="number"
+                                    min="0"
+                                    value={addSize.discountedPrice}
+                                    onChange={(e) => onSizeFieldsChange('discountedPrice', e.target.value)}
+                                    className="size-price-input inputClass"
+                                    onKeyDown={(e) => e.key === 'Enter' && handleAddSizeSubmit(e)}
+                                />
+                            )}
+                            <InputText
+                                placeholder="Qty"
+                                type="number"
+                                min="0"
+                                value={addSize.quantity}
+                                onChange={(e) => onSizeFieldsChange('quantity', e.target.value)}
+                                className="size-qty-input inputClass"
+                                onKeyDown={(e) => e.key === 'Enter' && handleAddSizeSubmit(e)}
+                            />
+                            <Button
+                                type="button"
+                                icon="pi pi-plus"
+                                onClick={handleAddSizeSubmit}
+                                className="p-button-rounded size-add-btn"
+                                tooltip="Add size (or press Enter)"
+                            />
+                        </div>
+                        <p className="size-inline-hint">
+                            <i className="pi pi-info-circle mr-1" />
+                            Press Enter or click + to add each size, then click "Add This Color" when done.
+                        </p>
+                    </div>
+
+                    <div className="variant-entry-footer">
+                        <Button
+                            type="button"
+                            onClick={handleColorSizeSubmit}
+                            label="Add This Color"
+                            icon="pi pi-check"
+                            className="add-color-btn"
+                            disabled={loading || sizes.length === 0}
+                        />
+                    </div>
+                </div>
+
+                {/* ── Added variant cards ── */}
+                {variants.length > 0 && (
+                    <div className="variant-cards mt-3">
+                        <span className="variant-cards-title">Added Color Variants ({variants.length})</span>
+                        {variants.map((v, idx) => (
+                            <div
+                                key={idx}
+                                className="variant-card"
+                                style={{ borderLeft: `4px solid ${v.colorHex || "#ccc"}` }}
+                            >
+                                <div className="variant-card-header">
+                                    <span className="color-dot" style={{ background: v.colorHex || "#ccc" }} />
+                                    <strong className="variant-color-name">{v.colorName}</strong>
+                                    <span className="variant-sku-badge">SKU: {v.sku}</span>
+                                    <Button
+                                        type="button"
+                                        icon="pi pi-trash"
+                                        className="p-button-text p-button-danger p-button-sm variant-remove-btn"
+                                        onClick={() => setVariants((prev) => prev.filter((_, i) => i !== idx))}
+                                        tooltip="Remove variant"
+                                    />
+                                </div>
+                                {v.size?.length > 0 && (
+                                    <div className="variant-size-list">
+                                        <div className="size-edit-list-header size-edit-list-header--compact">
+                                            <span>Size</span>
+                                            <span>Price (₹)</span>
+                                            {formik.values.isDiscount && <span>Disc.</span>}
+                                            <span>Qty</span>
+                                        </div>
+                                        {v.size.map((s, si) => (
+                                            <div key={si} className="size-edit-row size-edit-row--compact">
+                                                <span className="size-name-badge">{s.name}</span>
+                                                <input
+                                                    type="number"
+                                                    min="1"
+                                                    value={s.actualPrice}
+                                                    onChange={(e) => setVariants((prev) => prev.map((vv, vi) => vi === idx ? {
+                                                        ...vv,
+                                                        size: vv.size.map((ss, ssi) => ssi === si ? { ...ss, actualPrice: e.target.value } : ss)
+                                                    } : vv))}
+                                                    className="size-edit-input"
+                                                />
+                                                {formik.values.isDiscount && (
+                                                    <input
+                                                        type="number"
+                                                        min="0"
+                                                        value={s.discountedPrice || ""}
+                                                        onChange={(e) => setVariants((prev) => prev.map((vv, vi) => vi === idx ? {
+                                                            ...vv,
+                                                            size: vv.size.map((ss, ssi) => ssi === si ? { ...ss, discountedPrice: e.target.value } : ss)
+                                                        } : vv))}
+                                                        className="size-edit-input"
+                                                    />
+                                                )}
+                                                <input
+                                                    type="number"
+                                                    min="0"
+                                                    value={s.quantity}
+                                                    onChange={(e) => setVariants((prev) => prev.map((vv, vi) => vi === idx ? {
+                                                        ...vv,
+                                                        size: vv.size.map((ss, ssi) => ssi === si ? { ...ss, quantity: e.target.value } : ss)
+                                                    } : vv))}
+                                                    className="size-edit-input size-edit-input--sm"
+                                                />
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+                        ))}
+                    </div>
+                )}
+            </div>
+        );
     }
 
     const customEditInput = ({ value, onChange, type = 'text' }) => {
@@ -1337,9 +1557,9 @@ const AddEditProduct = ({ getProductData, onHide, editable, productRowData }) =>
                 <EditSizeDialog isFromColumn={isFromColumn} setVariants={setVariants} colorName={variantColorName} onHide={() => onHideInternal('showEditSizeDialog')} setSizes={setSizes} size={editSize} sizes={sizes} index={editSizeIndex} />
             </Dialog>
             {loading === true && editable === true ? <ProgressSpinner /> : (
-                <form onSubmit={formik.handleSubmit}>
-                    <div>
-                        <div className="grid">
+                <form onSubmit={formik.handleSubmit} className="aep__form">
+                    <div className="add-edit-product">
+                        <div className="grid aep__grid">
                             <div className="col-12 md:col-4">
                                 <div className="flex flex-column">
                                     <label className="mb-2">Category</label>
@@ -1505,6 +1725,54 @@ const AddEditProduct = ({ getProductData, onHide, editable, productRowData }) =>
                                     {getFormErrorMessage("longDescription")}
                                 </div>
                             </div>
+                            <div className="col-12 md:col-6">
+                                <div className="flex flex-column">
+                                    <label className="mb-2">Size Guide</label>
+                                    <InputTextarea
+                                        rows={5}
+                                        cols={30}
+                                        placeholder="Enter Size Guide"
+                                        id="sizeGuide"
+                                        name="sizeGuide"
+                                        value={formik?.values?.sizeGuide?.replace(/\s\s+/g, " ")}
+                                        onChange={formik.handleChange}
+                                        className={classNames({ "p-invalid": isFormFieldValid("sizeGuide") }, "w-full md:w-10 inputClass")}
+                                    />
+                                    {getFormErrorMessage("sizeGuide")}
+                                </div>
+                            </div>
+                            <div className="col-12 md:col-6">
+                                <div className="flex flex-column">
+                                    <label className="mb-2">Size & Fit</label>
+                                    <InputTextarea
+                                        rows={5}
+                                        cols={30}
+                                        placeholder="Enter Size & Fit"
+                                        id="sizeFit"
+                                        name="sizeFit"
+                                        value={formik?.values?.sizeFit?.replace(/\s\s+/g, " ")}
+                                        onChange={formik.handleChange}
+                                        className={classNames({ "p-invalid": isFormFieldValid("sizeFit") }, "w-full md:w-10 inputClass")}
+                                    />
+                                    {getFormErrorMessage("sizeFit")}
+                                </div>
+                            </div>
+                            <div className="col-12 md:col-6">
+                                <div className="flex flex-column">
+                                    <label className="mb-2">Delivery & Returns</label>
+                                    <InputTextarea
+                                        rows={5}
+                                        cols={30}
+                                        placeholder="Enter Delivery & Returns"
+                                        id="deliveryReturns"
+                                        name="deliveryReturns"
+                                        value={formik?.values?.deliveryReturns?.replace(/\s\s+/g, " ")}
+                                        onChange={formik.handleChange}
+                                        className={classNames({ "p-invalid": isFormFieldValid("deliveryReturns") }, "w-full md:w-10 inputClass")}
+                                    />
+                                    {getFormErrorMessage("deliveryReturns")}
+                                </div>
+                            </div>
                             <div className="col-12 md:col-4">
                                 <div className="flex flex-column">
                                     <label className="mb-2">Vendor</label>
@@ -1594,14 +1862,24 @@ const AddEditProduct = ({ getProductData, onHide, editable, productRowData }) =>
 
                         {hasVariants && hasSizes && hasColors && colorSizeComponent()}
                     </div>
-                    <div className="col-12 md:col-12 xl:col-12 lg:col-12 text-center">
-                        <Button
-                            label="Cancel"
-                            onClick={onHide}
-                            type="button"
-                            className="Cancelbtn p-mr-3"
-                        />
-                        <Button type="submit" disabled={disable} loading={loading} iconPos="right" label={editable ? "Update" : "Save"} autoFocus className="Savebtn p-mr-3" />
+                    <div className="aep__footer">
+                        <div className="aep__footerInner">
+                            <Button
+                                label="Cancel"
+                                onClick={onHide}
+                                type="button"
+                                className="Cancelbtn"
+                            />
+                            <Button
+                                type="submit"
+                                disabled={disable}
+                                loading={loading}
+                                iconPos="right"
+                                label={editable ? "Update" : "Save"}
+                                autoFocus
+                                className="Savebtn"
+                            />
+                        </div>
                     </div>
                 </form>
             )}

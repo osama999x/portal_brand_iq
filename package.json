@@ -3,6 +3,9 @@
     "version": "7.0.3-SNAPSHOT",
     "homepage": ".",
     "private": false,
+    "engines": {
+        "node": "16.x"
+    },
     "repository": {
         "type": "git",
         "url": "https://github.com/primefaces/sakai-react.git"
@@ -46,10 +49,13 @@
         "yup": "^0.32.11"
     },
     "scripts": {
-        "start": "react-scripts start",
-        "build": "react-scripts build",
+        "start": "cross-env NODE_OPTIONS=--openssl-legacy-provider react-scripts start",
+        "build": "cross-env NODE_OPTIONS=--openssl-legacy-provider react-scripts build",
         "test": "react-scripts test",
         "eject": "react-scripts eject"
+    },
+    "devDependencies": {
+        "cross-env": "^7.0.3"
     },
     "eslintConfig": {
         "extends": [

@@ -10,10 +10,17 @@ import { handlePostRequest } from "../../../service/PostTemplate";
 import { handlePatchRequest } from "../../../service/PatchTemplete";
 import { useDispatch } from "react-redux";
 import { ProgressSpinner } from "primereact/progressspinner";
-//import { toast } from "react-toastify";
-//import MultiImage from "../../../components/MultiImage";
 import { InputTextarea } from "primereact/inputtextarea";
+import { Dropdown } from "primereact/dropdown";
+import { Checkbox } from "primereact/checkbox";
 import { toast } from "react-toastify";
+
+const GENDER_OPTIONS = [
+    { label: "Men",     value: "men" },
+    { label: "Women",   value: "women" },
+    { label: "Juniors", value: "juniors" },
+    { label: "Unisex",  value: "unisex" },
+];
 
 const AddEditCategory = ({ getCategoryData, onHide, editable, categoryRowData }) => {
     const [loading, setLoading] = useState(false);
@@ -61,7 +68,8 @@ const AddEditCategory = ({ getCategoryData, onHide, editable, categoryRowData })
             name: "",
             icon: "",
             thumbnail: "",
-            // permissionsId: "",
+            gender: "",
+            isFeatured: false,
         },
         onSubmit: async (data, { setErrors }) => {
             if (editable === true) {
@@ -85,32 +93,27 @@ const AddEditCategory = ({ getCategoryData, onHide, editable, categoryRowData })
             }
 
             if (Object.keys(formik.errors).length === 0) {
-                if (editable === true) {
-                    onHide();
-                    // toast.configure();
+                // strip empty gender so backend validation doesn't reject it
+                if (!data.gender) delete data.gender;
 
+                if (editable === true) {
                     data["categoryId"] = categoryRowData;
-                    data["icon"] = iconFileData;
-                    data["thumbnail"] = thumbnailFileData;
+                    data["icon"] = iconFileData || data.icon;
+                    data["thumbnail"] = thumbnailFileData || data.thumbnail;
 
                     const res = await dispatch(handlePatchRequest(data, "api/v1/category/", true, true));
-
                     if (res?.status === 200) {
                         await getCategoryData();
-
                         formik.resetForm();
                         onHide();
                     }
                 } else {
                     data["icon"] = iconFileData;
                     data["thumbnail"] = thumbnailFileData;
-                    //toast.configure();
-                    data["categoryId"] = categoryRowData;
                     const res = await dispatch(handlePostRequest(data, "api/v1/category/", true, true));
                     if (res?.status === 200) {
                         await getCategoryData();
                         formik.resetForm();
-
                         onHide();
                     }
                 }
@@ -172,6 +175,36 @@ const AddEditCategory = ({ getCategoryData, onHide, editable, categoryRowData })
                                 <AddEditImage handleImages={handleThumbnailImages} editable={editable} EditIconImage={formik?.values.thumbnail} />
                             </div>
                         </div>
+                        <div className="col-12 md:col-6 lg:col-6 xl:col-6">
+                            <div className="flex flex-column">
+                                <label className="mb-2">Gender</label>
+                                <Dropdown
+                                    id="gender"
+                                    name="gender"
+                                    value={formik.values.gender}
+                                    options={GENDER_OPTIONS}
+                                    onChange={(e) => formik.setFieldValue("gender", e.value)}
+                                    placeholder="Select Gender"
+                                    showClear
+                                    className="w-full inputClass"
+                                />
+                            </div>
+                        </div>
+
+                        <div className="col-12 md:col-6 lg:col-6 xl:col-6">
+                            <div className="flex flex-column justify-content-center" style={{ paddingTop: "1.8rem" }}>
+                                <div className="flex align-items-center gap-2">
+                                    <Checkbox
+                                        inputId="isFeatured"
+                                        name="isFeatured"
+                                        checked={formik.values.isFeatured}
+                                        onChange={(e) => formik.setFieldValue("isFeatured", e.checked)}
+                                    />
+                                    <label htmlFor="isFeatured" className="ml-2 cursor-pointer">Featured Category</label>
+                                </div>
+                            </div>
+                        </div>
+
                         <div className="col-12 md:col-12 lg:col-12 xl:col-12">
                             <div className="flex flex-column">
                                 <label className="mb-2">Description</label>

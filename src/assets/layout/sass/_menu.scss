@@ -1,36 +1,45 @@
 :root {
-    --sidebar-bgone     : #1cb4b5;
-    --sidebar-text-color: #c3ebeb;
-    --Topbar-bg         : #fdfdfd;
-    --Content-bg        : #fefdfb;
-    --input-brdr        : #bee9e9;
-    --tab-0             : #0db2c5;
-    --tab-one           : #6ec753;
-    --tab-Two           : #e4c048;
-    --tab-Thre          : #b66fef;
-    --heading-text      : #395864;
-    --text-color        : #a6a6a6;
-    --red-clr           : #ed1b24;
-    --tab-Index         : #153947;
-    --table-header      : #eef8f9;
-    --modal-header      : #1bb4b4;
-    --modal-bg          : #f9ffff;
-    --tab-text-color    : #187e84;
-    --tab-0-iconbg      : #21bcd0;
-    --tab-1-iconbg      : #9adc84;
-    --tab-2-iconbg      : #e6cc74;
-    --tab-3-iconbg      : #c088ed;
+    /* BrandIQ: deep navy sidebar, warm light content, indigo accent */
+    --sidebar-bgone     : #1e2642;
+    --sidebar-text-color: #c8d0e7;
+    --Topbar-bg         : #fafbfc;
+    --Content-bg        : #f4f5f7;
+    --input-brdr        : #d3d6de;
 
+    /* Status and tile backgrounds (soft monochrome variants) */
+    --tab-0             : #2b2f36;
+    --tab-one           : #444955;
+    --tab-Two           : #5a606e;
+    --tab-Thre          : #7a808f;
 
+    --heading-text      : #202124;
+    --text-color        : #5f6368;
+    --red-clr           : #e53935;
 
+    /* Sidebar active indicator + table headers */
+    --tab-Index         : #e4e7ee;
+    --table-header      : #edeff3;
+
+    /* Modal surfaces */
+    --modal-header      : #181a1f;
+    --modal-bg          : #ffffff;
+
+    /* Tab/icon text colors */
+    --tab-text-color    : #202124;
+    --tab-0-iconbg      : #30333a;
+    --tab-1-iconbg      : #4b505b;
+    --tab-2-iconbg      : #676c78;
+    --tab-3-iconbg      : #8b909c;
 }
 
 .layout-sidebar {
     position                  : fixed;
-    width                     : 235px;
+    width                     : 260px;
+    min-width                 : 260px;
     height                    : calc(100vh - 3.4rem);
     z-index                   : 999;
     overflow-y                : auto;
+    overflow-x                : visible;
     -webkit-user-select       : none;
     user-select               : none;
     top                       : 3.6rem;
@@ -66,6 +75,9 @@
             font-weight   : 600;
             margin-bottom : .5rem;
             font-size     : .875rem;
+            overflow      : visible;
+            white-space   : normal;
+            word-break    : break-word;
         }
 
         a {
@@ -73,38 +85,43 @@
             text-decoration : none;
             display         : flex;
             align-items     : center;
-            color           : var(--Content-bg);
-            transition      : color $transitionDuration;
-            // border-radius: $borderRadius;
+            color           : var(--sidebar-text-color);
+            transition      : color 0.15s ease, background 0.15s ease, border-left 0.15s ease;
             padding         : .75rem 1rem;
-            transition      : background-color .15s;
             font-size       : 12px;
             font-weight     : 300;
+            overflow        : visible;
+            min-width       : 0;
 
             span {
-                margin-left: 0.5rem;
+                margin-left : 0.5rem;
+                flex        : 1;
+                min-width   : 0;
+                overflow    : visible;
+                white-space : normal;
+                word-break  : break-word;
             }
 
             .menuitem-toggle-icon {
                 margin-left: auto;
             }
 
-            // &:focus {
-            //     @include focused-inset();
-            // }
-
             &:hover {
-                font-weight     : 600;
-                color           : var(--sidebar-bgone);
-                background-color: var(--table-header);
-                border-left     : 5px solid var(--tab-Index);
+                font-weight      : 600;
+                color            : #a5b4fc;
+                background       : rgba(165, 180, 252, 0.10);
+                border-left      : 3px solid #a5b4fc;
+                padding-left     : calc(1rem - 3px);
+                border-radius    : 0 8px 8px 0;
             }
 
             &.router-link-exact-active {
-                font-weight     : 600;
-                color           : var(--sidebar-bgone);
-                background-color: var(--table-header);
-                border-left     : 5px solid var(--tab-Index);
+                font-weight      : 700;
+                color            : #ffffff;
+                background       : rgba(79, 110, 247, 0.25);
+                border-left      : 3px solid #a5b4fc;
+                padding-left     : calc(1rem - 3px);
+                border-radius    : 0 8px 8px 0;
             }
 
             .p-badge {

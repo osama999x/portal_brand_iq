@@ -29,49 +29,37 @@ const Dashboard = (props) => {
 
 
     const getlinedata = async () => {
-
-        const res = await handleGetRequest("api/v1/order/hotSellingProducts", false, true)
-            .then(res => {
-                let lables = res && res.map((item) => `${item.productName}`);
-                let values = res && res.map((item) => item.count);
-console.log(values,'values')
-                let data = {
-                    labels:
-                        lables,
-                    datasets: [
-                        {
-                            label: 'Sold',
-                            data: values,
-                            fill: false,
-                            borderColor: '#42A5F5',
-                            tension: .4
-                        }
-                    ]
-                };
-                setLineData(data);
-
+        try {
+            const res = await handleGetRequest("api/v1/order/hotSellingProducts", false, true);
+            // API returns { success: false, message: "..." } when none found, or array of { productName, count }
+            if (Array.isArray(res) && res.length > 0) {
+                const labels = res.map((item) => `${item.productName || ''}`);
+                const values = res.map((item) => item.count ?? 0);
+                setLineData({
+                    labels,
+                    datasets: [{ label: 'Sold', data: values, fill: false, borderColor: '#4f6ef7', backgroundColor: 'rgba(79,110,247,0.1)', tension: 0.4 }]
+                });
                 setDate(res);
-
-                // setMonth(res);
-            })
-
-        if (res === 200) {
-            setLineData(res?.data?.data);
-        };
-    }
+            } else {
+                setLineData({ labels: [], datasets: [{ label: 'Sold', data: [], fill: false, borderColor: '#4f6ef7', backgroundColor: 'rgba(79,110,247,0.1)', tension: 0.4 }] });
+            }
+        } catch (e) {
+            setLineData({ labels: [], datasets: [{ label: 'Sold', data: [], fill: false, borderColor: '#4f6ef7', backgroundColor: 'rgba(79,110,247,0.1)', tension: 0.4 }] });
+        }
+    };
     useEffect(() => {
         getlinedata();
     }, []);
 
 
 
-    // Get Line chart Data
+    // GET /api/v1/order/dashboard returns data: [{ status, order }, ..., { totalOrder }]
     const getOrderData = async () => {
-        const res = await handleGetRequest("api/v1/order/dashboard", false, true);
-        console.log("reseee", res)
-        setOrderData(res);
-        if (res?.status === 200) {
-            setOrderData(res);
+        try {
+            const res = await handleGetRequest("api/v1/order/dashboard", false, true);
+            setOrderData(Array.isArray(res) ? res : []);
+        } catch (e) {
+            setOrderData([]);
         }
     };
     useEffect(() => {
@@ -86,28 +74,24 @@ console.log(values,'values')
 
         return date.toLocaleString('en-US', { month: 'long' });
     }
-    // integrate delivered chart
+    // GET /api/v1/order/orderReport returns data: [{ status, total }, ..., { totalOrder }]
     const getDeliverdData = async () => {
-        const res = await handleGetRequest("api/v1/order/orderReport", false, true);
-        console.log("data", res)
-        setNewYear(res);
-        let lable = res && res.map((item) => (item?.year && `${getMonthName(item.month)}/${item.year}`));
-
-        //let year = res.map((item)=>item.year);
-        // /${item.year}`);
-        let value = res.map((item) => item.totalDelivered);
-        //let totaldiv = res.map((item) => item.totalDelivered);
-        let data = {
-            labels: lable,
-            datasets: [
-                {
-                    label: 'Total Delivered',
-                    backgroundColor: '#42A5F5',
-                    data: value,
-                },
-            ]
-        };
-        setDeliverdData(data);
+        try {
+            const res = await handleGetRequest("api/v1/order/orderReport", false, true);
+            setNewYear(Array.isArray(res) ? res : []);
+            if (!Array.isArray(res) || res.length === 0) {
+                setDeliverdData({ labels: [], datasets: [{ label: 'Orders', backgroundColor: '#4f6ef7', borderRadius: 6, data: [] }] });
+                return;
+            }
+            const labels = res.map((item) => (item.status != null ? item.status : 'Total Order'));
+            const values = res.map((item) => item.total != null ? item.total : item.totalOrder ?? 0);
+            setDeliverdData({
+                labels,
+                datasets: [{ label: 'Orders', backgroundColor: '#4f6ef7', borderRadius: 6, data: values }]
+            });
+        } catch (e) {
+            setDeliverdData({ labels: [], datasets: [{ label: 'Orders', backgroundColor: '#4f6ef7', borderRadius: 6, data: [] }] });
+        }
     };
     useEffect(() => {
         getDeliverdData();
@@ -186,93 +170,55 @@ console.log(values,'values')
 
 
             <div className="grid">
-                {orderData && orderData.map((item) => (
-                    <div className="col-12 lg:col-6 xl:col-3">
-                        <div className={`card mb-0 tab_${item?.status} m_height`}>
+                {orderData && orderData.map((item, index) => (
+                    <div key={item?.status ?? `total-${index}`} className="col-12 lg:col-6 xl:col-3">
+                        <div className={`card mb-0 tab_${item?.status ?? 'total'} m_height rounded-2xl transition-shadow duration-300 hover:shadow-lg`}>
                             <div className="flex justify-content-between mb-3">
                                 <div>
-                                    <span className="block text-500 font-medium mb-3 tab_text">{item?.status != undefined ? item?.status : "Total Order"}</span>
-                                    <div className="text-900 font-medium text-xl numbr_size">{item?.order != undefined ? item?.order : item.totalOrder}</div>
+                                    <span className="block text-500 font-medium mb-3 tab_text tracking-wider">{item?.status != null ? item.status : "Total Order"}</span>
+                                    <div className="text-900 font-medium text-xl numbr_size font-bold">{item?.order != null ? item.order : item?.totalOrder ?? 0}</div>
                                 </div>
-                                <div className={`flex align-items-center justify-content-center bg-blue-100 border-round icon_style_${item?.status} icon_size`}>
-                                    <i className="pi pi-shopping-cart text-white-500 text-xl" />
+                                <div className={`flex align-items-center justify-content-center border-round icon_style_${item?.status ?? 'total'} icon_size`}>
+                                    <i className="pi pi-shopping-cart text-xl" />
                                 </div>
                             </div>
                         </div>
                     </div>
-
-                ))
-
-                }
-                {/* <div className="col-12 lg:col-6 xl:col-3">
-                    <div className="card mb-0 tab_ m_height">
-                        <div className="flex justify-content-between mb-3">
-                            <div>
-                                <span className="block text-500 font-medium mb-3 tab_text">{item?.status}</span>
-                                <div className="text-900 font-medium text-xl numbr_size">{item?.order}</div>
-                            </div>
-                            <div className="flex align-items-center justify-content-center bg-blue-100 border-round icon_style icon_size">
-                                <i className="pi pi-shopping-cart text-white-500 text-xl" />
-                            </div>
-                        </div>
-                    </div>
-                </div> */}
-
+                ))}
             </div>
-
 
             <div className="grid mt-5">
                 <div className="col-12 lg:col-6 xl:col-6">
-                    <div className="card">
+                    <div className="card rounded-2xl shadow-sm hover:shadow-md transition-shadow duration-300">
                         <div className="mb-3">
                             <div className="grid">
                                 <div className="col-12 md:col-7">
-                                    <span className="block mb-3 mt-3 label_text">Orders</span>
+                                    <span className="block mb-3 mt-3 label_text text-base font-semibold">Orders</span>
                                 </div>
                                 <div className="col-12 md:col-5">
-                                    {/* <Dropdown
-                                        className="Dropdown_class"
-                                        value={selectedYear}
-                                        options={newYear}
-                                        onChange={onYearChange}
-                                        optionLabel="year"
-                                        placeholder="Select Year"
-                                    /> */}
                                 </div>
                             </div>
                         </div>
-                        <Chart type="bar" data={deliverddata} options={deliverddata} />
+                        <Chart type="bar" data={deliverddata || { labels: [], datasets: [] }} options={{ responsive: true, maintainAspectRatio: false }} />
                     </div>
                 </div>
 
                 <div className="col-12 lg:col-6 xl:col-6">
-                    <div className="card">
-                        <div className=" mb-3">
+                    <div className="card rounded-2xl shadow-sm hover:shadow-md transition-shadow duration-300">
+                        <div className="mb-3">
                             <div className="grid">
-
                                 <div className="col-12 md:col-7">
                                     <div>
-                                        <span className="block mb-3 mt-3 label_text">Top Selling Products</span>
+                                        <span className="block mb-3 mt-3 label_text text-base font-semibold">Top Selling Products</span>
                                     </div>
                                 </div>
-
                                 <div className="col-12 md:col-5">
                                     <div className="flex align-items-center justify-content-center">
-                                        {/* <Dropdown
-                                            className="Dropdown_class"
-                                            value={selectedDate}
-                                            options={date}
-                                            onChange={onDateChange}
-                                            optionLabel="dateofMonth"
-                                            placeholder="Select Date"
-                                        /> */}
-
                                     </div>
                                 </div>
                             </div>
                         </div>
-                        <Chart type="line" data={lineData} options={lineData} />
-
+                        <Chart type="line" data={lineData || { labels: [], datasets: [] }} options={{ responsive: true, maintainAspectRatio: false }} />
                     </div>
                 </div>
             </div>

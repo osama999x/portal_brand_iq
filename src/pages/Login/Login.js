@@ -3,7 +3,7 @@ import { Button } from 'primereact/button';
 import { InputText } from 'primereact/inputtext';
 import { useFormik } from 'formik';
 import "./login.css";
-import logo from "../../../src/assets/Logo.svg";
+import logo from "../../../src/assets/brandiq-logo.svg";
 import { useHistory } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { LOGIN_SUCCESS } from "../../redux/slices/authenticationSlice";
@@ -30,8 +30,8 @@ const Login = (props) => {
     const formik = useFormik({
         validationSchema: validationSchema,
         initialValues: {
-            email: '',
-            password: ''
+            email: 'admin@gmail.com',
+            password: 'Login@7860'
         },
         onSubmit: async (data) => {
             setloadingIcon("pi pi-spin pi-spinner");
@@ -41,7 +41,9 @@ const Login = (props) => {
 
             if (response?.data?.data?.email === data["email"]) {
                 localStorage.setItem("login", true);
-                getPermissionById(response?.data?.data?.role);
+                const role = response?.data?.data?.role;
+                const roleId = typeof role === "object" && role?._id ? role._id : role;
+                getPermissionById(roleId);
                 history.push("/");
             } else {
                 setLoginFailed(true);
@@ -54,9 +56,11 @@ const Login = (props) => {
         }
     });
 
-    const getPermissionById = async (data) => {
-        const response = await handleGetRequest(`api/v1/rolePermission/getByRole?roleId=${data}`, true);
+    const getPermissionById = async (roleId) => {
+        if (!roleId) return;
+        const response = await handleGetRequest(`api/v1/rolePermission/getByRole?roleId=${roleId}`, true);
 
+        if (!response?.modules) return;
         localStorage.setItem("permissions", JSON.stringify(response));
         const obj = {
             permissions: response,
@@ -77,67 +81,67 @@ const Login = (props) => {
 
     return (
         <div className="bg_body">
-            <div className="header__login">
-                <h2>Welcome to</h2>
-                <h3>M-Safa</h3>
+            {/* Left brand panel */}
+            <div className="login__brand-panel">
+                <img src={logo} alt="BrandIQ" className="login__brand-logo" />
+                <h1 className="login__brand-title">BrandIQ</h1>
+                <p className="login__brand-subtitle">
+                    Your intelligent brand management platform. Manage products, orders, and customers all in one place.
+                </p>
+                <div className="login__brand-dots">
+                    <span></span><span></span><span></span>
+                </div>
             </div>
-            <div className="login_container">
-                <div className="row d-flex justify-content-center">
-                    <div className="col-md-4">
-                        <form className="form-group" onSubmit={formik.handleSubmit} >
-                            <div className="form_logo">
-                                <img src={logo} alt="Zindigi" />
+
+            {/* Right form panel */}
+            <div className="login__form-panel">
+                <div className="login_container">
+                    <h2 className="login__form-heading">Welcome back</h2>
+                    <p className="login__form-sub">Sign in to your BrandIQ account</p>
+
+                    <form onSubmit={formik.handleSubmit}>
+                        <div className="Form-inputfield">
+                            <div>
+                                <label className="form-control" htmlFor="email">Email</label>
+                                <InputText
+                                    name="email"
+                                    id="email"
+                                    placeholder="Enter your email"
+                                    value={formik.values.email}
+                                    onChange={formik.handleChange}
+                                    autoFocus
+                                />
+                                {getFormErrorMessage('email')}
                             </div>
-                            <div className="Form-inputfield">
-                                <div>
-                                    <label className="form-control" htmlFor="email">Email</label>
-                                    <InputText
-                                        name="email"
-                                        id="email"
-                                        placeholder="Enter Email"
-                                        value={formik.values.email}
-                                        onChange={formik.handleChange}
-                                        autoFocus
-                                    />
-                                    {getFormErrorMessage('email')}
-                                </div>
-                                <div className="pt-2">
-                                    <label className="form-control" htmlFor="password">Password</label>
-                                    <Password
-                                        type="password"
-                                        name="password"
-                                        id="password"
-                                        placeholder="Enter Password"
-                                        value={formik.values.password}
-                                        onChange={formik.handleChange}
-                                        toggleMask
-                                        feedback={false}
-                                    />
-                                    {getFormErrorMessage('password')}
-                                </div>
+                            <div className="pt-2">
+                                <label className="form-control" htmlFor="password">Password</label>
+                                <Password
+                                    type="password"
+                                    name="password"
+                                    id="password"
+                                    placeholder="Enter your password"
+                                    value={formik.values.password}
+                                    onChange={formik.handleChange}
+                                    toggleMask
+                                    feedback={false}
+                                />
+                                {getFormErrorMessage('password')}
                             </div>
-                            <div className="form-check pt-2 text-right">
-                                <span
-                                    className="forgot_password"
-                                    onClick={forgetpassword1}
-                                >
-                                    Forgot password ?
-                                </span>
-                            </div>
-                            <div className="btn_class">
-                                <div className="p-mt-2">
-                                    <Button
-                                        type="submit"
-                                        className="Login_button"
-                                        label="LOGIN"
-                                        icon={loadingIcon || ""}
-                                        iconPos="right"
-                                        disabled={loading || loginFailed}
-                                    />
-                                </div>
-                            </div>
-                        </form>
-                    </div>
+                        </div>
+
+                        <span className="forgot_password" onClick={forgetpassword1}>
+                            Forgot password?
+                        </span>
+
+                        <Button
+                            type="submit"
+                            className="Login_button"
+                            label="Sign In"
+                            icon={loadingIcon || ""}
+                            iconPos="right"
+                            disabled={loading || loginFailed}
+                        />
+                    </form>
                 </div>
             </div>
         </div>

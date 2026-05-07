@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Link, NavLink } from 'react-router-dom';
 import classNames from 'classnames';
 import { Avatar } from 'primereact/avatar';
-import logo from "./assets/Logo.svg";
+import logo from "./assets/brandiq-logo.svg";
 export const AppTopbar = (props) => {
     const handleLogout = async () => {
         // const res = await dispatch(handlePostRequest({ token }, "logout", true, true));
@@ -41,7 +41,7 @@ export const AppTopbar = (props) => {
 
         <div className="layout-topbar">
             <Link to="/" className="layout-topbar-logo">
-            <img src={props.layoutColorMode === 'light' ? logo : logo} alt="logo" />
+                <img src={logo} alt="BrandIQ logo" />
             </Link>
 
             <button type="button" className="p-link  layout-menu-button layout-topbar-button" onClick={props.onToggleMenuClick}>

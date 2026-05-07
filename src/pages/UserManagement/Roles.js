@@ -152,17 +152,30 @@ const Roles = () => {
 
             <div className="grid">
                 <div className="col-12  md:col-12 lg:col-12 xl:col-12">
-                    <div className="text-right">
-                        <span className="p-input-icon-right mr-3">
-                            <input type="text" placeholder="Search" onInput={(e) => setGlobalFilter(e.target.value)} className="p-inputtext p-component p-filled" />
-                            <i className="pi pi-search"></i>
-                        </span>
-                        <button className="p-button p-button-primary p-component" onClick={() => setVisibleEdit(true)}>
-                            <span className="p-button-icon p-c p-button-icon-left pi pi-plus"></span>
-                            <span className="p-button-label p-c">Add New</span>
-                            <span className="p-ink"></span>
-                        </button>
+                    <div className="user-mgmt-toolbar">
+                        <div className="user-mgmt-toolbar__title">
+                            <h4 className="m-0">Roles</h4>
+                            <small className="text-600">Create roles used for permissions</small>
+                        </div>
 
+                        <div className="user-mgmt-toolbar__actions">
+                            <span className="p-input-icon-right mr-3 user-mgmt-toolbar__search">
+                                <input
+                                    type="text"
+                                    placeholder="Search roles..."
+                                    onInput={(e) => setGlobalFilter(e.target.value)}
+                                    className="p-inputtext p-component p-filled"
+                                />
+                                <i className="pi pi-search"></i>
+                            </span>
+                            <Button
+                                type="button"
+                                label="Add New"
+                                icon="pi pi-plus"
+                                className="Savebtn"
+                                onClick={() => setVisibleEdit(true)}
+                            />
+                        </div>
                     </div>
                 </div>
                 <div className="col-12 md:col-12 lg:col-12 xl:col-12">

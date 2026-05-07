@@ -6,7 +6,7 @@ import { InputText } from 'primereact/inputtext';
 // import { Password } from 'primereact/password';
 import { useFormik } from 'formik';
 import "./login.css";
-import logo from "../../assets/Logo.svg";
+import logo from "../../assets/brandiq-logo.svg";
 import { useHistory, useParams } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { handlePostRequest } from '../../service/PostTemplate';
@@ -93,7 +93,7 @@ const OTPView = () => {
         <div className="bg_body">
             <div className="header__login">
                 <h2>Welcome to</h2>
-                <h3>M-Safa</h3>
+                <h3>BrandIQ</h3>
             </div>
             <div className="login_container">
                 <div className="row d-flex justify-content-center">

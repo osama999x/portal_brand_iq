@@ -35,6 +35,7 @@ import OrderManagement from "./pages/OrderManagement/OrderManagement";
 import AddEditOrderManagement from "./pages/OrderManagement/AddEditOrderManagement";
 import AddEditReturn from "./pages/ReturnPolicy/AddEditReturn";
 import UploadBulkProducts from "./pages/UploadBulkProducts/UploadBulkProducts";
+import HomeHero from "./pages/HomeHero/Index";
 import "react-toastify/dist/ReactToastify.css";
 import PrimeReact from "primereact/api";
 import { Tooltip } from "primereact/tooltip";
@@ -59,7 +60,6 @@ import AddEditPromtionManagement from "./pages/PromotionManagement/AddEditPromot
 // import ResetPassword from "./pages/ResetPassword/ResetPassword"
 import CampaignManagement from "./pages/PromotionManagement/CampaignManagement";
 import ReturnManage from "./pages/ReturnPolicy/ManageReturn";
-import SubCategoryManagement from "./pages/SaleManagement/subCategoryManagement/subCategoryManagement";
 import ReviewsDetail from "./pages/ReviewsManagement/ReviewsDetail";
 import AssignRole from "./pages/AssignRole/AssignRole";
 import axios from "axios";
@@ -93,10 +93,11 @@ const App = () => {
     ]);
 
     useEffect(() => {
-        if (authState?.permissions) {
+        const hasPermissions = authState?.permissions || (auth && localStorage.getItem("permissions"));
+        if (hasPermissions) {
             getPermissions();
         }
-    }, [authState?.permissions]);
+    }, [authState?.permissions, auth]);
 
     // const handleMenuItemClick = (item) => {
     //     if (item?.item?.label && item?.item?.icon) {
@@ -209,45 +210,40 @@ const App = () => {
     const getPermissions = async () => {
         const permissions = localStorage.getItem("permissions");
         if (permissions === null || permissions === undefined || permissions === "undefined") {
-            // console.log("sdda")
             return;
         }
 
-        // console.log("below")
-        // console.log("permissions: ", permissions)
-        const perms = JSON.parse(permissions && permissions);
+        const perms = JSON.parse(permissions);
 
-        let result =
-            perms?.modules &&
-            perms?.modules.map((item) => {
-                // console.log("UTREEEN", item)
-                return {
-                    label: item.module?.label,
-                    to: item?.module?.route,
-                    items: mapChilds(item.sub_Modules),
-                    icon: item?.module?.icon,
-                };
-            });
+        if (!perms?.modules?.length) {
+            return;
+        }
 
-        result = result.filter((item) => item.items.length === 0);
-        setDynamicMenu((prev) => {
-            return [
-                ...prev,
-                {
-                    items: result,
-                },
-            ];
+        const result = perms.modules.map((item) => {
+            const subItems = mapChilds(item.subModules);
+            const hasSubs = subItems.length > 0;
+            return {
+                label: item.module?.label,
+                to: item?.module?.route,
+                items: hasSubs ? subItems : [{ label: item.module?.label, to: item?.module?.route, icon: item?.module?.icon || "pi pi-fw pi-circle" }],
+                icon: item?.module?.icon || "pi pi-fw pi-circle",
+            };
         });
-        // console.log("result", result)
+
+        setDynamicMenu([
+            { items: [{ label: "Dashboard", icon: "pi pi-table", to: "/" }] },
+            { items: result },
+        ]);
     };
 
     const mapChilds = (list) => {
-        // console.log("list", list)
+        if (!list || !Array.isArray(list)) return [];
         return list.map((item) => {
+            const route = item.subModule?.route;
             return {
-                label: item.name,
-                route: item.route,
-                icon: item.icon,
+                label: item.subModule?.label,
+                to: route && !route.startsWith('/') ? `/${route}` : route,
+                icon: item.subModule?.icon || "pi pi-fw pi-circle",
             };
         });
     };
@@ -384,16 +380,23 @@ const App = () => {
                             <Switch>
                                 <Route exact path="/" render={() => <Dashboard />} />
                                 {/* <Route exact path="/login" render={() => <Login />} /> */}
-                                <Route exact path="/usermanagement" element={<UserMangement />} render={() => <UserMangement />} />
+                                <Route exact path="/usermanagement" render={() => <UserMangement />} />
+                                <Route exact path="/createuser" render={() => <UserMangement />} />
+                                <Route exact path="/createrole" render={() => <UserMangement />} />
+                                <Route exact path="/createrolepermission" render={() => <UserMangement />} />
                                 <Route exact path="/taxesmanagement" render={() => <TaxesManagement />} />
                                 <Route exact path="/salemanagement" render={() => <SaleManagement />} />
-                                <Route exact path="/subcategorymanage" render={() => <SubCategoryManagement />} />
+                                <Route exact path="/categorymanagement" render={() => <SaleManagement />} />
+                                <Route exact path="/productmanagement" render={() => <SaleManagement />} />
+                                <Route exact path="/subcategory" render={() => <SaleManagement />} />
                                 <Route exact path="/discountmanage" render={() => <DiscountManage />} />
                                 <Route exact path="/promotionmanagement" render={() => <CampaignManagement />} />
                                 <Route exact path="/promotiondetail" render={() => <AddEditCampaign />} />
                                 <Route exact path="/managepromotion/:id" render={() => <PromotionManagment />} />
                                 <Route exact path="/managepromotiondetail" render={() => <AddEditPromtionManagement />} />
                                 <Route exact path="/customermanagement" render={() => <CustomerManagement />} />
+                                <Route exact path="/pointmanagement" render={() => <CustomerManagement />} />
+                                <Route exact path="/couponmanagement" render={() => <CustomerManagement />} />
                                 <Route exact path="/customerdetails" render={() => <CustomerDetails />} />
                                 <Route exact path="/shipmentmanagement" render={() => <ShipmentManagement />} />
                                 {/* <Route exact path="/deliverymanagement" render={() => <DeliveryManagement />} /> */}
@@ -411,6 +414,7 @@ const App = () => {
                                 {/* <Route exact path="/productsupload" render={() => <UploadBulkProducts />} /> */}
                                 <Route exact path="/feedback" render={() => <Feedback />} />
                                 <Route exact path="/customercare" render={() => <CustomerCare />} />
+                                <Route exact path="/homehero" render={() => <HomeHero />} />
 
                                 {/* <Route exact path="/assignrole" render={() => <AssignRole />} /> */}
                             </Switch>

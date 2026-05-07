@@ -17,9 +17,7 @@
     opacity: 0.4;
 }
 .p-button{
-
-    background   :  #1cb4b5;
-
-    border       : 1px solid #1cb4b5;
-
+    background   :  #111111;
+    border       : 1px solid #111111;
+    color        : #ffffff;
 }

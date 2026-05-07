@@ -2,14 +2,23 @@
 <html lang="en">
     <head>
         <meta charset="utf-8" />
-        <title>M-Safa</title>
+        <title>BrandIQ</title>
 
         <meta http-equiv="X-UA-Compatible" content="IE=edge" />
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
-        <link rel="icon" type="image/x-icon" href="/assets/layout/images/Logo.svg" />
+        <link rel="icon" type="image/svg+xml" href="/assets/brandiq-logo.svg" />
         <link id="theme-link" rel="stylesheet" href="%PUBLIC_URL%/assets/themes/lara-light-indigo/theme.css">
+        <!-- polyfill: Tailwind CDN uses process.env internally -->
+        <script>window.process = window.process || { env: { NODE_ENV: "production" } };</script>
+        <!-- Tailwind CSS Play CDN -->
+        <script src="https://cdn.tailwindcss.com"></script>
+        <script>
+            tailwind.config = {
+                corePlugins: { preflight: false }
+            }
+        </script>
     </head>
 
     <body>

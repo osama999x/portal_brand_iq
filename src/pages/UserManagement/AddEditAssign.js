@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Dropdown } from 'primereact/dropdown';
 import * as Yup from "yup";
 import { useFormik } from "formik";
@@ -10,7 +10,7 @@ import { Button } from 'primereact/button';
 // import { handleGetRequest } from '../../service/GetTemplate';
 //import { handleDecryptData } from '../../services/Decrypt';
 import { useDispatch } from 'react-redux';
-import { TreeSelect } from 'primereact/treeselect';
+import { Tree } from 'primereact/tree';
 import { handlePostRequest } from '../../service/PostTemplate';
 import Roles from './Roles';
 import { handleGetRequest } from '../../service/GetTemplate';
@@ -301,70 +301,82 @@ const AssignRole = ({ UsersRowData, editable, getPremissionData, handleSelectedU
 
     console.log("formik.values.roleId", formik.values.roleId)
 
+    const selectedCount = selectedRolePermissions ? Object.keys(selectedRolePermissions).length : 0;
+
     return (
 
         <form onSubmit={formik.handleSubmit}>
-            <div className="card">
-
-                <h5>Select  User Role and assign permissions</h5>
-                <hr />
-
-                <div className='mt-5'>
-
-                    <div className="p-fluid formgrid grid">
-
-                        <div className="col-4 md:col-4 lg:col-4 xl:col-4">
-                            <div className="flex flex-column">
-                                <label className="mb-2">Role</label>
-                                <Dropdown
-                                    id="roleId"
-                                    placeholder="Select Role"
-                                    options={userRoles}
-                                    optionLabel="name"
-                                    name="roleId"
-                                    optionValue="_id"
-                                    value={formik.values.roleId}
-                                    onChange={formik.handleChange}
-                                    //onChange={(e) => { formik.handleChange(e); handleSelectedUserType(e.target.value) }}
-                                    className={classNames({ "p-invalid": isFormFieldValid("roleId") }, "w-full md:w-10 inputClass")}
-
-                                />
-                                {getFormErrorMessage("roleId")}
-                            </div>
-                        </div>
-
-
-
-
-
-                        <div className="col-4 md:col-4 lg:col-4 xl:col-4">
-                            <div className="flex flex-column">
-                                <label className="mb-2">Role Permissions</label>
-                            </div>
-                            <div style={{ overflowY: 'scroll' }}>
-                                <TreeSelect
-                                    //value={selectedRolePermissions}
-                                    value={selectedRolePermissions}
-                                    options={treeOptions}
-                                    selectionMode="checkbox"
-                                    onChange={(e) => setSelectedRolePermissions(e.value)}
-                                    //onChange={(e) => setTreeData(e.value)}
-                                    display="chip" placeholder="Select Items"
-                                    metaKeySelection={false}
-                                    autoScrollToTopOnFilter={false}
-                                />
-                            </div>
-                        </div>
-
-
-                        <div className="field col-12 md:col-2 flex align-items-center mb-0">
-                            <Button type='submit' label="Update" aria-label="Save" className="Save__Button" />
-                        </div>
-
+            <div className="user-mgmt-permissions card">
+                <div className="um-perm__header">
+                    <div className="um-perm__title">
+                        <h3 className="m-0">Assign Permissions</h3>
+                        <small className="text-600">
+                            Select a role, then pick the modules/permissions it can access.
+                        </small>
                     </div>
 
+                    <Button
+                        type="submit"
+                        label={permissionExist ? "Update" : "Save"}
+                        aria-label="Save"
+                        className="Save__Button um-perm__cta"
+                        disabled={!formik.values.roleId}
+                    />
                 </div>
 
+                <div className="um-perm__grid">
+                    <div className="um-perm__panel um-perm__panel--left">
+                        <div className="um-perm__field">
+                            <label className="mb-2">Role</label>
+                            <Dropdown
+                                id="roleId"
+                                placeholder="Select Role"
+                                options={userRoles}
+                                optionLabel="name"
+                                name="roleId"
+                                optionValue="_id"
+                                value={formik.values.roleId}
+                                onChange={formik.handleChange}
+                                className={classNames(
+                                    { "p-invalid": isFormFieldValid("roleId") },
+                                    "w-full inputClass"
+                                )}
+                            />
+                            {getFormErrorMessage("roleId")}
+                        </div>
+
+                        <div className="um-perm__stats">
+                            <div className="um-perm__stat">
+                                <span className="um-perm__statLabel">Selected</span>
+                                <span className="um-perm__statValue">{selectedCount}</span>
+                            </div>
+                            <div className="um-perm__stat">
+                                <span className="um-perm__statLabel">Mode</span>
+                                <span className="um-perm__statValue">{permissionExist ? "Update" : "Create"}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="um-perm__panel um-perm__panel--right">
+                        <div className="um-perm__field">
+                            <label className="mb-2">Role Permissions</label>
+                            <div className="um-perm__picker">
+                                <Tree
+                                    value={treeOptions}
+                                    selectionMode="checkbox"
+                                    selectionKeys={selectedRolePermissions}
+                                    onSelectionChange={(e) => setSelectedRolePermissions(e.value)}
+                                    filter
+                                    filterMode="lenient"
+                                    className="um-perm__tree"
+                                />
+                            </div>
+                            <small className="text-600">
+                                Tip: expand a module and check the permissions you want to allow.
+                            </small>
+                        </div>
+                    </div>
+                </div>
             </div>
         </form>
     );
