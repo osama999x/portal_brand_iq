@@ -110,7 +110,6 @@ const App = () => {
     //     }
     // };
 
-    require("dotenv").config();
     PrimeReact.ripple = true;
 
     let menuClick = false;
