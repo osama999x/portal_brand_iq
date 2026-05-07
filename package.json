@@ -4,7 +4,7 @@
     "homepage": ".",
     "private": false,
     "engines": {
-        "node": "16.x"
+        "node": "24.x"
     },
     "repository": {
         "type": "git",
@@ -39,7 +39,7 @@
         "react-quill": "^2.0.0",
         "react-redux": "^7.2.4",
         "react-router-dom": "^5.2.0",
-        "react-scripts": "3.4.1",
+        "react-scripts": "^5.0.1",
         "react-toastify": "^8.2.0",
         "react-transition-group": "^4.4.1",
         "regex": "^0.1.1",
@@ -49,14 +49,12 @@
         "yup": "^0.32.11"
     },
     "scripts": {
-        "start": "cross-env NODE_OPTIONS=--openssl-legacy-provider react-scripts start",
-        "build": "cross-env NODE_OPTIONS=--openssl-legacy-provider react-scripts build",
+        "start": "react-scripts start",
+        "build": "react-scripts build",
         "test": "react-scripts test",
         "eject": "react-scripts eject"
     },
-    "devDependencies": {
-        "cross-env": "^7.0.3"
-    },
+    "devDependencies": {},
     "eslintConfig": {
         "extends": [
             "react-app"
