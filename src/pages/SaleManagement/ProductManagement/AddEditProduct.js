@@ -141,26 +141,149 @@ const AddEditProduct = ({ getProductData, onHide, editable, productRowData }) =>
     }
 
 
-    var validationSchema = Yup.object().shape({
-        categoryId: Yup.mixed().required("This field is required"),
-        subcategoryId: Yup.mixed().required("This field is required"),
-        name: Yup.mixed().required("This field is required"),
-        title: Yup.mixed().required("This field is required"),
-        vendor: Yup.mixed().required("This field is required"),
-        description: Yup.mixed().required("This field is required"),
-        taxType: Yup.mixed().required("This field is required"),
-        metaDataString: Yup.mixed().required("This field is required"),
-        tags: Yup.mixed().required("This field is required"),
-        sku: ((!hasColors && !hasSizes) || (hasSizes && !hasColors)) ? Yup.string().required("This field is required").test('sku-test', 'SKU can contain only letters, numbers, "_" and "-".', function (value) { return /^[\w-_]+$/.test(value); }) : null,
-        actualPrice: !hasColors && !hasSizes ? Yup.number().required("This field is required").min(1, 'Minimum price is 1') : null,
+    const validationSchema = Yup.object().shape({
+        categoryId: Yup.string().required("Category is required"),
+        subcategoryId: Yup.string().required("Sub-Category is required"),
+        name: Yup.string().trim().min(3, "Product Name must be at least 3 characters").required("Product Name is required"),
+        title: Yup.string().trim().min(3, "Product Title must be at least 3 characters").required("Product Title is required"),
+        vendor: Yup.string().trim().required("Vendor is required"),
+        taxType: Yup.string().required("Tax Type is required"),
+        taxAmount: Yup.number()
+            .typeError("Tax Amount must be a number")
+            .min(0, "Tax Amount cannot be negative")
+            .required("Tax Amount is required"),
+        metaDataString: Yup.array()
+            .of(Yup.string().trim().min(1))
+            .min(1, "Meta Data is required (add at least one value)")
+            .required("Meta Data is required"),
+        tags: Yup.string().trim().required("Tags are required"),
+        metaDescription: Yup.string().trim().required("Meta Description is required"),
+        description: Yup.string().trim().required("Description is required"),
+        longDescription: Yup.string().trim().required("Long Description is required"),
+        sizeGuide: Yup.string().trim().required("Size Guide is required"),
+        sizeFit: Yup.string().trim().required("Size & Fit is required"),
+        deliveryReturns: Yup.string().trim().required("Delivery & Returns is required"),
+        sku: ((!hasColors && !hasSizes) || (hasSizes && !hasColors))
+            ? Yup.string()
+                .trim()
+                .required("Product SKU is required")
+                .test("sku-test", 'SKU can contain only letters, numbers, "_" and "-".', (value) => /^[\w-_]+$/.test(value || ""))
+            : Yup.string().nullable(),
+        actualPrice: !hasColors && !hasSizes
+            ? Yup.number()
+                .typeError("Actual Price must be a number")
+                .min(1, "Actual Price must be at least 1")
+                .required("Actual Price is required")
+            : Yup.number().nullable(),
         // actualPrice: Yup.number()
         //     .test('len', 'Actual Price must not exceed 10 characters', val => val.toString().length <= 10)
         //     .required('Actual Price is required'),
         //discountedPrice: isDiscount === true ? Yup.number().required("Discount Price is required").min(1, 'Minimum discount is 1') : null,
-        quantity: !hasColors && !hasSizes ? Yup.number().required("Quantity is required is required").min(0, 'Minimum discount is 0') : null,
+        discountedPrice: Yup.number()
+            .transform((value, originalValue) => (String(originalValue).trim() === "" ? undefined : value))
+            .nullable()
+            .when("isDiscount", {
+                is: true,
+                then: (schema) =>
+                    schema
+                        .typeError("Discounted Price must be a number")
+                        .min(0, "Discounted Price cannot be negative")
+                        .test("disc-lte-actual", "Discounted Price must be less than or equal to Actual Price", function (value) {
+                            // only applies for "Simple" products (no variants)
+                            if (hasVariants || value == null) return true;
+                            const actual = Number(this.parent.actualPrice);
+                            if (!Number.isFinite(actual)) return true;
+                            return Number(value) <= actual;
+                        })
+                        .required("Discounted Price is required"),
+                otherwise: (schema) => schema.notRequired(),
+            }),
+        quantity: !hasColors && !hasSizes
+            ? Yup.number()
+                .typeError("Quantity must be a number")
+                .min(0, "Quantity cannot be negative")
+                .required("Quantity is required")
+            : Yup.number().nullable(),
 
 
     });
+
+    const isBlank = (v) => v === null || v === undefined || String(v).trim().length === 0;
+    const isValidSku = (v) => /^[\w-_]+$/.test(String(v || ""));
+    const toNum = (v) => (isBlank(v) ? NaN : Number(v));
+
+    const validateVariantStructures = () => {
+        // Return a single human-friendly message (field-by-field) if something is missing.
+        // This is needed because variants/sizes are not part of Formik values.
+
+        // Image validation (Create + Edit)
+        const hasAnyImages = allImages.length > 0 || oldImages.length > 0;
+        if (!hasAnyImages) return "Images are required (upload at least 1 image)";
+
+        if (!hasVariants) return null; // Simple product handled by Formik schema
+
+        if (hasVariants && variants.length === 0) {
+            return hasColors || hasSizes ? "Please add at least one variant" : "Wrong product type selection";
+        }
+
+        const skuSet = new Set();
+        for (let i = 0; i < variants.length; i++) {
+            const v = variants[i] || {};
+            const prefix = `Variant ${i + 1}`;
+
+            if (hasColors) {
+                if (isBlank(v.colorName)) return `${prefix}: Color Name is required`;
+                if (isBlank(v.colorHex)) return `${prefix}: Color is required`;
+            }
+
+            if (isBlank(v.sku)) return `${prefix}: SKU is required`;
+            if (!isValidSku(v.sku)) return `${prefix}: SKU can contain only letters, numbers, "_" and "-"`;
+            if (skuSet.has(v.sku)) return `${prefix}: SKU must be unique`;
+            skuSet.add(v.sku);
+
+            // Colors-only (no sizes): price/qty live on the variant itself
+            if (hasColors && !hasSizes) {
+                const ap = toNum(v.actualPrice);
+                if (!Number.isFinite(ap) || ap < 1) return `${prefix}: Actual Price must be at least 1`;
+
+                if (formik.values.isDiscount) {
+                    const dp = toNum(v.discountedPrice);
+                    if (!Number.isFinite(dp) || dp < 0) return `${prefix}: Discounted Price must be 0 or more`;
+                    if (dp > ap) return `${prefix}: Discounted Price must be ≤ Actual Price`;
+                }
+
+                const q = toNum(v.quantity);
+                if (!Number.isFinite(q) || q < 0) return `${prefix}: Quantity must be 0 or more`;
+            }
+
+            // Sizes-only and Colors+Sizes: validate sizes array
+            if (hasSizes) {
+                if (!Array.isArray(v.size) || v.size.length === 0) return `${prefix}: add at least one Size`;
+                const sizeNames = new Set();
+                for (let s = 0; s < v.size.length; s++) {
+                    const sz = v.size[s] || {};
+                    const sprefix = `${prefix} / Size ${s + 1}`;
+                    if (isBlank(sz.name)) return `${sprefix}: Size Name is required`;
+                    if (sizeNames.has(sz.name)) return `${prefix}: Size names must be unique`;
+                    sizeNames.add(sz.name);
+
+                    const ap = toNum(sz.actualPrice);
+                    if (!Number.isFinite(ap) || ap < 1) return `${sprefix}: Actual Price must be at least 1`;
+
+                    if (formik.values.isDiscount) {
+                        const dp = toNum(sz.discountedPrice);
+                        if (!Number.isFinite(dp) || dp < 0) return `${sprefix}: Discounted Price must be 0 or more`;
+                        if (dp > ap) return `${sprefix}: Discounted Price must be ≤ Actual Price`;
+                    }
+
+                    const q = toNum(sz.quantity);
+                    if (!Number.isFinite(q) || q < 0) return `${sprefix}: Quantity must be 0 or more`;
+                }
+            }
+        }
+
+        return null;
+    };
 
 
     const formik = useFormik({
@@ -178,7 +301,7 @@ const AddEditProduct = ({ getProductData, onHide, editable, productRowData }) =>
             deliveryReturns: "",
             vendor: "",
             thumbnail: "",
-            metaDataString: "",
+            metaDataString: [],
             metaDescription: "",
             sku: "",
             actualPrice: '',
@@ -253,6 +376,33 @@ const AddEditProduct = ({ getProductData, onHide, editable, productRowData }) =>
             }
         },
     });
+
+    const touchAllFields = () => {
+        const nextTouched = Object.keys(formik.values).reduce((acc, key) => {
+            acc[key] = true;
+            return acc;
+        }, {});
+        formik.setTouched(nextTouched, true);
+    };
+
+    const submitWithValidation = async (e) => {
+        e?.preventDefault?.();
+        const errors = await formik.validateForm();
+        touchAllFields();
+        if (errors && Object.keys(errors).length > 0) {
+            const firstErrorKey = Object.keys(errors)[0];
+            const firstErrorValue = errors[firstErrorKey];
+            const msg = typeof firstErrorValue === "string" ? firstErrorValue : "Please fill all required fields";
+            toast.warn(msg);
+            return;
+        }
+        const variantMsg = validateVariantStructures();
+        if (variantMsg) {
+            toast.warn(variantMsg);
+            return;
+        }
+        formik.handleSubmit();
+    };
 
 
     const getCommonFields = (data) => {
@@ -1557,7 +1707,7 @@ const AddEditProduct = ({ getProductData, onHide, editable, productRowData }) =>
                 <EditSizeDialog isFromColumn={isFromColumn} setVariants={setVariants} colorName={variantColorName} onHide={() => onHideInternal('showEditSizeDialog')} setSizes={setSizes} size={editSize} sizes={sizes} index={editSizeIndex} />
             </Dialog>
             {loading === true && editable === true ? <ProgressSpinner /> : (
-                <form onSubmit={formik.handleSubmit} className="aep__form">
+                <form onSubmit={submitWithValidation} className="aep__form">
                     <div className="add-edit-product">
                         <div className="grid aep__grid">
                             <div className="col-12 md:col-4">
@@ -1571,7 +1721,15 @@ const AddEditProduct = ({ getProductData, onHide, editable, productRowData }) =>
                                         className={classNames({ "p-invalid": isFormFieldValid("categoryId") }, "w-full md:w-10 inputClass")}
                                         value={formik.values.categoryId}
                                         options={category}
-                                        onChange={formik.handleChange}
+                                        onChange={(e) => {
+                                            formik.setFieldValue("categoryId", e.value);
+                                            formik.setFieldTouched("categoryId", true, true);
+                                            // reset subcategory when category changes
+                                            if (formik.values.subcategoryId) {
+                                                formik.setFieldValue("subcategoryId", "");
+                                            }
+                                        }}
+                                        onBlur={() => formik.setFieldTouched("categoryId", true, true)}
                                         optionValue="_id"
                                         optionLabel="name"
 
@@ -1590,7 +1748,11 @@ const AddEditProduct = ({ getProductData, onHide, editable, productRowData }) =>
                                         className={classNames({ "p-invalid": isFormFieldValid("subcategoryId") }, "w-full md:w-10 inputClass")}
                                         value={formik.values.subcategoryId}
                                         options={subCategory?.filter((item) => item?.category?._id === formik.values.categoryId)}
-                                        onChange={formik.handleChange}
+                                        onChange={(e) => {
+                                            formik.setFieldValue("subcategoryId", e.value);
+                                            formik.setFieldTouched("subcategoryId", true, true);
+                                        }}
+                                        onBlur={() => formik.setFieldTouched("subcategoryId", true, true)}
                                         optionValue="_id"
                                         optionLabel="name"
 
@@ -1601,7 +1763,7 @@ const AddEditProduct = ({ getProductData, onHide, editable, productRowData }) =>
                             <div className="col-12 md:col-4">
                                 <div className="flex flex-column">
                                     <label className="mb-2">Product Name</label>
-                                    <InputText maxLength={40} minLength={3} placeholder="Enter Product Name" id="name" name="name" value={formik?.values?.name?.replace(/\s\s+/g, " ")} onChange={formik.handleChange} className={classNames({ "p-invalid": isFormFieldValid("name") }, "w-full md:w-10 inputClass")} />
+                                    <InputText maxLength={40} minLength={3} placeholder="Enter Product Name" id="name" name="name" value={formik?.values?.name?.replace(/\s\s+/g, " ")} onChange={formik.handleChange} onBlur={formik.handleBlur} className={classNames({ "p-invalid": isFormFieldValid("name") }, "w-full md:w-10 inputClass")} />
                                     {getFormErrorMessage("name")}
                                 </div>
                             </div>
@@ -1617,7 +1779,11 @@ const AddEditProduct = ({ getProductData, onHide, editable, productRowData }) =>
                                         className={classNames({ "p-invalid": isFormFieldValid("taxType") }, "w-full md:w-10 inputClass")}
                                         value={formik.values.taxType}
                                         options={taxType}
-                                        onChange={formik.handleChange}
+                                        onChange={(e) => {
+                                            formik.setFieldValue("taxType", e.value);
+                                            formik.setFieldTouched("taxType", true, true);
+                                        }}
+                                        onBlur={() => formik.setFieldTouched("taxType", true, true)}
                                         optionValue="_id"
                                         optionLabel="taxType"
 
@@ -1628,7 +1794,7 @@ const AddEditProduct = ({ getProductData, onHide, editable, productRowData }) =>
                             <div className="col-12 md:col-4">
                                 <div className="flex flex-column">
                                     <label className="mb-2">Tax Amount</label>
-                                    <InputText maxLength={6} keyfilter="int" placeholder="Enter Tax Amount" id="taxAmount" name="taxAmount" value={formik?.values?.taxAmount} onChange={formik.handleChange} className={classNames({ "p-invalid": isFormFieldValid("taxAmount") }, "w-full md:w-10 inputClass")} />
+                                    <InputText maxLength={6} keyfilter="int" placeholder="Enter Tax Amount" id="taxAmount" name="taxAmount" value={formik?.values?.taxAmount} onChange={formik.handleChange} onBlur={formik.handleBlur} className={classNames({ "p-invalid": isFormFieldValid("taxAmount") }, "w-full md:w-10 inputClass")} />
                                     {getFormErrorMessage("taxAmount")}
                                 </div>
                             </div>
@@ -1636,7 +1802,7 @@ const AddEditProduct = ({ getProductData, onHide, editable, productRowData }) =>
                             <div className="col-12 md:col-4">
                                 <div className="flex flex-column">
                                     <label className="mb-2">Product Title</label>
-                                    <InputText maxLength={70} placeholder="Enter Product Title" id="title" name="title" value={formik?.values?.title?.replace(/\s\s+/g, " ")} onChange={formik.handleChange} className={classNames({ "p-invalid": isFormFieldValid("title") }, "w-full md:w-10 inputClass")} />
+                                    <InputText maxLength={70} placeholder="Enter Product Title" id="title" name="title" value={formik?.values?.title?.replace(/\s\s+/g, " ")} onChange={formik.handleChange} onBlur={formik.handleBlur} className={classNames({ "p-invalid": isFormFieldValid("title") }, "w-full md:w-10 inputClass")} />
                                     {getFormErrorMessage("title")}
                                 </div>
                             </div>
@@ -1661,7 +1827,11 @@ const AddEditProduct = ({ getProductData, onHide, editable, productRowData }) =>
                                     <Chips id="metaDataString"
                                         name="metaDataString"
                                         value={formik?.values?.metaDataString}
-                                        onChange={formik.handleChange}
+                                        onChange={(e) => {
+                                            formik.setFieldValue("metaDataString", e.value);
+                                            formik.setFieldTouched("metaDataString", true, true);
+                                        }}
+                                        onBlur={() => formik.setFieldTouched("metaDataString", true, true)}
                                         className={classNames({ "p-invalid": isFormFieldValid("metaDataString") }, "w-full md:w-10 inputClass")}
                                         separator="," />
                                     {getFormErrorMessage("metaDataString")}
@@ -1674,6 +1844,7 @@ const AddEditProduct = ({ getProductData, onHide, editable, productRowData }) =>
                                         name="tags"
                                         value={formik?.values?.tags}
                                         onChange={formik.handleChange}
+                                        onBlur={formik.handleBlur}
                                         className={classNames({ "p-invalid": isFormFieldValid("tags") }, "w-full md:w-10 inputClass")}
                                     //separator=","
                                     />
@@ -1690,6 +1861,7 @@ const AddEditProduct = ({ getProductData, onHide, editable, productRowData }) =>
                                         name="metaDescription"
                                         value={formik?.values?.metaDescription?.replace(/\s\s+/g, " ")}
                                         onChange={formik.handleChange}
+                                        onBlur={formik.handleBlur}
                                         className={classNames({ "p-invalid": isFormFieldValid("metaDescription") }, "w-full md:w-10 inputClass")}
                                     />
                                     {getFormErrorMessage("metaDescription")}
@@ -1705,6 +1877,7 @@ const AddEditProduct = ({ getProductData, onHide, editable, productRowData }) =>
                                         name="description"
                                         value={formik?.values?.description?.replace(/\s\s+/g, " ")}
                                         onChange={formik.handleChange}
+                                        onBlur={formik.handleBlur}
                                         className={classNames({ "p-invalid": isFormFieldValid("description") }, "w-full md:w-10 inputClass")}
                                     />
                                     {getFormErrorMessage("description")}
@@ -1720,6 +1893,7 @@ const AddEditProduct = ({ getProductData, onHide, editable, productRowData }) =>
                                         name="longDescription"
                                         value={formik?.values?.longDescription?.replace(/\s\s+/g, " ")}
                                         onChange={formik.handleChange}
+                                        onBlur={formik.handleBlur}
                                         className={classNames({ "p-invalid": isFormFieldValid("longDescription") }, "w-full md:w-10 inputClass")}
                                     />
                                     {getFormErrorMessage("longDescription")}
@@ -1736,6 +1910,7 @@ const AddEditProduct = ({ getProductData, onHide, editable, productRowData }) =>
                                         name="sizeGuide"
                                         value={formik?.values?.sizeGuide?.replace(/\s\s+/g, " ")}
                                         onChange={formik.handleChange}
+                                        onBlur={formik.handleBlur}
                                         className={classNames({ "p-invalid": isFormFieldValid("sizeGuide") }, "w-full md:w-10 inputClass")}
                                     />
                                     {getFormErrorMessage("sizeGuide")}
@@ -1752,6 +1927,7 @@ const AddEditProduct = ({ getProductData, onHide, editable, productRowData }) =>
                                         name="sizeFit"
                                         value={formik?.values?.sizeFit?.replace(/\s\s+/g, " ")}
                                         onChange={formik.handleChange}
+                                        onBlur={formik.handleBlur}
                                         className={classNames({ "p-invalid": isFormFieldValid("sizeFit") }, "w-full md:w-10 inputClass")}
                                     />
                                     {getFormErrorMessage("sizeFit")}
@@ -1768,6 +1944,7 @@ const AddEditProduct = ({ getProductData, onHide, editable, productRowData }) =>
                                         name="deliveryReturns"
                                         value={formik?.values?.deliveryReturns?.replace(/\s\s+/g, " ")}
                                         onChange={formik.handleChange}
+                                        onBlur={formik.handleBlur}
                                         className={classNames({ "p-invalid": isFormFieldValid("deliveryReturns") }, "w-full md:w-10 inputClass")}
                                     />
                                     {getFormErrorMessage("deliveryReturns")}
@@ -1776,7 +1953,7 @@ const AddEditProduct = ({ getProductData, onHide, editable, productRowData }) =>
                             <div className="col-12 md:col-4">
                                 <div className="flex flex-column">
                                     <label className="mb-2">Vendor</label>
-                                    <InputText placeholder="Enter Vendor" id="vendor" name="vendor" value={formik?.values?.vendor?.replace(/\s\s+/g, " ")} onChange={formik.handleChange} className={classNames({ "p-invalid": isFormFieldValid("vendor") }, "w-full md:w-10 inputClass")} />
+                                    <InputText placeholder="Enter Vendor" id="vendor" name="vendor" value={formik?.values?.vendor?.replace(/\s\s+/g, " ")} onChange={formik.handleChange} onBlur={formik.handleBlur} className={classNames({ "p-invalid": isFormFieldValid("vendor") }, "w-full md:w-10 inputClass")} />
                                     {getFormErrorMessage("vendor")}
                                 </div>
                             </div>
@@ -1818,21 +1995,21 @@ const AddEditProduct = ({ getProductData, onHide, editable, productRowData }) =>
                             {(!hasVariants || (hasVariants && hasSizes && !hasColors)) && <div className="col-12 md:col-3">
                                 <div className="flex flex-column">
                                     <label className="mb-2">Product SKU</label>
-                                    <InputText disabled={editable} placeholder="SKU" id="sku" name="sku" value={formik?.values?.sku?.replace(/\s\s+/g, " ")} onChange={formik.handleChange} className={classNames({ "p-invalid": isFormFieldValid("sku") }, "w-full md:w-10 inputClass")} />
+                                    <InputText disabled={editable} placeholder="SKU" id="sku" name="sku" value={formik?.values?.sku?.replace(/\s\s+/g, " ")} onChange={formik.handleChange} onBlur={formik.handleBlur} className={classNames({ "p-invalid": isFormFieldValid("sku") }, "w-full md:w-10 inputClass")} />
                                     {getFormErrorMessage("sku")}
                                 </div>
                             </div>}
                             {!hasVariants && <div className="col-12 md:col-3">
                                 <div className="flex flex-column">
                                     <label className="mb-2">Acutal Price</label>
-                                    <InputText placeholder="Acutal Price" id="title" type='number' min="1" name="actualPrice" value={formik?.values?.actualPrice} onChange={formik.handleChange} className={classNames({ "p-invalid": isFormFieldValid("actualPrice") }, "w-full md:w-10 inputClass")} />
+                                    <InputText placeholder="Acutal Price" id="title" type='number' min="1" name="actualPrice" value={formik?.values?.actualPrice} onChange={formik.handleChange} onBlur={formik.handleBlur} className={classNames({ "p-invalid": isFormFieldValid("actualPrice") }, "w-full md:w-10 inputClass")} />
                                     {getFormErrorMessage("actualPrice")}
                                 </div>
                             </div>}
                             {formik.values.isDiscount && !hasVariants && <div className="col-12 md:col-3">
                                 <div className="flex flex-column">
                                     <label className="mb-2">Product Discounted Price</label>
-                                    <InputText placeholder="Discounted Price" id="title" type='number' min="0" name="discountedPrice" value={formik?.values?.discountedPrice} onChange={formik.handleChange} className={classNames({ "p-invalid": isFormFieldValid("discountedPrice") }, "w-full md:w-10 inputClass")} />
+                                    <InputText placeholder="Discounted Price" id="title" type='number' min="0" name="discountedPrice" value={formik?.values?.discountedPrice} onChange={formik.handleChange} onBlur={formik.handleBlur} className={classNames({ "p-invalid": isFormFieldValid("discountedPrice") }, "w-full md:w-10 inputClass")} />
                                     {getFormErrorMessage("discountedPrice")}
                                 </div>
                             </div>}
@@ -1840,7 +2017,7 @@ const AddEditProduct = ({ getProductData, onHide, editable, productRowData }) =>
                             {!hasVariants && <div className="col-12 md:col-3">
                                 <div className="flex flex-column">
                                     <label className="mb-2">Quantity</label>
-                                    <InputText placeholder="Quantity" type='number' min="0" id="title" name="quantity" value={formik?.values?.quantity} onChange={formik.handleChange} className={classNames({ "p-invalid": isFormFieldValid("quantity") }, "w-full md:w-10 inputClass")} />
+                                    <InputText placeholder="Quantity" type='number' min="0" id="title" name="quantity" value={formik?.values?.quantity} onChange={formik.handleChange} onBlur={formik.handleBlur} className={classNames({ "p-invalid": isFormFieldValid("quantity") }, "w-full md:w-10 inputClass")} />
                                     {getFormErrorMessage("quantity")}
                                 </div>
                             </div>}
