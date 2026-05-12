@@ -996,13 +996,54 @@ input[type="number"] {
     from { opacity: 0; transform: translateY(16px); }
     to   { opacity: 1; transform: translateY(0); }
 }
-.grid .card {
+.grid .card,
+.dashboard-stats-row .card {
     animation: fadeSlideUp 0.35s ease both;
 }
-.col-12:nth-child(1) .card { animation-delay: 0.04s; }
-.col-12:nth-child(2) .card { animation-delay: 0.09s; }
-.col-12:nth-child(3) .card { animation-delay: 0.14s; }
-.col-12:nth-child(4) .card { animation-delay: 0.19s; }
+.dashboard-stat-cell:nth-child(1) .card { animation-delay: 0.04s; }
+.dashboard-stat-cell:nth-child(2) .card { animation-delay: 0.09s; }
+.dashboard-stat-cell:nth-child(3) .card { animation-delay: 0.14s; }
+.dashboard-stat-cell:nth-child(4) .card { animation-delay: 0.19s; }
+.dashboard-stat-cell:nth-child(5) .card { animation-delay: 0.24s; }
+
+/* Dashboard: full-width responsive grid (does not depend on PrimeFlex column order) */
+.dashboard-page {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+}
+
+.dashboard-stats-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr));
+    gap: 1rem;
+    width: 100%;
+    min-width: 0;
+}
+
+.dashboard-stat-cell {
+    min-width: 0;
+}
+
+.dashboard-charts-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 340px), 1fr));
+    gap: 1.5rem;
+    margin-top: 2rem;
+    width: 100%;
+    min-width: 0;
+}
+
+.dashboard-chart-cell {
+    min-width: 0;
+}
+
+.dashboard-chart-canvas {
+    position: relative;
+    width: 100%;
+    min-height: 280px;
+    height: 320px;
+}
 
 /* ─── Edit/Delete action buttons ─── */
 .Edit_Icon {

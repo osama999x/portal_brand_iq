@@ -166,12 +166,10 @@ const Dashboard = (props) => {
 
 
     return (
-        <>
-
-
-            <div className="grid">
+        <div className="dashboard-page">
+            <div className="dashboard-stats-row">
                 {orderData && orderData.map((item, index) => (
-                    <div key={item?.status ?? `total-${index}`} className="col-12 lg:col-6 xl:col-3">
+                    <div key={item?.status ?? `total-${index}`} className="dashboard-stat-cell">
                         <div className={`card mb-0 tab_${item?.status ?? 'total'} m_height rounded-2xl transition-shadow duration-300 hover:shadow-lg`}>
                             <div className="flex justify-content-between mb-3">
                                 <div>
@@ -187,43 +185,30 @@ const Dashboard = (props) => {
                 ))}
             </div>
 
-            <div className="grid mt-5">
-                <div className="col-12 lg:col-6 xl:col-6">
+            <div className="dashboard-charts-row">
+                <div className="dashboard-chart-cell">
                     <div className="card rounded-2xl shadow-sm hover:shadow-md transition-shadow duration-300">
                         <div className="mb-3">
-                            <div className="grid">
-                                <div className="col-12 md:col-7">
-                                    <span className="block mb-3 mt-3 label_text text-base font-semibold">Orders</span>
-                                </div>
-                                <div className="col-12 md:col-5">
-                                </div>
-                            </div>
+                            <span className="block mb-3 mt-3 label_text text-base font-semibold">Orders</span>
                         </div>
-                        <Chart type="bar" data={deliverddata || { labels: [], datasets: [] }} options={{ responsive: true, maintainAspectRatio: false }} />
+                        <div className="dashboard-chart-canvas">
+                            <Chart type="bar" data={deliverddata || { labels: [], datasets: [] }} options={{ responsive: true, maintainAspectRatio: false }} />
+                        </div>
                     </div>
                 </div>
 
-                <div className="col-12 lg:col-6 xl:col-6">
+                <div className="dashboard-chart-cell">
                     <div className="card rounded-2xl shadow-sm hover:shadow-md transition-shadow duration-300">
                         <div className="mb-3">
-                            <div className="grid">
-                                <div className="col-12 md:col-7">
-                                    <div>
-                                        <span className="block mb-3 mt-3 label_text text-base font-semibold">Top Selling Products</span>
-                                    </div>
-                                </div>
-                                <div className="col-12 md:col-5">
-                                    <div className="flex align-items-center justify-content-center">
-                                    </div>
-                                </div>
-                            </div>
+                            <span className="block mb-3 mt-3 label_text text-base font-semibold">Top Selling Products</span>
                         </div>
-                        <Chart type="line" data={lineData || { labels: [], datasets: [] }} options={{ responsive: true, maintainAspectRatio: false }} />
+                        <div className="dashboard-chart-canvas">
+                            <Chart type="line" data={lineData || { labels: [], datasets: [] }} options={{ responsive: true, maintainAspectRatio: false }} />
+                        </div>
                     </div>
                 </div>
             </div>
-        </>
-
+        </div>
     );
 }
 
