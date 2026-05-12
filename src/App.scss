@@ -545,8 +545,12 @@
         margin-bottom: 7px !important;
     }
 
+    /* Avoid page-wide horizontal scroll; scroll tabs inside the tab bar only */
     .p-tabview-nav {
-        width: 130vw !important;
+        width: 100% !important;
+        max-width: 100%;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
     }
 }
 

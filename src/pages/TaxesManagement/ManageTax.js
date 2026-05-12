@@ -150,12 +150,12 @@ const ManageTax = () => {
                 <AddTaxType onHide={onHide} getTaxData={getTaxData} TaxTypeRowData={TaxTypeRowData} />
             </Dialog>
 
-            <div className="grid">
+            <div className="grid grid-nogutter">
                 <div className="col-12 md:col-12 lg:col-12 xs:col-12">
-                    <div className="text-right">
-                        <span class="p-input-icon-right mr-3">
-                            <input type="text" placeholder="Search" class="p-inputtext p-component p-filled" onInput={(e) => setGlobalFilter(e.target.value)} />
-                            <i class="pi pi-search"></i>
+                    <div className="text-right flex flex-wrap align-items-center justify-content-end">
+                        <span className="p-input-icon-right mr-3">
+                            <input type="text" placeholder="Search" className="p-inputtext p-component p-filled" onInput={(e) => setGlobalFilter(e.target.value)} />
+                            <i className="pi pi-search" />
                         </span>
                         <button className="p-button p-button-primary p-component mr-2" onClick={() => {
                             setaddEditTax(false)
@@ -175,15 +175,16 @@ const ManageTax = () => {
                     </div>
                 </div>
                 <div className="col-12 md:col-12 lg:col-12 xs:col-12">
-                    <div className="innr-Body">
+                    <div className="innr-Body innr-Body--table">
                         <DataTable
                             paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
                             currentPageReportTemplate="Showing {first} to {last} of {totalRecords} Records"
                             globalFilter={globalFilter}
                             rows={7}
                             paginator
-                            responsiveLayout="scroll"
-                            value={taxdata}>
+                            responsiveLayout="stack"
+                            value={taxdata}
+                            style={{ width: "100%" }}>
                             {/* <Column field="_id" header="Tax Head ID" /> */}
                             <Column field="taxHead" header="Tax Head ID" />
                             <Column body={TaxTypeTemplate} header="Tax Type" />

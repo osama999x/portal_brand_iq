@@ -1,3 +1,5 @@
+// NOTE: Do not set width: 100% here. With layout-static, margin-left: 260px is applied
+// in _responsive.scss; width 100% + margin overflows the viewport and causes horizontal scroll.
 .layout-main-container {
     display: flex;
     flex-direction: column;
@@ -5,12 +7,14 @@
     justify-content: space-between;
     padding: 5rem 2rem 2rem 4rem;
     transition: margin-left $transitionDuration;
-    width: 100%;
-    max-width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
 }
 
 .layout-main {
     flex: 1 1 auto;
+    min-width: 0;
     width: 100%;
     max-width: 100%;
+    box-sizing: border-box;
 }

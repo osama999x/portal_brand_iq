@@ -222,8 +222,42 @@ const AddEditProduct = ({ getProductData, onHide, editable, productRowData }) =>
 
         if (!hasVariants) return null; // Simple product handled by Formik schema
 
-        if (hasVariants && variants.length === 0) {
-            return hasColors || hasSizes ? "Please add at least one variant" : "Wrong product type selection";
+        // Invalid: Variants on but neither colors nor sizes
+        if (hasVariants && !hasColors && !hasSizes) {
+            return "Wrong product type selection";
+        }
+
+        // Sizes Only: rows live in `sizes` state — NOT in `variants` (colors use `variants`)
+        if (hasVariants && hasSizes && !hasColors) {
+            if (!Array.isArray(sizes) || sizes.length === 0) {
+                return "Please add at least one size (use + or Enter after each row)";
+            }
+            const sizeNames = new Set();
+            for (let s = 0; s < sizes.length; s++) {
+                const sz = sizes[s] || {};
+                const label = isBlank(sz.name) ? `Row ${s + 1}` : `Size '${sz.name}'`;
+                if (isBlank(sz.name)) return `${label}: Size name is required`;
+                if (sizeNames.has(sz.name)) return `Size '${sz.name}': each size name must be unique`;
+                sizeNames.add(sz.name);
+
+                const ap = toNum(sz.actualPrice);
+                if (!Number.isFinite(ap) || ap < 1) return `${label}: Price must be at least 1`;
+
+                if (formik.values.isDiscount) {
+                    const dp = toNum(sz.discountedPrice);
+                    if (!Number.isFinite(dp) || dp < 0) return `${label}: Discounted Price must be 0 or more`;
+                    if (dp > ap) return `${label}: Discounted Price must be ≤ Price`;
+                }
+
+                const q = toNum(sz.quantity);
+                if (!Number.isFinite(q) || q < 0) return `${label}: Quantity must be 0 or more`;
+            }
+            return null;
+        }
+
+        // Colors Only or Colors + Sizes: require at least one entry in `variants`
+        if (hasColors && variants.length === 0) {
+            return "Please add at least one color variant";
         }
 
         const skuSet = new Set();
@@ -256,8 +290,8 @@ const AddEditProduct = ({ getProductData, onHide, editable, productRowData }) =>
                 if (!Number.isFinite(q) || q < 0) return `${prefix}: Quantity must be 0 or more`;
             }
 
-            // Sizes-only and Colors+Sizes: validate sizes array
-            if (hasSizes) {
+            // Colors + Sizes: validate nested size rows on each color variant
+            if (hasColors && hasSizes) {
                 if (!Array.isArray(v.size) || v.size.length === 0) return `${prefix}: add at least one Size`;
                 const sizeNames = new Set();
                 for (let s = 0; s < v.size.length; s++) {
