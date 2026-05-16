@@ -183,14 +183,14 @@ const AddEditProduct = ({ getProductData, onHide, editable, productRowData }) =>
             .transform((value, originalValue) => (String(originalValue).trim() === "" ? undefined : value))
             .nullable()
             .when("isDiscount", {
-                is: true,
+                // Variant products store discounted prices per size/color row, not on this field
+                is: (isDiscount) => isDiscount === true && !hasVariants,
                 then: (schema) =>
                     schema
                         .typeError("Discounted Price must be a number")
                         .min(0, "Discounted Price cannot be negative")
                         .test("disc-lte-actual", "Discounted Price must be less than or equal to Actual Price", function (value) {
-                            // only applies for "Simple" products (no variants)
-                            if (hasVariants || value == null) return true;
+                            if (value == null) return true;
                             const actual = Number(this.parent.actualPrice);
                             if (!Number.isFinite(actual)) return true;
                             return Number(value) <= actual;
@@ -483,11 +483,8 @@ const AddEditProduct = ({ getProductData, onHide, editable, productRowData }) =>
 
 
     useEffect(() => {
-
         setIsDiscount(formik.values.isDiscount);
-        setSizes([]);
-        setVariants([]);
-    }, [formik.values.isDiscount])
+    }, [formik.values.isDiscount]);
 
 
     useEffect(() => {
@@ -1740,9 +1737,13 @@ const AddEditProduct = ({ getProductData, onHide, editable, productRowData }) =>
             <Dialog header="Edit size" visible={showEditSizeDialog} style={{ width: '40vw' }} onHide={() => onHideInternal('showEditSizeDialog')}>
                 <EditSizeDialog isFromColumn={isFromColumn} setVariants={setVariants} colorName={variantColorName} onHide={() => onHideInternal('showEditSizeDialog')} setSizes={setSizes} size={editSize} sizes={sizes} index={editSizeIndex} />
             </Dialog>
-            {loading === true && editable === true ? <ProgressSpinner /> : (
+            {loading === true && editable === true ? (
+                <div className="aep__loading">
+                    <ProgressSpinner />
+                </div>
+            ) : (
                 <form onSubmit={submitWithValidation} className="aep__form">
-                    <div className="add-edit-product">
+                    <div className="aep__body add-edit-product">
                         <div className="grid aep__grid">
                             <div className="col-12 md:col-4">
                                 <div className="flex flex-column">
@@ -1752,7 +1753,7 @@ const AddEditProduct = ({ getProductData, onHide, editable, productRowData }) =>
                                         id="categoryId"
                                         name="categoryId"
                                         placeholder="Select Category"
-                                        className={classNames({ "p-invalid": isFormFieldValid("categoryId") }, "w-full md:w-10 inputClass")}
+                                        className={classNames({ "p-invalid": isFormFieldValid("categoryId") }, "w-full inputClass")}
                                         value={formik.values.categoryId}
                                         options={category}
                                         onChange={(e) => {
@@ -1779,7 +1780,7 @@ const AddEditProduct = ({ getProductData, onHide, editable, productRowData }) =>
                                         id="subcategoryId"
                                         name="subcategoryId"
                                         placeholder="Select Sub-Category"
-                                        className={classNames({ "p-invalid": isFormFieldValid("subcategoryId") }, "w-full md:w-10 inputClass")}
+                                        className={classNames({ "p-invalid": isFormFieldValid("subcategoryId") }, "w-full inputClass")}
                                         value={formik.values.subcategoryId}
                                         options={subCategory?.filter((item) => item?.category?._id === formik.values.categoryId)}
                                         onChange={(e) => {
@@ -1797,7 +1798,7 @@ const AddEditProduct = ({ getProductData, onHide, editable, productRowData }) =>
                             <div className="col-12 md:col-4">
                                 <div className="flex flex-column">
                                     <label className="mb-2">Product Name</label>
-                                    <InputText maxLength={40} minLength={3} placeholder="Enter Product Name" id="name" name="name" value={formik?.values?.name?.replace(/\s\s+/g, " ")} onChange={formik.handleChange} onBlur={formik.handleBlur} className={classNames({ "p-invalid": isFormFieldValid("name") }, "w-full md:w-10 inputClass")} />
+                                    <InputText maxLength={40} minLength={3} placeholder="Enter Product Name" id="name" name="name" value={formik?.values?.name?.replace(/\s\s+/g, " ")} onChange={formik.handleChange} onBlur={formik.handleBlur} className={classNames({ "p-invalid": isFormFieldValid("name") }, "w-full inputClass")} />
                                     {getFormErrorMessage("name")}
                                 </div>
                             </div>
@@ -1810,7 +1811,7 @@ const AddEditProduct = ({ getProductData, onHide, editable, productRowData }) =>
                                         id="taxType"
                                         name="taxType"
                                         placeholder="Select Tax Type"
-                                        className={classNames({ "p-invalid": isFormFieldValid("taxType") }, "w-full md:w-10 inputClass")}
+                                        className={classNames({ "p-invalid": isFormFieldValid("taxType") }, "w-full inputClass")}
                                         value={formik.values.taxType}
                                         options={taxType}
                                         onChange={(e) => {
@@ -1828,7 +1829,7 @@ const AddEditProduct = ({ getProductData, onHide, editable, productRowData }) =>
                             <div className="col-12 md:col-4">
                                 <div className="flex flex-column">
                                     <label className="mb-2">Tax Amount</label>
-                                    <InputText maxLength={6} keyfilter="int" placeholder="Enter Tax Amount" id="taxAmount" name="taxAmount" value={formik?.values?.taxAmount} onChange={formik.handleChange} onBlur={formik.handleBlur} className={classNames({ "p-invalid": isFormFieldValid("taxAmount") }, "w-full md:w-10 inputClass")} />
+                                    <InputText maxLength={6} keyfilter="int" placeholder="Enter Tax Amount" id="taxAmount" name="taxAmount" value={formik?.values?.taxAmount} onChange={formik.handleChange} onBlur={formik.handleBlur} className={classNames({ "p-invalid": isFormFieldValid("taxAmount") }, "w-full inputClass")} />
                                     {getFormErrorMessage("taxAmount")}
                                 </div>
                             </div>
@@ -1836,24 +1837,37 @@ const AddEditProduct = ({ getProductData, onHide, editable, productRowData }) =>
                             <div className="col-12 md:col-4">
                                 <div className="flex flex-column">
                                     <label className="mb-2">Product Title</label>
-                                    <InputText maxLength={70} placeholder="Enter Product Title" id="title" name="title" value={formik?.values?.title?.replace(/\s\s+/g, " ")} onChange={formik.handleChange} onBlur={formik.handleBlur} className={classNames({ "p-invalid": isFormFieldValid("title") }, "w-full md:w-10 inputClass")} />
+                                    <InputText maxLength={70} placeholder="Enter Product Title" id="title" name="title" value={formik?.values?.title?.replace(/\s\s+/g, " ")} onChange={formik.handleChange} onBlur={formik.handleBlur} className={classNames({ "p-invalid": isFormFieldValid("title") }, "w-full inputClass")} />
                                     {getFormErrorMessage("title")}
                                 </div>
                             </div>
-                            <div className="col-12 md:col-4 flex">
-                                <div className="flex flex-column">
-                                    <label className="mb-2">is Active?</label>
-                                    <Checkbox id="isActive" name="isActive" inputId="binary" checked={formik?.values?.isActive} onChange={formik.handleChange} />
-                                    {/* {getFormErrorMessage("isActive")} */}
-                                </div>
-                                <div className="flex flex-column ml-3">
-                                    <label className="mb-2">is Discount?</label>
-                                    <Checkbox id="isDiscount" name="isDiscount" inputId="binary" checked={formik?.values?.isDiscount} onChange={formik.handleChange} />
-                                    {/* {getFormErrorMessage("isActive")} */}
+                            <div className="col-12 md:col-4">
+                                <div className="aep__field aep__field--checkboxes">
+                                    <span className="aep__label">Options</span>
+                                    <div className="aep__checkbox-row">
+                                        <div className="aep__checkbox-item">
+                                            <Checkbox
+                                                id="isActive"
+                                                name="isActive"
+                                                inputId="product-isActive"
+                                                checked={formik?.values?.isActive}
+                                                onChange={formik.handleChange}
+                                            />
+                                            <label htmlFor="product-isActive">Is Active</label>
+                                        </div>
+                                        <div className="aep__checkbox-item">
+                                            <Checkbox
+                                                id="isDiscount"
+                                                name="isDiscount"
+                                                inputId="product-isDiscount"
+                                                checked={formik?.values?.isDiscount}
+                                                onChange={formik.handleChange}
+                                            />
+                                            <label htmlFor="product-isDiscount">Is Discount</label>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
-
-
 
                             <div className="col-12 md:col-4">
                                 <div className="flex flex-column">
@@ -1866,7 +1880,7 @@ const AddEditProduct = ({ getProductData, onHide, editable, productRowData }) =>
                                             formik.setFieldTouched("metaDataString", true, true);
                                         }}
                                         onBlur={() => formik.setFieldTouched("metaDataString", true, true)}
-                                        className={classNames({ "p-invalid": isFormFieldValid("metaDataString") }, "w-full md:w-10 inputClass")}
+                                        className={classNames({ "p-invalid": isFormFieldValid("metaDataString") }, "w-full inputClass")}
                                         separator="," />
                                     {getFormErrorMessage("metaDataString")}
                                 </div>
@@ -1879,148 +1893,147 @@ const AddEditProduct = ({ getProductData, onHide, editable, productRowData }) =>
                                         value={formik?.values?.tags}
                                         onChange={formik.handleChange}
                                         onBlur={formik.handleBlur}
-                                        className={classNames({ "p-invalid": isFormFieldValid("tags") }, "w-full md:w-10 inputClass")}
+                                        className={classNames({ "p-invalid": isFormFieldValid("tags") }, "w-full inputClass")}
                                     //separator=","
                                     />
                                     {getFormErrorMessage("tags")}
                                 </div>
                             </div>
-                            <div className="col-12 md:col-4">
-                                <div className="flex flex-column">
-                                    <label className="mb-2">Meta Description</label>
+                            <div className="col-12 md:col-6">
+                                <div className="flex flex-column aep__field">
+                                    <label className="aep__label">Meta Description</label>
                                     <InputTextarea
-                                        rows={5} cols={30}
+                                        rows={3}
+                                        autoResize
                                         placeholder="Enter Meta Description"
                                         id="metaDescription"
                                         name="metaDescription"
                                         value={formik?.values?.metaDescription?.replace(/\s\s+/g, " ")}
                                         onChange={formik.handleChange}
                                         onBlur={formik.handleBlur}
-                                        className={classNames({ "p-invalid": isFormFieldValid("metaDescription") }, "w-full md:w-10 inputClass")}
+                                        className={classNames({ "p-invalid": isFormFieldValid("metaDescription") }, "w-full inputClass aep__textarea")}
                                     />
                                     {getFormErrorMessage("metaDescription")}
                                 </div>
                             </div>
-                            <div className="col-12 md:col-4">
-                                <div className="flex flex-column">
-                                    <label className="mb-2">Description</label>
+                            <div className="col-12 md:col-6">
+                                <div className="flex flex-column aep__field">
+                                    <label className="aep__label">Description</label>
                                     <InputTextarea
-                                        rows={5} cols={30}
+                                        rows={3}
+                                        autoResize
                                         placeholder="Enter Description"
                                         id="description"
                                         name="description"
                                         value={formik?.values?.description?.replace(/\s\s+/g, " ")}
                                         onChange={formik.handleChange}
                                         onBlur={formik.handleBlur}
-                                        className={classNames({ "p-invalid": isFormFieldValid("description") }, "w-full md:w-10 inputClass")}
+                                        className={classNames({ "p-invalid": isFormFieldValid("description") }, "w-full inputClass aep__textarea")}
                                     />
                                     {getFormErrorMessage("description")}
                                 </div>
                             </div>
                             <div className="col-12 md:col-6">
-                                <div className="flex flex-column">
-                                    <label className="mb-2">Long Description</label>
+                                <div className="flex flex-column aep__field">
+                                    <label className="aep__label">Long Description</label>
                                     <InputTextarea
-                                        rows={5} cols={30}
+                                        rows={3}
+                                        autoResize
                                         placeholder="Enter Long Description"
                                         id="longDescription"
                                         name="longDescription"
                                         value={formik?.values?.longDescription?.replace(/\s\s+/g, " ")}
                                         onChange={formik.handleChange}
                                         onBlur={formik.handleBlur}
-                                        className={classNames({ "p-invalid": isFormFieldValid("longDescription") }, "w-full md:w-10 inputClass")}
+                                        className={classNames({ "p-invalid": isFormFieldValid("longDescription") }, "w-full inputClass aep__textarea")}
                                     />
                                     {getFormErrorMessage("longDescription")}
                                 </div>
                             </div>
                             <div className="col-12 md:col-6">
-                                <div className="flex flex-column">
-                                    <label className="mb-2">Size Guide</label>
+                                <div className="flex flex-column aep__field">
+                                    <label className="aep__label">Size Guide</label>
                                     <InputTextarea
-                                        rows={5}
-                                        cols={30}
+                                        rows={3}
+                                        autoResize
                                         placeholder="Enter Size Guide"
                                         id="sizeGuide"
                                         name="sizeGuide"
                                         value={formik?.values?.sizeGuide?.replace(/\s\s+/g, " ")}
                                         onChange={formik.handleChange}
                                         onBlur={formik.handleBlur}
-                                        className={classNames({ "p-invalid": isFormFieldValid("sizeGuide") }, "w-full md:w-10 inputClass")}
+                                        className={classNames({ "p-invalid": isFormFieldValid("sizeGuide") }, "w-full inputClass aep__textarea")}
                                     />
                                     {getFormErrorMessage("sizeGuide")}
                                 </div>
                             </div>
                             <div className="col-12 md:col-6">
-                                <div className="flex flex-column">
-                                    <label className="mb-2">Size & Fit</label>
+                                <div className="flex flex-column aep__field">
+                                    <label className="aep__label">Size & Fit</label>
                                     <InputTextarea
-                                        rows={5}
-                                        cols={30}
+                                        rows={3}
+                                        autoResize
                                         placeholder="Enter Size & Fit"
                                         id="sizeFit"
                                         name="sizeFit"
                                         value={formik?.values?.sizeFit?.replace(/\s\s+/g, " ")}
                                         onChange={formik.handleChange}
                                         onBlur={formik.handleBlur}
-                                        className={classNames({ "p-invalid": isFormFieldValid("sizeFit") }, "w-full md:w-10 inputClass")}
+                                        className={classNames({ "p-invalid": isFormFieldValid("sizeFit") }, "w-full inputClass aep__textarea")}
                                     />
                                     {getFormErrorMessage("sizeFit")}
                                 </div>
                             </div>
                             <div className="col-12 md:col-6">
-                                <div className="flex flex-column">
-                                    <label className="mb-2">Delivery & Returns</label>
+                                <div className="flex flex-column aep__field">
+                                    <label className="aep__label">Delivery & Returns</label>
                                     <InputTextarea
-                                        rows={5}
-                                        cols={30}
+                                        rows={3}
+                                        autoResize
                                         placeholder="Enter Delivery & Returns"
                                         id="deliveryReturns"
                                         name="deliveryReturns"
                                         value={formik?.values?.deliveryReturns?.replace(/\s\s+/g, " ")}
                                         onChange={formik.handleChange}
                                         onBlur={formik.handleBlur}
-                                        className={classNames({ "p-invalid": isFormFieldValid("deliveryReturns") }, "w-full md:w-10 inputClass")}
+                                        className={classNames({ "p-invalid": isFormFieldValid("deliveryReturns") }, "w-full inputClass aep__textarea")}
                                     />
                                     {getFormErrorMessage("deliveryReturns")}
                                 </div>
                             </div>
                             <div className="col-12 md:col-4">
-                                <div className="flex flex-column">
-                                    <label className="mb-2">Vendor</label>
-                                    <InputText placeholder="Enter Vendor" id="vendor" name="vendor" value={formik?.values?.vendor?.replace(/\s\s+/g, " ")} onChange={formik.handleChange} onBlur={formik.handleBlur} className={classNames({ "p-invalid": isFormFieldValid("vendor") }, "w-full md:w-10 inputClass")} />
+                                <div className="flex flex-column aep__field">
+                                    <label className="aep__label">Vendor</label>
+                                    <InputText placeholder="Enter Vendor" id="vendor" name="vendor" value={formik?.values?.vendor?.replace(/\s\s+/g, " ")} onChange={formik.handleChange} onBlur={formik.handleBlur} className={classNames({ "p-invalid": isFormFieldValid("vendor") }, "w-full inputClass")} />
                                     {getFormErrorMessage("vendor")}
                                 </div>
                             </div>
 
-                            <div className="col-12 md:col-12 lg:col-12 xl:col-12">
-                                <div className="flex flex-column">
-                                    <label className="mb-2">Images</label>
-                                    <div className="flex flex-row">
-                                    {console.log(oldImages, 'old imagesssssssssssssssssss')}
-                                        {
-                                            oldImages.map((item, index) => {
-                                                return <div key={`${index} images`} className="relative">
-                                                    <Image className="mx-2" height="80px" width="80px" preview src={`${baseURL}${item}`} />
-
-                                                    <Button icon="pi pi-times" onClick={(e) => {
-                                                        e.preventDefault();
-
-                                                        setOldImages((prev) => {
-
-
-
-                                                            return [...prev]
-                                                        })
-
-                                                    }} className="p-button-rounded p-button-danger p-button-text absolute right-0 top-0" aria-label="Cancel" />
-
+                            <div className="col-12">
+                                <div className="aep__field">
+                                    <label className="aep__label">Images</label>
+                                    {oldImages.length > 0 && (
+                                    <div className="aep__image-strip">
+                                        {oldImages.map((item, index) => (
+                                                <div key={`${index}-image`} className="aep__image-thumb">
+                                                    <Image height="80" width="80" preview src={`${baseURL}${item}`} alt={`Product ${index + 1}`} />
+                                                    <Button
+                                                        type="button"
+                                                        icon="pi pi-times"
+                                                        onClick={(e) => {
+                                                            e.preventDefault();
+                                                            setOldImages((prev) => prev.filter((_, i) => i !== index));
+                                                        }}
+                                                        className="aep__image-remove p-button-rounded p-button-danger"
+                                                        aria-label="Remove image"
+                                                    />
                                                 </div>
-                                            })
-                                        }
+                                        ))}
                                     </div>
+                                    )}
                                     <MultiImage handleImages={handleImages} />
-                                    {/* <ImageUpload handleImages={handleImages} className="w-full md:w-10 inputClass" /> */}
-                                    {/* <InputText type="file" className="w-full md:w-10 inputClass" /> */}
+                                    {/* <ImageUpload handleImages={handleImages} className="w-full inputClass" /> */}
+                                    {/* <InputText type="file" className="w-full inputClass" /> */}
                                 </div>
                             </div>
 
@@ -2029,21 +2042,21 @@ const AddEditProduct = ({ getProductData, onHide, editable, productRowData }) =>
                             {(!hasVariants || (hasVariants && hasSizes && !hasColors)) && <div className="col-12 md:col-3">
                                 <div className="flex flex-column">
                                     <label className="mb-2">Product SKU</label>
-                                    <InputText disabled={editable} placeholder="SKU" id="sku" name="sku" value={formik?.values?.sku?.replace(/\s\s+/g, " ")} onChange={formik.handleChange} onBlur={formik.handleBlur} className={classNames({ "p-invalid": isFormFieldValid("sku") }, "w-full md:w-10 inputClass")} />
+                                    <InputText disabled={editable} placeholder="SKU" id="sku" name="sku" value={formik?.values?.sku?.replace(/\s\s+/g, " ")} onChange={formik.handleChange} onBlur={formik.handleBlur} className={classNames({ "p-invalid": isFormFieldValid("sku") }, "w-full inputClass")} />
                                     {getFormErrorMessage("sku")}
                                 </div>
                             </div>}
                             {!hasVariants && <div className="col-12 md:col-3">
                                 <div className="flex flex-column">
                                     <label className="mb-2">Acutal Price</label>
-                                    <InputText placeholder="Acutal Price" id="title" type='number' min="1" name="actualPrice" value={formik?.values?.actualPrice} onChange={formik.handleChange} onBlur={formik.handleBlur} className={classNames({ "p-invalid": isFormFieldValid("actualPrice") }, "w-full md:w-10 inputClass")} />
+                                    <InputText placeholder="Acutal Price" id="title" type='number' min="1" name="actualPrice" value={formik?.values?.actualPrice} onChange={formik.handleChange} onBlur={formik.handleBlur} className={classNames({ "p-invalid": isFormFieldValid("actualPrice") }, "w-full inputClass")} />
                                     {getFormErrorMessage("actualPrice")}
                                 </div>
                             </div>}
                             {formik.values.isDiscount && !hasVariants && <div className="col-12 md:col-3">
                                 <div className="flex flex-column">
                                     <label className="mb-2">Product Discounted Price</label>
-                                    <InputText placeholder="Discounted Price" id="title" type='number' min="0" name="discountedPrice" value={formik?.values?.discountedPrice} onChange={formik.handleChange} onBlur={formik.handleBlur} className={classNames({ "p-invalid": isFormFieldValid("discountedPrice") }, "w-full md:w-10 inputClass")} />
+                                    <InputText placeholder="Discounted Price" id="title" type='number' min="0" name="discountedPrice" value={formik?.values?.discountedPrice} onChange={formik.handleChange} onBlur={formik.handleBlur} className={classNames({ "p-invalid": isFormFieldValid("discountedPrice") }, "w-full inputClass")} />
                                     {getFormErrorMessage("discountedPrice")}
                                 </div>
                             </div>}
@@ -2051,7 +2064,7 @@ const AddEditProduct = ({ getProductData, onHide, editable, productRowData }) =>
                             {!hasVariants && <div className="col-12 md:col-3">
                                 <div className="flex flex-column">
                                     <label className="mb-2">Quantity</label>
-                                    <InputText placeholder="Quantity" type='number' min="0" id="title" name="quantity" value={formik?.values?.quantity} onChange={formik.handleChange} onBlur={formik.handleBlur} className={classNames({ "p-invalid": isFormFieldValid("quantity") }, "w-full md:w-10 inputClass")} />
+                                    <InputText placeholder="Quantity" type='number' min="0" id="title" name="quantity" value={formik?.values?.quantity} onChange={formik.handleChange} onBlur={formik.handleBlur} className={classNames({ "p-invalid": isFormFieldValid("quantity") }, "w-full inputClass")} />
                                     {getFormErrorMessage("quantity")}
                                 </div>
                             </div>}
@@ -2062,16 +2075,14 @@ const AddEditProduct = ({ getProductData, onHide, editable, productRowData }) =>
 
                         </div>
 
-                        {productTypeComponent()}
+                        <div className="aep__section">
+                            <h3 className="aep__section-title">Product type &amp; variants</h3>
+                            {productTypeComponent()}
 
-                        {
-                            hasVariants && hasColors && !hasSizes && colorNoSizeComponent()
-                        }
-                        {
-                            hasVariants && hasSizes && !hasColors && noColorSizeComponent()
-                        }
-
-                        {hasVariants && hasSizes && hasColors && colorSizeComponent()}
+                            {hasVariants && hasColors && !hasSizes && colorNoSizeComponent()}
+                            {hasVariants && hasSizes && !hasColors && noColorSizeComponent()}
+                            {hasVariants && hasSizes && hasColors && colorSizeComponent()}
+                        </div>
                     </div>
                     <div className="aep__footer">
                         <div className="aep__footerInner">

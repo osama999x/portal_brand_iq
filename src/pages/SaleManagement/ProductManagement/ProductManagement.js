@@ -125,8 +125,34 @@ const ProductManagement = () => {
         const subcategoryName = rowData?.subcategory?.name;
         return <React.Fragment>{subcategoryName}</React.Fragment>;
     }
+    const getProductDisplayPrice = (product) => {
+        const variants = product?.variant;
+        if (!Array.isArray(variants) || variants.length === 0) return 0;
+
+        const prices = [];
+        for (const v of variants) {
+            const variantPrice = Number(v?.actualPrice);
+            if (Number.isFinite(variantPrice) && variantPrice > 0) {
+                prices.push(variantPrice);
+            }
+            if (Array.isArray(v?.size)) {
+                for (const sizeEntry of v.size) {
+                    const sizePrice = typeof sizeEntry === "object"
+                        ? Number(sizeEntry?.actualPrice)
+                        : NaN;
+                    if (Number.isFinite(sizePrice) && sizePrice > 0) {
+                        prices.push(sizePrice);
+                    }
+                }
+            }
+        }
+
+        if (prices.length === 0) return 0;
+        return Math.min(...prices);
+    };
+
     const priceTemplete = (rowData) => {
-        const variantPrice = rowData?.variant[0]?.actualPrice;
+        const variantPrice = getProductDisplayPrice(rowData);
 
         return <React.Fragment>{variantPrice}</React.Fragment>;
     }
@@ -145,8 +171,16 @@ const ProductManagement = () => {
     return (
         <>
             <Toast ref={toast} />
-            <Dialog header={editable ? "Edit" : "Add New Product"} visible={visibleEdit} style={{ width: '80vw' }} onHide={onHide}>
-                {/* <Add></Add> */}
+            <Dialog
+                header={editable ? "Edit Product" : "Add New Product"}
+                visible={visibleEdit}
+                className="product-dialog"
+                contentClassName="product-dialog__content"
+                style={{ width: "min(960px, 94vw)" }}
+                maximizable={false}
+                draggable={false}
+                onHide={onHide}
+            >
                 <AddEditProduct getProductData={getProductData} editable={editable} onHide={onHide} productRowData={productRowData} />
             </Dialog>
 
