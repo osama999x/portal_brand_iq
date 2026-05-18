@@ -440,7 +440,8 @@ const AddEditProduct = ({ getProductData, onHide, editable, productRowData }) =>
 
 
     const getCommonFields = (data) => {
-        let multipleImages = JSON.parse(JSON.stringify(allImages));
+        const multipleImages = JSON.parse(JSON.stringify(allImages));
+        const thumbnail = resolveThumbnail(oldImages, allImages);
 
         let value = {
             "categoryId": data.categoryId,
@@ -458,7 +459,7 @@ const AddEditProduct = ({ getProductData, onHide, editable, productRowData }) =>
             "vendor": data.vendor,
             "metaData": data.metaDataString.join(','),
             "metaDescription": data.metaDescription,
-            "thumbnail": featureImage,
+            "thumbnail": thumbnail,
             "isTaxable": true,
             "taxHead": "6385e95304beaf8be86471ce",
             "isPercentage": false,
@@ -704,11 +705,25 @@ const AddEditProduct = ({ getProductData, onHide, editable, productRowData }) =>
         return isFormFieldValid(name) && <small className="p-error">{formik.errors[name]}</small>;
     };
 
-    //Callback Function to Get Base64 of Uploaded Image
-    const handleImages = (images) => {
-        setAllImages(images);
-        setFeatureImage(images[0]);
+    /** First image in display order: existing (edit) then newly uploaded. */
+    const resolveThumbnail = (existing = oldImages, uploaded = allImages) => {
+        if (existing?.length > 0) return existing[0];
+        if (uploaded?.length > 0) return uploaded[0];
+        return "";
     };
+
+    // Sync new uploads from MultiImage (removals inside MultiImage update this list too)
+    const handleImages = (images) => {
+        setAllImages(Array.isArray(images) ? images : []);
+    };
+
+    const removeOldImage = (index) => {
+        setOldImages((prev) => prev.filter((_, i) => i !== index));
+    };
+
+    useEffect(() => {
+        setFeatureImage(resolveThumbnail(oldImages, allImages));
+    }, [oldImages, allImages]);
 
     const [addVariant, setAddVariant] = useState({
         colorName: "",
@@ -934,7 +949,10 @@ const AddEditProduct = ({ getProductData, onHide, editable, productRowData }) =>
             let firstVariant = product.variant[0];
             //No Color No Size
             setEditProductId(product._id);
-            setOldImages(product.images);
+            const existingImages = Array.isArray(product.images) ? product.images : [];
+            setOldImages(existingImages);
+            setAllImages([]);
+            setFeatureImage(product.thumbnail || existingImages[0] || "");
 
             if (isEmpty(firstVariant.colorHex) && isEmpty(firstVariant.size)) {
 
@@ -2016,8 +2034,8 @@ const AddEditProduct = ({ getProductData, onHide, editable, productRowData }) =>
 
                                                     <Button icon="pi pi-times" onClick={(e) => {
                                                         e.preventDefault();
-                                                        setOldImages((prev) => prev.filter((_, i) => i !== index));
-                                                    }} className="p-button-rounded p-button-danger p-button-text absolute right-0 top-0" aria-label="Cancel" />
+                                                        removeOldImage(index);
+                                                    }} className="p-button-rounded p-button-danger p-button-text absolute right-0 top-0" aria-label="Remove image" />
 
                                                 </div>
                                             })
