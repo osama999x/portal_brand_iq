@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect } from "react";
 import { InputText } from "primereact/inputtext";
 import { InputTextarea } from 'primereact/inputtextarea';
 import { useHistory } from "react-router-dom";
@@ -130,10 +130,10 @@ const AddEditProduct = ({ getProductData, onHide, editable, productRowData }) =>
     }, []);
 
     useEffect(() => {
-        if (editable && productRowData) {
+        if (productRowData !== undefined && productRowData !== null && editable === true) {
             getProductById();
         }
-    }, [editable, productRowData]);
+    }, []);
 
 
     const stringToAbsString = (value) => {
@@ -704,36 +704,11 @@ const AddEditProduct = ({ getProductData, onHide, editable, productRowData }) =>
         return isFormFieldValid(name) && <small className="p-error">{formik.errors[name]}</small>;
     };
 
-    const resetImageState = useCallback(() => {
-        setAllImages([]);
-        setOldImages([]);
-        setFeatureImage("");
-    }, []);
-
-    // Callback from MultiImage — do not clear thumbnail when sync runs with an empty list on mount
-    const handleImages = useCallback((images) => {
-        const next = Array.isArray(images) ? images : [];
-        setAllImages(next);
-        if (next.length > 0) {
-            setFeatureImage(next[0]);
-        }
-    }, []);
-
-    const removeOldImage = (index) => {
-        setOldImages((prev) => {
-            const next = prev.filter((_, i) => i !== index);
-            if (next.length > 0) {
-                setFeatureImage(next[0]);
-            }
-            return next;
-        });
+    //Callback Function to Get Base64 of Uploaded Image
+    const handleImages = (images) => {
+        setAllImages(images);
+        setFeatureImage(images[0]);
     };
-
-    useEffect(() => {
-        if (!editable) {
-            resetImageState();
-        }
-    }, [editable, resetImageState]);
 
     const [addVariant, setAddVariant] = useState({
         colorName: "",
@@ -959,10 +934,7 @@ const AddEditProduct = ({ getProductData, onHide, editable, productRowData }) =>
             let firstVariant = product.variant[0];
             //No Color No Size
             setEditProductId(product._id);
-            const existingImages = Array.isArray(product.images) ? product.images : [];
-            setOldImages(existingImages);
-            setAllImages([]);
-            setFeatureImage(product.thumbnail || existingImages[0] || "");
+            setOldImages(product.images);
 
             if (isEmpty(firstVariant.colorHex) && isEmpty(firstVariant.size)) {
 
@@ -1765,13 +1737,9 @@ const AddEditProduct = ({ getProductData, onHide, editable, productRowData }) =>
             <Dialog header="Edit size" visible={showEditSizeDialog} style={{ width: '40vw' }} onHide={() => onHideInternal('showEditSizeDialog')}>
                 <EditSizeDialog isFromColumn={isFromColumn} setVariants={setVariants} colorName={variantColorName} onHide={() => onHideInternal('showEditSizeDialog')} setSizes={setSizes} size={editSize} sizes={sizes} index={editSizeIndex} />
             </Dialog>
-            {loading === true && editable === true ? (
-                <div className="aep__loading">
-                    <ProgressSpinner />
-                </div>
-            ) : (
+            {loading === true && editable === true ? <ProgressSpinner /> : (
                 <form onSubmit={submitWithValidation} className="aep__form">
-                    <div className="aep__body add-edit-product">
+                    <div className="add-edit-product">
                         <div className="grid aep__grid">
                             <div className="col-12 md:col-4">
                                 <div className="flex flex-column">
@@ -2037,40 +2005,25 @@ const AddEditProduct = ({ getProductData, onHide, editable, productRowData }) =>
                                 </div>
                             </div>
 
-                            <div className="col-12">
-                                <div className="aep__field aep__field--images">
-                                    <label className="aep__label">Images</label>
-                                    {oldImages.length > 0 && (
-                                    <div className="aep__image-strip">
-                                        {oldImages.map((item, index) => (
-                                                <div key={`${index}-image`} className="aep__image-thumb">
-                                                    <Image
-                                                        className="aep__image-preview"
-                                                        height="80px"
-                                                        width="80px"
-                                                        preview
-                                                        src={`${baseURL}${item}`}
-                                                        alt={`Product ${index + 1}`}
-                                                    />
-                                                    <Button
-                                                        type="button"
-                                                        icon="pi pi-times"
-                                                        onClick={(e) => {
-                                                            e.preventDefault();
-                                                            e.stopPropagation();
-                                                            removeOldImage(index);
-                                                        }}
-                                                        className="aep__image-remove p-button-rounded p-button-danger p-button-text"
-                                                        aria-label="Remove image"
-                                                    />
+                            <div className="col-12 md:col-12 lg:col-12 xl:col-12">
+                                <div className="flex flex-column">
+                                    <label className="mb-2">Images</label>
+                                    <div className="flex flex-row">
+                                        {
+                                            oldImages.map((item, index) => {
+                                                return <div key={`${index} images`} className="relative">
+                                                    <Image className="mx-2" height="80px" width="80px" preview src={`${baseURL}${item}`} />
+
+                                                    <Button icon="pi pi-times" onClick={(e) => {
+                                                        e.preventDefault();
+                                                        setOldImages((prev) => prev.filter((_, i) => i !== index));
+                                                    }} className="p-button-rounded p-button-danger p-button-text absolute right-0 top-0" aria-label="Cancel" />
+
                                                 </div>
-                                        ))}
+                                            })
+                                        }
                                     </div>
-                                    )}
-                                    <MultiImage
-                                        key={editable ? `edit-${productRowData}` : "create"}
-                                        handleImages={handleImages}
-                                    />
+                                    <MultiImage handleImages={handleImages} />
                                 </div>
                             </div>
 
@@ -2112,14 +2065,16 @@ const AddEditProduct = ({ getProductData, onHide, editable, productRowData }) =>
 
                         </div>
 
-                        <div className="aep__section">
-                            <h3 className="aep__section-title">Product type &amp; variants</h3>
-                            {productTypeComponent()}
+                        {productTypeComponent()}
 
-                            {hasVariants && hasColors && !hasSizes && colorNoSizeComponent()}
-                            {hasVariants && hasSizes && !hasColors && noColorSizeComponent()}
-                            {hasVariants && hasSizes && hasColors && colorSizeComponent()}
-                        </div>
+                        {
+                            hasVariants && hasColors && !hasSizes && colorNoSizeComponent()
+                        }
+                        {
+                            hasVariants && hasSizes && !hasColors && noColorSizeComponent()
+                        }
+
+                        {hasVariants && hasSizes && hasColors && colorSizeComponent()}
                     </div>
                     <div className="aep__footer">
                         <div className="aep__footerInner">

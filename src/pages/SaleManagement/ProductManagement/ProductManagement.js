@@ -27,13 +27,6 @@ const ProductManagement = () => {
     const onHide = () => {
         setEditable(false);
         setVisibleEdit(false);
-        setProductRowData("");
-    }
-
-    const openAddProduct = () => {
-        setEditable(false);
-        setProductRowData("");
-        setVisibleEdit(true);
     }
 
 
@@ -178,23 +171,8 @@ const ProductManagement = () => {
     return (
         <>
             <Toast ref={toast} />
-            <Dialog
-                header={editable ? "Edit Product" : "Add New Product"}
-                visible={visibleEdit}
-                className="product-dialog"
-                contentClassName="product-dialog__content"
-                style={{ width: "min(960px, 94vw)" }}
-                maximizable={false}
-                draggable={false}
-                onHide={onHide}
-            >
-                <AddEditProduct
-                    key={editable ? `edit-${productRowData}` : "add-new"}
-                    getProductData={getProductData}
-                    editable={editable}
-                    onHide={onHide}
-                    productRowData={productRowData}
-                />
+            <Dialog header={editable ? "Edit" : "Add New Product"} visible={visibleEdit} style={{ width: '80vw' }} onHide={onHide}>
+                <AddEditProduct getProductData={getProductData} editable={editable} onHide={onHide} productRowData={productRowData} />
             </Dialog>
 
             <div className="grid">
@@ -204,7 +182,7 @@ const ProductManagement = () => {
                             <input type="text" placeholder="Search" onInput={(e) => setGlobalFilter(e.target.value)} className="p-inputtext p-component p-filled" />
                             <i className="pi pi-search"></i>
                         </span>
-                        <button className="p-button p-button-primary p-component" onClick={openAddProduct}>
+                        <button className="p-button p-button-primary p-component" onClick={() => setVisibleEdit(true)}>
                             <span className="p-button-icon p-c p-button-icon-left pi pi-plus"></span>
                             <span className="p-button-label p-c">Add New</span>
                             <span className="p-ink"></span>
