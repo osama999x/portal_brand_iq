@@ -1448,18 +1448,33 @@ input[type="number"] {
         margin-bottom: 0.75rem;
     }
 
+    .aep__field--images {
+        .p-panel {
+            margin-top: 0.5rem;
+        }
+    }
+
     .aep__image-thumb {
         position: relative;
         width: 80px;
         height: 80px;
         flex-shrink: 0;
         border-radius: 10px;
-        overflow: hidden;
+        overflow: visible;
         border: 1px solid #e5e7eb;
         background: #f9fafb;
 
-        .p-image,
-        img {
+        .aep__image-preview,
+        .p-image {
+            width: 80px !important;
+            height: 80px !important;
+            display: block;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .aep__image-preview img,
+        .p-image img {
             width: 80px !important;
             height: 80px !important;
             object-fit: cover;
@@ -1469,14 +1484,17 @@ input[type="number"] {
 
     .aep__image-remove {
         position: absolute !important;
-        top: 2px !important;
-        right: 2px !important;
+        top: -6px !important;
+        right: -6px !important;
         width: 1.5rem !important;
         height: 1.5rem !important;
         min-width: 1.5rem !important;
         padding: 0 !important;
-        z-index: 2;
-        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+        z-index: 20;
+        pointer-events: auto;
+        background: #ef4444 !important;
+        color: #fff !important;
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25);
     }
 
     .multi-image-header {

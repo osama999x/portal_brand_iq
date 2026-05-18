@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { InputText } from "primereact/inputtext";
 import { InputTextarea } from 'primereact/inputtextarea';
 import { useHistory } from "react-router-dom";
@@ -130,10 +130,10 @@ const AddEditProduct = ({ getProductData, onHide, editable, productRowData }) =>
     }, []);
 
     useEffect(() => {
-        if (productRowData !== undefined && productRowData !== null && editable === true) {
+        if (editable && productRowData) {
             getProductById();
         }
-    }, []);
+    }, [editable, productRowData]);
 
 
     const stringToAbsString = (value) => {
@@ -704,11 +704,36 @@ const AddEditProduct = ({ getProductData, onHide, editable, productRowData }) =>
         return isFormFieldValid(name) && <small className="p-error">{formik.errors[name]}</small>;
     };
 
-    //Callback Function to Get Base64 of Uploaded Image
-    const handleImages = (images) => {
-        setAllImages(images);
-        setFeatureImage(images[0]);
+    const resetImageState = useCallback(() => {
+        setAllImages([]);
+        setOldImages([]);
+        setFeatureImage("");
+    }, []);
+
+    // Callback from MultiImage — do not clear thumbnail when sync runs with an empty list on mount
+    const handleImages = useCallback((images) => {
+        const next = Array.isArray(images) ? images : [];
+        setAllImages(next);
+        if (next.length > 0) {
+            setFeatureImage(next[0]);
+        }
+    }, []);
+
+    const removeOldImage = (index) => {
+        setOldImages((prev) => {
+            const next = prev.filter((_, i) => i !== index);
+            if (next.length > 0) {
+                setFeatureImage(next[0]);
+            }
+            return next;
+        });
     };
+
+    useEffect(() => {
+        if (!editable) {
+            resetImageState();
+        }
+    }, [editable, resetImageState]);
 
     const [addVariant, setAddVariant] = useState({
         colorName: "",
@@ -934,7 +959,10 @@ const AddEditProduct = ({ getProductData, onHide, editable, productRowData }) =>
             let firstVariant = product.variant[0];
             //No Color No Size
             setEditProductId(product._id);
-            setOldImages(product.images);
+            const existingImages = Array.isArray(product.images) ? product.images : [];
+            setOldImages(existingImages);
+            setAllImages([]);
+            setFeatureImage(product.thumbnail || existingImages[0] || "");
 
             if (isEmpty(firstVariant.colorHex) && isEmpty(firstVariant.size)) {
 
@@ -2010,30 +2038,39 @@ const AddEditProduct = ({ getProductData, onHide, editable, productRowData }) =>
                             </div>
 
                             <div className="col-12">
-                                <div className="aep__field">
+                                <div className="aep__field aep__field--images">
                                     <label className="aep__label">Images</label>
                                     {oldImages.length > 0 && (
                                     <div className="aep__image-strip">
                                         {oldImages.map((item, index) => (
                                                 <div key={`${index}-image`} className="aep__image-thumb">
-                                                    <Image height="80" width="80" preview src={`${baseURL}${item}`} alt={`Product ${index + 1}`} />
+                                                    <Image
+                                                        className="aep__image-preview"
+                                                        height="80px"
+                                                        width="80px"
+                                                        preview
+                                                        src={`${baseURL}${item}`}
+                                                        alt={`Product ${index + 1}`}
+                                                    />
                                                     <Button
                                                         type="button"
                                                         icon="pi pi-times"
                                                         onClick={(e) => {
                                                             e.preventDefault();
-                                                            setOldImages((prev) => prev.filter((_, i) => i !== index));
+                                                            e.stopPropagation();
+                                                            removeOldImage(index);
                                                         }}
-                                                        className="aep__image-remove p-button-rounded p-button-danger"
+                                                        className="aep__image-remove p-button-rounded p-button-danger p-button-text"
                                                         aria-label="Remove image"
                                                     />
                                                 </div>
                                         ))}
                                     </div>
                                     )}
-                                    <MultiImage handleImages={handleImages} />
-                                    {/* <ImageUpload handleImages={handleImages} className="w-full inputClass" /> */}
-                                    {/* <InputText type="file" className="w-full inputClass" /> */}
+                                    <MultiImage
+                                        key={editable ? `edit-${productRowData}` : "create"}
+                                        handleImages={handleImages}
+                                    />
                                 </div>
                             </div>
 

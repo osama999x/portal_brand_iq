@@ -27,6 +27,13 @@ const ProductManagement = () => {
     const onHide = () => {
         setEditable(false);
         setVisibleEdit(false);
+        setProductRowData("");
+    }
+
+    const openAddProduct = () => {
+        setEditable(false);
+        setProductRowData("");
+        setVisibleEdit(true);
     }
 
 
@@ -181,7 +188,13 @@ const ProductManagement = () => {
                 draggable={false}
                 onHide={onHide}
             >
-                <AddEditProduct getProductData={getProductData} editable={editable} onHide={onHide} productRowData={productRowData} />
+                <AddEditProduct
+                    key={editable ? `edit-${productRowData}` : "add-new"}
+                    getProductData={getProductData}
+                    editable={editable}
+                    onHide={onHide}
+                    productRowData={productRowData}
+                />
             </Dialog>
 
             <div className="grid">
@@ -191,7 +204,7 @@ const ProductManagement = () => {
                             <input type="text" placeholder="Search" onInput={(e) => setGlobalFilter(e.target.value)} className="p-inputtext p-component p-filled" />
                             <i className="pi pi-search"></i>
                         </span>
-                        <button className="p-button p-button-primary p-component" onClick={() => setVisibleEdit(true)}>
+                        <button className="p-button p-button-primary p-component" onClick={openAddProduct}>
                             <span className="p-button-icon p-c p-button-icon-left pi pi-plus"></span>
                             <span className="p-button-label p-c">Add New</span>
                             <span className="p-ink"></span>
