@@ -440,8 +440,7 @@ const AddEditProduct = ({ getProductData, onHide, editable, productRowData }) =>
 
 
     const getCommonFields = (data) => {
-        const multipleImages = JSON.parse(JSON.stringify(allImages));
-        const thumbnail = resolveThumbnail(oldImages, allImages);
+        const imageFields = buildImageFieldsForApi();
 
         let value = {
             "categoryId": data.categoryId,
@@ -459,7 +458,6 @@ const AddEditProduct = ({ getProductData, onHide, editable, productRowData }) =>
             "vendor": data.vendor,
             "metaData": data.metaDataString.join(','),
             "metaDescription": data.metaDescription,
-            "thumbnail": thumbnail,
             "isTaxable": true,
             "taxHead": "6385e95304beaf8be86471ce",
             "isPercentage": false,
@@ -467,16 +465,8 @@ const AddEditProduct = ({ getProductData, onHide, editable, productRowData }) =>
             "tags": data.tags,
             "addons": [],
             "isColor": true,
-
+            ...imageFields,
         };
-        if (editable) {
-            value['images'] = oldImages;
-            value['newImages'] = multipleImages
-
-        } else {
-            value['images'] = multipleImages;
-
-        }
 
         return value;
 
@@ -705,11 +695,43 @@ const AddEditProduct = ({ getProductData, onHide, editable, productRowData }) =>
         return isFormFieldValid(name) && <small className="p-error">{formik.errors[name]}</small>;
     };
 
-    /** First image in display order: existing (edit) then newly uploaded. */
+    /** True when value is a stored path (e.g. images/...), not a base64 data URL. */
+    const isServerImagePath = (value) =>
+        typeof value === "string" && value.length > 0 && !value.startsWith("data:");
+
+    /** UI preview: first kept server image, else first new upload. */
     const resolveThumbnail = (existing = oldImages, uploaded = allImages) => {
         if (existing?.length > 0) return existing[0];
         if (uploaded?.length > 0) return uploaded[0];
         return "";
+    };
+
+    /**
+     * API image payload (Option A — frontend only):
+     * - images: new base64 uploads (create = all; edit = new only)
+     * - oldImages: existing paths to keep (edit only)
+     * - thumbnail: only server paths; otherwise backend uses images[0] / oldImages[0]
+     */
+    const buildImageFieldsForApi = () => {
+        const newUploads = JSON.parse(JSON.stringify(allImages));
+        const keptPaths = JSON.parse(JSON.stringify(oldImages));
+
+        const fields = {};
+
+        if (editable) {
+            fields.oldImages = keptPaths;
+            fields.images = newUploads;
+        } else {
+            fields.images = newUploads;
+        }
+
+        if (editable && keptPaths.length > 0 && isServerImagePath(keptPaths[0])) {
+            fields.thumbnail = keptPaths[0];
+        } else if (isServerImagePath(featureImage)) {
+            fields.thumbnail = featureImage;
+        }
+
+        return fields;
     };
 
     // Sync new uploads from MultiImage (removals inside MultiImage update this list too)
