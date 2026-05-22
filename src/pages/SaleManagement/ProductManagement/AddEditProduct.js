@@ -182,9 +182,9 @@ const AddEditProduct = ({ getProductData, onHide, editable, productRowData }) =>
         discountedPrice: Yup.number()
             .transform((value, originalValue) => (String(originalValue).trim() === "" ? undefined : value))
             .nullable()
-            .when("isDiscount", {
+            .when(["isDiscount", "isSale"], {
                 // Variant products store discounted prices per size/color row, not on this field
-                is: (isDiscount) => isDiscount === true && !hasVariants,
+                is: (isDiscount, isSale) => (isDiscount === true || isSale === true) && !hasVariants,
                 then: (schema) =>
                     schema
                         .typeError("Discounted Price must be a number")
@@ -243,7 +243,7 @@ const AddEditProduct = ({ getProductData, onHide, editable, productRowData }) =>
                 const ap = toNum(sz.actualPrice);
                 if (!Number.isFinite(ap) || ap < 1) return `${label}: Price must be at least 1`;
 
-                if (formik.values.isDiscount) {
+                if (usesDiscountedPricing()) {
                     const dp = toNum(sz.discountedPrice);
                     if (!Number.isFinite(dp) || dp < 0) return `${label}: Discounted Price must be 0 or more`;
                     if (dp > ap) return `${label}: Discounted Price must be ≤ Price`;
@@ -280,7 +280,7 @@ const AddEditProduct = ({ getProductData, onHide, editable, productRowData }) =>
                 const ap = toNum(v.actualPrice);
                 if (!Number.isFinite(ap) || ap < 1) return `${prefix}: Actual Price must be at least 1`;
 
-                if (formik.values.isDiscount) {
+                if (usesDiscountedPricing()) {
                     const dp = toNum(v.discountedPrice);
                     if (!Number.isFinite(dp) || dp < 0) return `${prefix}: Discounted Price must be 0 or more`;
                     if (dp > ap) return `${prefix}: Discounted Price must be ≤ Actual Price`;
@@ -304,7 +304,7 @@ const AddEditProduct = ({ getProductData, onHide, editable, productRowData }) =>
                     const ap = toNum(sz.actualPrice);
                     if (!Number.isFinite(ap) || ap < 1) return `${sprefix}: Actual Price must be at least 1`;
 
-                    if (formik.values.isDiscount) {
+                    if (usesDiscountedPricing()) {
                         const dp = toNum(sz.discountedPrice);
                         if (!Number.isFinite(dp) || dp < 0) return `${sprefix}: Discounted Price must be 0 or more`;
                         if (dp > ap) return `${sprefix}: Discounted Price must be ≤ Actual Price`;
@@ -344,6 +344,8 @@ const AddEditProduct = ({ getProductData, onHide, editable, productRowData }) =>
             isActive: true,
             oneTimeDeal: false,
             isDiscount: false,
+            isSale: false,
+            discount: "",
             tags: "",
             taxAmount: '',
 
@@ -411,6 +413,53 @@ const AddEditProduct = ({ getProductData, onHide, editable, productRowData }) =>
         },
     });
 
+    /** Show / require discounted price only when discount mode is on. */
+    const usesDiscountedPricing = () => {
+        const v = formik.values;
+        if (v.isDiscount === true || v.isSale === true) return true;
+        if (!hasVariants) {
+            const productDisc = toNum(v.discountedPrice);
+            const discountAmt = toNum(v.discount);
+            return (
+                (Number.isFinite(productDisc) && productDisc > 0) ||
+                (Number.isFinite(discountAmt) && discountAmt > 0)
+            );
+        }
+        return false;
+    };
+
+    const productDiscountEnabled = (product) =>
+        Boolean(product?.isDiscount || product?.isSale);
+
+    const variantDiscountValue = (product, value) =>
+        productDiscountEnabled(product) ? (value ?? "") : "";
+
+    const sanitizeVariantForApi = (variant) => {
+        if (usesDiscountedPricing()) return variant;
+        const copy = { ...variant };
+        delete copy.discountedPrice;
+        if (Array.isArray(copy.size)) {
+            copy.size = copy.size.map((s) => {
+                const row = { ...s };
+                delete row.discountedPrice;
+                return row;
+            });
+        }
+        return copy;
+    };
+
+    const sanitizeVariantsForApi = (list) =>
+        (Array.isArray(list) ? list : []).map(sanitizeVariantForApi);
+
+    const sanitizeSizesForApi = (list) => {
+        if (usesDiscountedPricing()) return list;
+        return (Array.isArray(list) ? list : []).map((s) => {
+            const row = { ...s };
+            delete row.discountedPrice;
+            return row;
+        });
+    };
+
     const touchAllFields = () => {
         const nextTouched = Object.keys(formik.values).reduce((acc, key) => {
             acc[key] = true;
@@ -477,6 +526,21 @@ const AddEditProduct = ({ getProductData, onHide, editable, productRowData }) =>
         setIsDiscount(formik.values.isDiscount);
     }, [formik.values.isDiscount]);
 
+    useEffect(() => {
+        if (usesDiscountedPricing()) return;
+        setAddVariant((prev) => ({ ...prev, discountedPrice: "" }));
+        setAddSize((prev) => ({ ...prev, discountedPrice: "" }));
+        setVariants((prev) =>
+            prev.map((v) => ({
+                ...v,
+                discountedPrice: "",
+                size: Array.isArray(v.size)
+                    ? v.size.map((s) => ({ ...s, discountedPrice: "" }))
+                    : v.size,
+            }))
+        );
+        setSizes((prev) => prev.map((s) => ({ ...s, discountedPrice: "" })));
+    }, [formik.values.isDiscount, formik.values.isSale, formik.values.discountedPrice, formik.values.discount, hasVariants]);
 
     useEffect(() => {
 
@@ -494,7 +558,7 @@ const AddEditProduct = ({ getProductData, onHide, editable, productRowData }) =>
         data["thumbnail"] = featureImage;
         let body = {
             ...getCommonFields(data),
-            "variant": variants,
+            "variant": sanitizeVariantsForApi(variants),
 
 
         }
@@ -515,7 +579,7 @@ const AddEditProduct = ({ getProductData, onHide, editable, productRowData }) =>
         data["thumbnail"] = featureImage;
         let body = {
             ...getCommonFields(data),
-            "variant": variants,
+            "variant": sanitizeVariantsForApi(variants),
         }
         handleUpdateApiCall(body);
 
@@ -534,7 +598,7 @@ const AddEditProduct = ({ getProductData, onHide, editable, productRowData }) =>
         data["thumbnail"] = featureImage;
         let body = {
             ...getCommonFields(data),
-            "variant": variants,
+            "variant": sanitizeVariantsForApi(variants),
 
 
 
@@ -551,7 +615,7 @@ const AddEditProduct = ({ getProductData, onHide, editable, productRowData }) =>
         data["thumbnail"] = featureImage;
         let body = {
             ...getCommonFields(data),
-            "variant": variants,
+            "variant": sanitizeVariantsForApi(variants),
 
 
 
@@ -571,20 +635,21 @@ const AddEditProduct = ({ getProductData, onHide, editable, productRowData }) =>
         // let remainingImages = multipleImages.shift();
 
         data["thumbnail"] = featureImage;
+        const simpleVariant = {
+            "colorName": "",
+            "colorHex": "",
+            "sku": data.sku,
+            "actualPrice": data.actualPrice,
+            "quantity": data.quantity,
+            "image": "",
+            "size": [],
+        };
+        if (usesDiscountedPricing()) {
+            simpleVariant.discountedPrice = data.discountedPrice;
+        }
         let body = {
             ...getCommonFields(data),
-            "variant": [
-                {
-                    "colorName": "",
-                    "colorHex": "",
-                    "sku": data.sku,
-                    "actualPrice": data.actualPrice,
-                    "discountedPrice": data.discountedPrice,
-                    "quantity": data.quantity,
-                    "image": "",
-                    "size": []
-                }
-            ],
+            "variant": [simpleVariant],
         }
 
 
@@ -599,20 +664,21 @@ const AddEditProduct = ({ getProductData, onHide, editable, productRowData }) =>
 
 
         data["thumbnail"] = featureImage;
+        const simpleVariant = {
+            "colorName": "",
+            "colorHex": "",
+            "sku": data.sku,
+            "actualPrice": data.actualPrice,
+            "quantity": data.quantity,
+            "image": "",
+            "size": [],
+        };
+        if (usesDiscountedPricing()) {
+            simpleVariant.discountedPrice = data.discountedPrice;
+        }
         let body = {
             ...getCommonFields(data),
-            "variant": [
-                {
-                    "colorName": "",
-                    "colorHex": "",
-                    "sku": data.sku,
-                    "actualPrice": data.actualPrice,
-                    "discountedPrice": data.discountedPrice,
-                    "quantity": data.quantity,
-                    "image": "",
-                    "size": []
-                }
-            ],
+            "variant": [simpleVariant],
         }
         handleUpdateApiCall(body);
     }
@@ -620,18 +686,18 @@ const AddEditProduct = ({ getProductData, onHide, editable, productRowData }) =>
 
         let multipleImages = JSON.parse(JSON.stringify(allImages));
         data["thumbnail"] = featureImage;
+        const sizeOnlyVariant = {
+            "colorName": "",
+            "colorHex": "",
+            "sku": data.sku,
+            "size": sanitizeSizesForApi(sizes),
+        };
+        if (usesDiscountedPricing()) {
+            sizeOnlyVariant.discountedPrice = data.discountedPrice;
+        }
         let body = {
             ...getCommonFields(data),
-            "variant": [
-                {
-                    "colorName": "",
-                    "colorHex": "",
-                    "sku": data.sku,
-                    "size": sizes,
-                    "discountedPrice": data.discountedPrice,
-
-                }
-            ],
+            "variant": [sizeOnlyVariant],
         }
         handleApiCall(body);
 
@@ -649,8 +715,7 @@ const AddEditProduct = ({ getProductData, onHide, editable, productRowData }) =>
                     "colorName": "",
                     "colorHex": "",
                     "sku": data.sku,
-
-                    "size": sizes
+                    "size": sanitizeSizesForApi(sizes),
                 }
             ],
         }
@@ -855,7 +920,7 @@ const AddEditProduct = ({ getProductData, onHide, editable, productRowData }) =>
         delete varnts['size'];
         delete varnts['image'];
 
-        if (formik.values.isDiscount === false) {
+        if (!usesDiscountedPricing()) {
             delete varnts['discountedPrice'];
         }
 
@@ -864,7 +929,7 @@ const AddEditProduct = ({ getProductData, onHide, editable, productRowData }) =>
             toast.warn("Please enter all the values");
             return;
         }
-        if (formik.values.isDiscount) {
+        if (usesDiscountedPricing()) {
             if (varnts['discountedPrice'] < 1) {
                 toast.warn("Discount price is required");
                 return;
@@ -924,7 +989,7 @@ const AddEditProduct = ({ getProductData, onHide, editable, productRowData }) =>
     const handleAddSizeSubmit = (e) => {
 
         e.preventDefault();
-        if (formik.values.isDiscount === false) {
+        if (!usesDiscountedPricing()) {
             delete addSize['discountedPrice'];
         }
 
@@ -935,7 +1000,7 @@ const AddEditProduct = ({ getProductData, onHide, editable, productRowData }) =>
             return;
         }
         let name = addSize.name;
-        if (formik.values.isDiscount) {
+        if (usesDiscountedPricing()) {
             if (addSize['discountedPrice'] < 1) {
                 toast.warn("Discount price is required");
                 return;
@@ -1031,6 +1096,8 @@ const AddEditProduct = ({ getProductData, onHide, editable, productRowData }) =>
         formik.setFieldValue("quantity", product.variant[0].quantity);
         formik.setFieldValue("discountedPrice", variant.discountedPrice);
         formik.setFieldValue("isDiscount", product.isDiscount);
+        formik.setFieldValue("isSale", product.isSale || false);
+        formik.setFieldValue("discount", product.discount ?? "");
         formik.setFieldValue("tags", product.tags);
 
 
@@ -1064,12 +1131,14 @@ const AddEditProduct = ({ getProductData, onHide, editable, productRowData }) =>
         formik.setFieldValue("taxAmount", product.taxAmount);
         formik.setFieldValue("tags", product.tags);
         formik.setFieldValue("isDiscount", product.isDiscount);
+        formik.setFieldValue("isSale", product.isSale || false);
+        formik.setFieldValue("discount", product.discount ?? "");
         let temp = [];
         for (var item of product.variant) {
             temp.push({
                 "name": getSizeName(item.size),
                 "actualPrice": item.actualPrice,
-                "discountedPrice": item.discountedPrice,
+                "discountedPrice": variantDiscountValue(product, item.discountedPrice),
                 "quantity": item.quantity
             });
         }
@@ -1106,6 +1175,8 @@ const AddEditProduct = ({ getProductData, onHide, editable, productRowData }) =>
         formik.setFieldValue("taxAmount", product.taxAmount);
         formik.setFieldValue("tags", product.tags);
         formik.setFieldValue("isDiscount", product.isDiscount);
+        formik.setFieldValue("isSale", product.isSale || false);
+        formik.setFieldValue("discount", product.discount ?? "");
         let localVariants = [];
         for (var item of product.variant) {
             localVariants.push({
@@ -1113,7 +1184,7 @@ const AddEditProduct = ({ getProductData, onHide, editable, productRowData }) =>
                 colorHex: item.colorHex,
                 sku: item.sku,
                 actualPrice: item.actualPrice,
-                discountedPrice: item.discountedPrice,
+                discountedPrice: variantDiscountValue(product, item.discountedPrice),
                 quantity: item.quantity,
                 size: item.size,
                 image: item.image
@@ -1153,6 +1224,8 @@ const AddEditProduct = ({ getProductData, onHide, editable, productRowData }) =>
         formik.setFieldValue("taxAmount", product.taxAmount);
         formik.setFieldValue("tags", product.tags);
         formik.setFieldValue("isDiscount", product.isDiscount);
+        formik.setFieldValue("isSale", product.isSale || false);
+        formik.setFieldValue("discount", product.discount ?? "");
         let localVariants = [];
         const firstV = product.variant[0];
         /* Detect if the backend already returns one doc per colour with an
@@ -1172,7 +1245,7 @@ const AddEditProduct = ({ getProductData, onHide, editable, productRowData }) =>
                 size     : item.size.map((s) => ({
                     name           : s.name,
                     actualPrice    : s.actualPrice,
-                    discountedPrice: s.discountedPrice ?? "",
+                    discountedPrice: variantDiscountValue(product, s.discountedPrice),
                     quantity       : s.quantity,
                 })),
             }));
@@ -1195,7 +1268,7 @@ const AddEditProduct = ({ getProductData, onHide, editable, productRowData }) =>
                     size     : grouped[key].items.map((item) => ({
                         name           : getSizeName(item.size),
                         actualPrice    : item.actualPrice,
-                        discountedPrice: item.discountedPrice ?? "",
+                        discountedPrice: variantDiscountValue(product, item.discountedPrice),
                         quantity       : item.quantity,
                     })),
                 });
@@ -1325,7 +1398,7 @@ const AddEditProduct = ({ getProductData, onHide, editable, productRowData }) =>
                                 <InputText placeholder="Actual price" type="number" min="1" value={addVariant.actualPrice} onChange={(e) => onAddVariantsFieldsChange('actualPrice', e.target.value)} className="w-full inputClass" />
                             </div>
                         </div>
-                        {formik.values.isDiscount && (
+                        {usesDiscountedPricing() && (
                             <div className="col-12 md:col-4">
                                 <div className="flex flex-column">
                                     <label className="mb-2">Discounted Price</label>
@@ -1362,18 +1435,18 @@ const AddEditProduct = ({ getProductData, onHide, editable, productRowData }) =>
                                         tooltip="Remove"
                                     />
                                 </div>
-                                <div className="variant-edit-row">
-                                    <div className="size-edit-field">
-                                        <span className="size-edit-label">Price (₹)</span>
+                                <div className={`variant-edit-row${usesDiscountedPricing() ? " variant-edit-row--with-discount" : ""}`}>
+                                    <div className="size-edit-field variant-edit-field--price">
+                                        <span className="size-edit-label">Actual Price (₹)</span>
                                         <input
                                             type="number"
                                             min="1"
-                                            value={v.actualPrice}
+                                            value={v.actualPrice ?? ""}
                                             onChange={(e) => setVariants((prev) => prev.map((item, i) => i === idx ? { ...item, actualPrice: e.target.value } : item))}
                                             className="size-edit-input"
                                         />
                                     </div>
-                                    {formik.values.isDiscount && (
+                                    {usesDiscountedPricing() && (
                                         <div className="size-edit-field">
                                             <span className="size-edit-label">Disc. Price</span>
                                             <input
@@ -1385,14 +1458,14 @@ const AddEditProduct = ({ getProductData, onHide, editable, productRowData }) =>
                                             />
                                         </div>
                                     )}
-                                    <div className="size-edit-field">
+                                    <div className="size-edit-field variant-edit-field--qty">
                                         <span className="size-edit-label">Qty</span>
                                         <input
                                             type="number"
                                             min="0"
-                                            value={v.quantity}
+                                            value={v.quantity ?? ""}
                                             onChange={(e) => setVariants((prev) => prev.map((item, i) => i === idx ? { ...item, quantity: e.target.value } : item))}
-                                            className="size-edit-input size-edit-input--sm"
+                                            className="size-edit-input"
                                         />
                                     </div>
                                 </div>
@@ -1414,7 +1487,7 @@ const AddEditProduct = ({ getProductData, onHide, editable, productRowData }) =>
                             <div className="size-edit-list-header">
                                 <span>Size</span>
                                 <span>Price (₹)</span>
-                                {formik.values.isDiscount && <span>Disc. Price</span>}
+                                {usesDiscountedPricing() && <span>Disc. Price</span>}
                                 <span>Qty</span>
                                 <span></span>
                             </div>
@@ -1428,7 +1501,7 @@ const AddEditProduct = ({ getProductData, onHide, editable, productRowData }) =>
                                         onChange={(e) => setSizes((prev) => prev.map((item, idx) => idx === i ? { ...item, actualPrice: e.target.value } : item))}
                                         className="size-edit-input"
                                     />
-                                    {formik.values.isDiscount && (
+                                    {usesDiscountedPricing() && (
                                         <input
                                             type="number"
                                             min="0"
@@ -1472,7 +1545,7 @@ const AddEditProduct = ({ getProductData, onHide, editable, productRowData }) =>
                             className="size-price-input inputClass"
                             onKeyDown={(e) => e.key === 'Enter' && handleAddSizeSubmit(e)}
                         />
-                        {formik.values.isDiscount && (
+                        {usesDiscountedPricing() && (
                             <InputText
                                 placeholder="Disc. Price"
                                 type="number"
@@ -1586,7 +1659,7 @@ const AddEditProduct = ({ getProductData, onHide, editable, productRowData }) =>
                                 <div className="size-edit-list-header">
                                     <span>Size</span>
                                     <span>Price (₹)</span>
-                                    {formik.values.isDiscount && <span>Disc.</span>}
+                                    {usesDiscountedPricing() && <span>Disc.</span>}
                                     <span>Qty</span>
                                     <span></span>
                                 </div>
@@ -1600,7 +1673,7 @@ const AddEditProduct = ({ getProductData, onHide, editable, productRowData }) =>
                                             onChange={(e) => setSizes((prev) => prev.map((item, idx) => idx === i ? { ...item, actualPrice: e.target.value } : item))}
                                             className="size-edit-input"
                                         />
-                                        {formik.values.isDiscount && (
+                                        {usesDiscountedPricing() && (
                                             <input
                                                 type="number"
                                                 min="0"
@@ -1644,7 +1717,7 @@ const AddEditProduct = ({ getProductData, onHide, editable, productRowData }) =>
                                 className="size-price-input inputClass"
                                 onKeyDown={(e) => e.key === 'Enter' && handleAddSizeSubmit(e)}
                             />
-                            {formik.values.isDiscount && (
+                            {usesDiscountedPricing() && (
                                 <InputText
                                     placeholder="Disc. Price"
                                     type="number"
@@ -1717,7 +1790,7 @@ const AddEditProduct = ({ getProductData, onHide, editable, productRowData }) =>
                                         <div className="size-edit-list-header size-edit-list-header--compact">
                                             <span>Size</span>
                                             <span>Price (₹)</span>
-                                            {formik.values.isDiscount && <span>Disc.</span>}
+                                            {usesDiscountedPricing() && <span>Disc.</span>}
                                             <span>Qty</span>
                                         </div>
                                         {v.size.map((s, si) => (
@@ -1733,7 +1806,7 @@ const AddEditProduct = ({ getProductData, onHide, editable, productRowData }) =>
                                                     } : vv))}
                                                     className="size-edit-input"
                                                 />
-                                                {formik.values.isDiscount && (
+                                                {usesDiscountedPricing() && (
                                                     <input
                                                         type="number"
                                                         min="0"
@@ -2083,7 +2156,7 @@ const AddEditProduct = ({ getProductData, onHide, editable, productRowData }) =>
                                     {getFormErrorMessage("actualPrice")}
                                 </div>
                             </div>}
-                            {formik.values.isDiscount && !hasVariants && <div className="col-12 md:col-3">
+                            {usesDiscountedPricing() && !hasVariants && <div className="col-12 md:col-3">
                                 <div className="flex flex-column">
                                     <label className="mb-2">Product Discounted Price</label>
                                     <InputText placeholder="Discounted Price" id="title" type='number' min="0" name="discountedPrice" value={formik?.values?.discountedPrice} onChange={formik.handleChange} onBlur={formik.handleBlur} className={classNames({ "p-invalid": isFormFieldValid("discountedPrice") }, "w-full inputClass")} />

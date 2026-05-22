@@ -1971,11 +1971,44 @@ input[type="number"] {
 
 // Editable fields row inside colorNoSize variant card
 .variant-edit-row {
-    display    : flex;
-    align-items: flex-end;
-    gap        : 12px;
-    flex-wrap  : wrap;
-    margin-top : 8px;
-    padding-top: 8px;
-    border-top : 1px solid #f3f4f6;
+    display              : grid;
+    gap                  : 12px;
+    align-items          : end;
+    margin-top           : 8px;
+    padding-top          : 10px;
+    border-top           : 1px solid #f3f4f6;
+    grid-template-columns: minmax(140px, 1fr) minmax(90px, 120px);
+
+    &--with-discount {
+        grid-template-columns: minmax(120px, 1fr) minmax(120px, 1fr) minmax(80px, 100px);
+    }
+
+    .size-edit-field {
+        min-width: 0;
+    }
+
+    .variant-edit-field--price,
+    .variant-edit-field--qty {
+        width: 100%;
+    }
+
+    .size-edit-input {
+        width: 100% !important;
+        min-width: 0;
+        max-width: 100%;
+    }
+
+    .size-edit-input--sm {
+        width: 100% !important;
+    }
+}
+
+.add-edit-product .variant-card {
+    overflow: visible;
+}
+
+.add-edit-product .variant-card-header {
+    .variant-remove-btn {
+        flex-shrink: 0;
+    }
 }
