@@ -23,18 +23,14 @@ export const AppTopbar = (props) => {
     const [open, setOpen] = useState(false);
     let menuRef = useRef();
     useEffect(() => {
-        let handler = (e) => {
-            if (!menuRef.current.contains(e.target)) {
+        const handler = (e) => {
+            if (!menuRef.current?.contains(e.target)) {
                 setOpen(false);
-                //console.log(menuRef.current);
             }
         };
         document.addEventListener("mousedown", handler);
-        return () => {
-            document.removeEventListener("mousedown", handler);
-        }
-
-    });
+        return () => document.removeEventListener("mousedown", handler);
+    }, []);
 
     return (
 
@@ -66,24 +62,30 @@ export const AppTopbar = (props) => {
                         <span>Profile</span>
                     </button>
                 </li> */}
-                <div className='menu-container' ref={menuRef}>
-                    <div className='menu-trigger' onClick={() => { setOpen(!open) }}>
-                        <div className='flex align-items-center'>
-                            {/* <h5 className='mb-0 mr-2'>Admin</h5> */}
-                            {/* <Avatar image="images/avatar/amyelsner.png" size="large" className="p-mr-2 mr-2" shape="circle" style={{position: "unset"}}/> */}
-                            <i className='pi pi-angle-down'></i>
+                <li className="layout-topbar-user-menu">
+                    <div className="menu-container" ref={menuRef}>
+                        <button
+                            type="button"
+                            className="menu-trigger"
+                            aria-label="Account menu"
+                            aria-expanded={open}
+                            onClick={() => setOpen((prev) => !prev)}
+                        >
+                            <i className="pi pi-angle-down" />
+                        </button>
+
+                        <div className={`dropdown-menu ${open ? 'active' : 'inactive'}`}>
+                            <ul>
+                                <li className="dropdownItem">
+                                    <button type="button" className="dropdownItem__btn" onClick={handleLogout}>
+                                        <i className="pi pi-sign-out" />
+                                        <span>Logout</span>
+                                    </button>
+                                </li>
+                            </ul>
                         </div>
                     </div>
-
-                    <div className={`dropdown-menu ${open ? 'active' : 'inactive'}`} >
-                        <ul>
-                            <li className='dropdownItem' onClick={handleLogout}>
-
-                                <a className="color"> <b className='pi pi-sign-out mr-3'></b><b>Logout</b> </a>
-                            </li>
-                        </ul>
-                    </div>
-                </div>
+                </li>
             </ul>
 
         </div>
