@@ -6,7 +6,7 @@ import { InputText } from 'primereact/inputtext';
 // import { Password } from 'primereact/password';
 import { useFormik } from 'formik';
 import "./login.css";
-import logo from "../../assets/brandiq-logo.svg";
+import { BRAND_LOGO_URL } from "../../constants/brandLogo";
 import { useHistory, useParams } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { handlePostRequest } from '../../service/PostTemplate';
@@ -100,7 +100,7 @@ const OTPView = () => {
                     <div className="col-md-4">
                         <form className="form-group" onSubmit={formik.handleSubmit} >
                             <div className="form_logo">
-                                <img src={logo} alt="Zindigi" />
+                                <img src={BRAND_LOGO_URL} alt="BrandIQ" />
                             </div>
                             {/* <div className="Form-inputfield">
                                 <div>

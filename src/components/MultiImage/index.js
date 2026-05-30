@@ -9,17 +9,27 @@ import "./ImageUpload.css";
 
 const UNSPLASH_KEY = process.env.REACT_APP_UNSPLASH_KEY || "";
 
-/* ─── resize any image to 400×400 via Canvas ─── */
-function resizeTo400(src) {
+/* ─── Resize image without stretching (preserves aspect ratio) ─── */
+function resizeImagePreserveAspect(src, maxSize = 1200) {
     return new Promise((resolve, reject) => {
         const img = new Image();
         img.crossOrigin = "anonymous";
         img.onload = () => {
+            const longest = Math.max(img.naturalWidth, img.naturalHeight);
+            const scale = longest > maxSize ? maxSize / longest : 1;
+            const width = Math.max(1, Math.round(img.naturalWidth * scale));
+            const height = Math.max(1, Math.round(img.naturalHeight * scale));
+
             const canvas = document.createElement("canvas");
-            canvas.width  = 400;
-            canvas.height = 400;
-            canvas.getContext("2d").drawImage(img, 0, 0, 400, 400);
-            resolve(canvas.toDataURL("image/jpeg", 0.92));
+            canvas.width = width;
+            canvas.height = height;
+            const ctx = canvas.getContext("2d");
+            ctx.drawImage(img, 0, 0, width, height);
+            resolve({
+                dataUrl: canvas.toDataURL("image/jpeg", 0.92),
+                width,
+                height,
+            });
         };
         img.onerror = reject;
         img.src = src;
@@ -53,13 +63,13 @@ function MultiImage({ handleImages }) {
         try {
             const reader = new FileReader();
             reader.onload = async () => {
-                const resized = await resizeTo400(reader.result);
+                const { dataUrl, width, height } = await resizeImagePreserveAspect(reader.result);
                 const ext = `.${file.type.split("/")[1]}`;
                 setFiles((prev) => {
-                    if (prev.some((f) => f.fileBase64 === resized)) return prev;
-                    return [...prev, { fileBase64: resized, fileName: file.name, fileSize: file.size, fileExtension: ext }];
+                    if (prev.some((f) => f.fileBase64 === dataUrl)) return prev;
+                    return [...prev, { fileBase64: dataUrl, fileName: file.name, fileSize: file.size, fileExtension: ext, width, height }];
                 });
-                toast.current.show({ severity: "success", summary: "Image added", detail: "Auto-resized to 400×400." });
+                toast.current.show({ severity: "success", summary: "Image added", detail: `Optimized to ${width}×${height} (aspect ratio kept).` });
                 setLoading(false);
             };
             reader.readAsDataURL(file);
@@ -110,19 +120,21 @@ function MultiImage({ handleImages }) {
     const pickImage = async (photo) => {
         setLibLoading(true);
         try {
-            const url     = `${photo.urls.raw}&w=800&h=800&fit=crop&auto=format`;
-            const resized = await resizeTo400(url);
+            const url = `${photo.urls.raw}&w=1200&auto=format`;
+            const { dataUrl, width, height } = await resizeImagePreserveAspect(url);
             setFiles((prev) => {
-                if (prev.some((f) => f.fileBase64 === resized)) return prev;
+                if (prev.some((f) => f.fileBase64 === dataUrl)) return prev;
                 return [...prev, {
-                    fileBase64     : resized,
+                    fileBase64     : dataUrl,
                     fileName       : `${photo.slug ?? "unsplash"}.jpg`,
                     fileSize       : 0,
                     fileExtension  : ".jpg",
                     photographer   : photo.user?.name,
+                    width,
+                    height,
                 }];
             });
-            toast.current.show({ severity: "success", summary: "Image added", detail: "Resized to 400×400 automatically." });
+            toast.current.show({ severity: "success", summary: "Image added", detail: `Optimized to ${width}×${height}.` });
             setShowLib(false);
         } catch {
             toast.current.show({ severity: "error", summary: "Error", detail: "Could not load image. Try another." });
@@ -162,7 +174,7 @@ function MultiImage({ handleImages }) {
             )}
             <span className="multi-image-hint">
                 <i className="pi pi-info-circle mr-1" />
-                Any size accepted — auto-resized to 400×400
+                Any size accepted — aspect ratio preserved, max 1200px
             </span>
         </div>
     );
@@ -297,7 +309,9 @@ function MultiImage({ handleImages }) {
                                 </div>
                                 <div className="field col-12 md:col-5 mt-2">
                                     <p className="multi-img-name">{file.fileName}</p>
-                                    <span className="multi-img-dim">400 × 400 px</span>
+                                    <span className="multi-img-dim">
+                                        {file.width && file.height ? `${file.width} × ${file.height} px` : "Optimized"}
+                                    </span>
                                 </div>
                                 <div className="field col-12 md:col-3 mt-2">
                                     {file.fileSize > 0 && (

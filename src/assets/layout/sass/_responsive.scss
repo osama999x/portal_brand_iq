@@ -26,9 +26,9 @@
 
         &.layout-static {
             .layout-main-container {
-                margin-left: 260px;
+                margin-left: var(--sidebar-width);
                 /* Fill area beside fixed sidebar (avoids narrow column + empty right gap) */
-                width: calc(100% - 260px);
+                width: calc(100% - var(--sidebar-width));
                 max-width: 100%;
                 box-sizing: border-box;
             }

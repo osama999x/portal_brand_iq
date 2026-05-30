@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Link, NavLink } from 'react-router-dom';
 import classNames from 'classnames';
 import { Avatar } from 'primereact/avatar';
-import logo from "./assets/brandiq-logo.svg";
+import { BRAND_LOGO_URL } from './constants/brandLogo';
 export const AppTopbar = (props) => {
     const handleLogout = async () => {
         // const res = await dispatch(handlePostRequest({ token }, "logout", true, true));
@@ -40,15 +40,19 @@ export const AppTopbar = (props) => {
 
 
         <div className="layout-topbar">
-            <Link to="/" className="layout-topbar-logo">
-                <img src={logo} alt="BrandIQ logo" />
-            </Link>
+            <div className="layout-topbar-start">
+                <div className="layout-topbar-brand">
+                    <Link to="/" className="layout-topbar-logo">
+                        <img src={BRAND_LOGO_URL} alt="BrandIQ logo" className="layout-topbar-logo__img" />
+                    </Link>
+                </div>
 
-            <button type="button" className="p-link  layout-menu-button layout-topbar-button" onClick={props.onToggleMenuClick}>
-                <i className="pi pi-bars" />
-            </button>
+                <button type="button" className="p-link layout-menu-button layout-topbar-button" onClick={props.onToggleMenuClick} aria-label="Toggle menu">
+                    <i className="pi pi-bars" />
+                </button>
+            </div>
 
-            <button type="button" className="p-link layout-topbar-menu-button layout-topbar-button" onClick={props.onMobileTopbarMenuClick}>
+            <button type="button" className="p-link layout-topbar-menu-button layout-topbar-button" onClick={props.onMobileTopbarMenuClick} aria-label="Open menu">
                 <i className="pi pi-ellipsis-v" />
             </button>
 

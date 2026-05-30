@@ -1,34 +1,72 @@
 .layout-topbar {
     position: fixed;
-    height: 3.5rem;
+    height: var(--topbar-height);
+    min-height: var(--topbar-height);
     z-index: 997;
     left: 0;
     top: 0;
     width: 100%;
-    padding: 0 1rem;
+    max-width: 100%;
+    padding: 0;
     background-color: var(--surface-card);
     transition: left $transitionDuration;
     display: flex;
-    align-items: center;
+    align-items: stretch;
+    justify-content: space-between;
+    overflow: hidden;
+    box-sizing: border-box;
     box-shadow: 0px 3px 5px rgba(0,0,0,.02), 0px 0px 2px rgba(0,0,0,.05), 0px 1px 4px rgba(0,0,0,.08);
+
+    .layout-topbar-start {
+        display: flex;
+        align-items: center;
+        height: 100%;
+        min-width: 0;
+        flex-shrink: 0;
+    }
+
+    .layout-topbar-brand {
+        display: flex;
+        align-items: center;
+        justify-content: flex-start;
+        width: var(--sidebar-width);
+        min-width: var(--sidebar-width);
+        max-width: var(--sidebar-width);
+        height: 100%;
+        padding: 0 1rem 0 1.25rem;
+        border-right: 1px solid rgba(0, 0, 0, 0.06);
+        box-sizing: border-box;
+        overflow: hidden;
+        background-color: var(--Topbar-bg, var(--surface-card));
+    }
 
     .layout-topbar-logo {
         display: flex;
         align-items: center;
+        justify-content: flex-start;
+        gap: 0.65rem;
+        width: 100%;
+        min-width: 0;
+        max-width: 100%;
+        height: 100%;
+        text-decoration: none;
         color: var(--surface-900);
-        font-size: 1.5rem;
-        font-weight: 500;
-        width: 150px;
-        border-radius: 12px;
-
-        img {
-            height: 2.5rem;
-            margin-right: .5rem;
-        }
+        border-radius: 0;
 
         &:focus {
             @include focused();
         }
+    }
+
+    .layout-topbar-logo__img {
+        height: 42px;
+        width: auto;
+        max-width: min(200px, 100%);
+        min-width: 0;
+        flex-shrink: 0;
+        object-fit: contain;
+        object-position: left center;
+        display: block;
     }
 
     .layout-topbar-button {
@@ -38,8 +76,9 @@
         position: relative;
         color: var(--text-color-secondary);
         border-radius: 50%;
-        width: 3rem;
-        height: 3rem;
+        width: 2.75rem;
+        height: 2.75rem;
+        flex-shrink: 0;
         cursor: pointer;
         transition: background-color $transitionDuration;
 
@@ -53,7 +92,7 @@
         }
 
         i {
-            font-size: 1.5rem;
+            font-size: 1.35rem;
         }
 
         span {
@@ -63,11 +102,13 @@
     }
 
     .layout-menu-button {
-        margin-left: 2.83rem;
+        margin-left: 0.75rem;
     }
 
     .layout-topbar-menu-button {
         display: none;
+        align-self: center;
+        margin-right: 0.75rem;
 
         i {
             font-size: 1.25rem;
@@ -75,10 +116,12 @@
     }
 
     .layout-topbar-menu {
-        margin: 0 0 0 auto;
+        margin: 0 0.75rem 0 auto;
         padding: 0;
         list-style: none;
         display: flex;
+        align-items: center;
+        align-self: center;
 
         .layout-topbar-button {
             margin-left: 1rem;
@@ -88,22 +131,37 @@
 
 @media (max-width: 991px) {
     .layout-topbar {
-        justify-content: space-between;
+        align-items: center;
+        padding: 0 0.5rem;
 
-        .layout-topbar-logo {
+        .layout-topbar-start {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .layout-topbar-brand {
             width: auto;
-            order: 2;
+            min-width: 0;
+            max-width: none;
+            flex: 1;
+            border-right: none;
+            padding: 0 0.5rem 0 0.25rem;
+        }
+
+        .layout-topbar-logo__img {
+            height: 36px;
+            max-width: min(160px, 100%);
         }
 
         .layout-menu-button {
+            order: -1;
             margin-left: 0;
-            order: 1;
+            margin-right: 0.25rem;
         }
 
         .layout-topbar-menu-button {
             display: inline-flex;
             margin-left: 0;
-            order: 3;
         }
 
         .layout-topbar-menu {
@@ -114,8 +172,8 @@
             box-shadow: 0px 3px 5px rgba(0,0,0,.02), 0px 0px 2px rgba(0,0,0,.05), 0px 1px 4px rgba(0,0,0,.08);
             border-radius: 12px;
             padding: 1rem;
-            right: 2rem;
-            top: 5rem;
+            right: 0.75rem;
+            top: calc(var(--topbar-height) + 0.5rem);
             min-width: 15rem;
             display: none;
             -webkit-animation: scalein 0.15s linear;
@@ -144,6 +202,21 @@
                     display: block;
                 }
             }
+        }
+    }
+}
+
+@media (max-width: 480px) {
+    .layout-topbar {
+        .layout-topbar-logo__img {
+            height: 32px;
+            max-width: min(130px, 100%);
+        }
+
+        .layout-menu-button,
+        .layout-topbar-menu-button {
+            width: 2.5rem;
+            height: 2.5rem;
         }
     }
 }

@@ -1852,7 +1852,7 @@ const AddEditProduct = ({ getProductData, onHide, editable, productRowData }) =>
             </Dialog>
             {loading === true && editable === true ? <ProgressSpinner /> : (
                 <form onSubmit={submitWithValidation} className="aep__form">
-                    <div className="add-edit-product">
+                    <div className="aep__body add-edit-product">
                         <div className="grid aep__grid">
                             <div className="col-12 md:col-4">
                                 <div className="flex flex-column">
@@ -2121,18 +2121,23 @@ const AddEditProduct = ({ getProductData, onHide, editable, productRowData }) =>
                             <div className="col-12 md:col-12 lg:col-12 xl:col-12">
                                 <div className="flex flex-column">
                                     <label className="mb-2">Images</label>
-                                    <div className="flex flex-row">
+                                    <div className="aep__image-strip">
                                         {
                                             oldImages.map((item, index) => {
-                                                return <div key={`${index} images`} className="relative">
-                                                    <Image className="mx-2" height="80px" width="80px" preview src={`${baseURL}${item}`} />
-
-                                                    <Button icon="pi pi-times" onClick={(e) => {
-                                                        e.preventDefault();
-                                                        removeOldImage(index);
-                                                    }} className="p-button-rounded p-button-danger p-button-text absolute right-0 top-0" aria-label="Remove image" />
-
-                                                </div>
+                                                return (
+                                                    <div key={`${index} images`} className="aep__image-thumb">
+                                                        <Image className="aep__image-preview" height="80px" width="80px" preview src={`${baseURL}${item}`} />
+                                                        <Button
+                                                            icon="pi pi-times"
+                                                            onClick={(e) => {
+                                                                e.preventDefault();
+                                                                removeOldImage(index);
+                                                            }}
+                                                            className="p-button-rounded p-button-danger aep__image-remove"
+                                                            aria-label="Remove image"
+                                                        />
+                                                    </div>
+                                                );
                                             })
                                         }
                                     </div>
@@ -2142,43 +2147,54 @@ const AddEditProduct = ({ getProductData, onHide, editable, productRowData }) =>
 
                             {/* ========== */}
 
-                            {(!hasVariants || (hasVariants && hasSizes && !hasColors)) && <div className="col-12 md:col-3">
-                                <div className="flex flex-column">
-                                    <label className="mb-2">Product SKU</label>
-                                    <InputText disabled={editable} placeholder="SKU" id="sku" name="sku" value={formik?.values?.sku?.replace(/\s\s+/g, " ")} onChange={formik.handleChange} onBlur={formik.handleBlur} className={classNames({ "p-invalid": isFormFieldValid("sku") }, "w-full inputClass")} />
-                                    {getFormErrorMessage("sku")}
+                            {(!hasVariants || (hasVariants && hasSizes && !hasColors)) && (
+                                <div className="col-12">
+                                    <div className="aep__pricing-row">
+                                        {(!hasVariants || (hasVariants && hasSizes && !hasColors)) && (
+                                            <div className="aep__pricing-field">
+                                                <div className="flex flex-column">
+                                                    <label className="mb-2">Product SKU</label>
+                                                    <InputText disabled={editable} placeholder="SKU" id="sku" name="sku" value={formik?.values?.sku?.replace(/\s\s+/g, " ")} onChange={formik.handleChange} onBlur={formik.handleBlur} className={classNames({ "p-invalid": isFormFieldValid("sku") }, "w-full inputClass")} />
+                                                    {getFormErrorMessage("sku")}
+                                                </div>
+                                            </div>
+                                        )}
+                                        {!hasVariants && (
+                                            <div className="aep__pricing-field">
+                                                <div className="flex flex-column">
+                                                    <label className="mb-2">Acutal Price</label>
+                                                    <InputText placeholder="Acutal Price" id="title" type='number' min="1" name="actualPrice" value={formik?.values?.actualPrice} onChange={formik.handleChange} onBlur={formik.handleBlur} className={classNames({ "p-invalid": isFormFieldValid("actualPrice") }, "w-full inputClass")} />
+                                                    {getFormErrorMessage("actualPrice")}
+                                                </div>
+                                            </div>
+                                        )}
+                                        {usesDiscountedPricing() && !hasVariants && (
+                                            <div className="aep__pricing-field">
+                                                <div className="flex flex-column">
+                                                    <label className="mb-2">Product Discounted Price</label>
+                                                    <InputText placeholder="Discounted Price" id="title" type='number' min="0" name="discountedPrice" value={formik?.values?.discountedPrice} onChange={formik.handleChange} onBlur={formik.handleBlur} className={classNames({ "p-invalid": isFormFieldValid("discountedPrice") }, "w-full inputClass")} />
+                                                    {getFormErrorMessage("discountedPrice")}
+                                                </div>
+                                            </div>
+                                        )}
+                                        {!hasVariants && (
+                                            <div className="aep__pricing-field">
+                                                <div className="flex flex-column">
+                                                    <label className="mb-2">Quantity</label>
+                                                    <InputText placeholder="Quantity" type='number' min="0" id="title" name="quantity" value={formik?.values?.quantity} onChange={formik.handleChange} onBlur={formik.handleBlur} className={classNames({ "p-invalid": isFormFieldValid("quantity") }, "w-full inputClass")} />
+                                                    {getFormErrorMessage("quantity")}
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
                                 </div>
-                            </div>}
-                            {!hasVariants && <div className="col-12 md:col-3">
-                                <div className="flex flex-column">
-                                    <label className="mb-2">Acutal Price</label>
-                                    <InputText placeholder="Acutal Price" id="title" type='number' min="1" name="actualPrice" value={formik?.values?.actualPrice} onChange={formik.handleChange} onBlur={formik.handleBlur} className={classNames({ "p-invalid": isFormFieldValid("actualPrice") }, "w-full inputClass")} />
-                                    {getFormErrorMessage("actualPrice")}
-                                </div>
-                            </div>}
-                            {usesDiscountedPricing() && !hasVariants && <div className="col-12 md:col-3">
-                                <div className="flex flex-column">
-                                    <label className="mb-2">Product Discounted Price</label>
-                                    <InputText placeholder="Discounted Price" id="title" type='number' min="0" name="discountedPrice" value={formik?.values?.discountedPrice} onChange={formik.handleChange} onBlur={formik.handleBlur} className={classNames({ "p-invalid": isFormFieldValid("discountedPrice") }, "w-full inputClass")} />
-                                    {getFormErrorMessage("discountedPrice")}
-                                </div>
-                            </div>}
-
-                            {!hasVariants && <div className="col-12 md:col-3">
-                                <div className="flex flex-column">
-                                    <label className="mb-2">Quantity</label>
-                                    <InputText placeholder="Quantity" type='number' min="0" id="title" name="quantity" value={formik?.values?.quantity} onChange={formik.handleChange} onBlur={formik.handleBlur} className={classNames({ "p-invalid": isFormFieldValid("quantity") }, "w-full inputClass")} />
-                                    {getFormErrorMessage("quantity")}
-                                </div>
-                            </div>}
+                            )}
 
 
 
 
 
                         </div>
-
-                        {productTypeComponent()}
 
                         {
                             hasVariants && hasColors && !hasSizes && colorNoSizeComponent()
@@ -2190,22 +2206,25 @@ const AddEditProduct = ({ getProductData, onHide, editable, productRowData }) =>
                         {hasVariants && hasSizes && hasColors && colorSizeComponent()}
                     </div>
                     <div className="aep__footer">
-                        <div className="aep__footerInner">
-                            <Button
-                                label="Cancel"
-                                onClick={onHide}
-                                type="button"
-                                className="Cancelbtn"
-                            />
-                            <Button
-                                type="submit"
-                                disabled={disable}
-                                loading={loading}
-                                iconPos="right"
-                                label={editable ? "Update" : "Save"}
-                                autoFocus
-                                className="Savebtn"
-                            />
+                        <div className="aep__footerToolbar">
+                            {productTypeComponent()}
+                            <div className="aep__footerActions">
+                                <Button
+                                    label="Cancel"
+                                    onClick={onHide}
+                                    type="button"
+                                    className="Cancelbtn"
+                                />
+                                <Button
+                                    type="submit"
+                                    disabled={disable}
+                                    loading={loading}
+                                    iconPos="right"
+                                    label={editable ? "Update" : "Save"}
+                                    autoFocus
+                                    className="Savebtn"
+                                />
+                            </div>
                         </div>
                     </div>
                 </form>

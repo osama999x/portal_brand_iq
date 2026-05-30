@@ -171,7 +171,14 @@ const ProductManagement = () => {
     return (
         <>
             <Toast ref={toast} />
-            <Dialog header={editable ? "Edit" : "Add New Product"} visible={visibleEdit} style={{ width: '80vw' }} onHide={onHide}>
+            <Dialog
+                header={editable ? "Edit" : "Add New Product"}
+                visible={visibleEdit}
+                className="product-dialog"
+                contentClassName="product-dialog__content"
+                style={{ width: 'min(960px, 94vw)' }}
+                onHide={onHide}
+            >
                 <AddEditProduct getProductData={getProductData} editable={editable} onHide={onHide} productRowData={productRowData} />
             </Dialog>
 

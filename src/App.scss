@@ -61,7 +61,15 @@
 /* BrandIQ layout chrome */
 .layout-topbar {
     background-color: var(--Topbar-bg) !important;
-    border-bottom: 1px solid #e0e0e0;
+    border-bottom: 1px solid #e8eaef;
+}
+
+.layout-topbar-brand {
+    box-sizing: border-box;
+}
+
+.layout-topbar-logo__img {
+    image-rendering: auto;
 }
 
 .card {
@@ -818,7 +826,7 @@ input[type="number"] {
 }
 
 .layout-topbar {
-    border-bottom: 1px solid #000;
+    border-bottom: 1px solid #e8eaef;
 }
 
 .menu-trigger img {
@@ -845,7 +853,7 @@ input[type="number"] {
 
     position: absolute;
 
-    top: 48px;
+    top: calc(var(--topbar-height) - 0.25rem);
 
     right: 7px;
 
@@ -1296,20 +1304,33 @@ input[type="number"] {
     align-items   : center;
     flex-wrap     : wrap;
     gap           : 12px;
-    padding       : 0 0 0.75rem;
+    padding       : 0;
+    width         : 100%;
+    max-width     : 100%;
+    min-width     : 0;
+    box-sizing    : border-box;
 }
 
 // ═══════════════════════════════════════════════════
 // Add/Edit Product dialog polish (scoped)
 // ═══════════════════════════════════════════════════
-.product-dialog {
+.product-dialog.p-dialog {
+    max-width: min(960px, 94vw);
+    width: 100% !important;
+    box-sizing: border-box;
+    overflow-x: hidden;
+
     .p-dialog-content.product-dialog__content {
         margin: 0 !important;
         padding: 0 !important;
         overflow: hidden !important;
+        overflow-x: hidden !important;
         display: flex;
         flex-direction: column;
         max-height: calc(92vh - 4rem);
+        width: 100%;
+        max-width: 100%;
+        box-sizing: border-box;
     }
 }
 
@@ -1318,6 +1339,10 @@ input[type="number"] {
     flex-direction: column;
     min-height: 0;
     max-height: calc(92vh - 5rem);
+    width: 100%;
+    max-width: 100%;
+    overflow: hidden;
+    box-sizing: border-box;
 }
 
 .aep__body {
@@ -1338,10 +1363,36 @@ input[type="number"] {
 }
 
 .add-edit-product {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    overflow-x: hidden;
+    box-sizing: border-box;
+
     .aep__grid {
         row-gap: 1rem;
         column-gap: 1rem;
         margin: 0;
+        width: 100%;
+        max-width: 100%;
+    }
+
+    .aep__grid > [class*="col-"] {
+        min-width: 0;
+    }
+
+    .aep__pricing-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        width: 100%;
+        max-width: 100%;
+    }
+
+    .aep__pricing-field {
+        flex: 1 1 180px;
+        min-width: 0;
+        max-width: 100%;
     }
 
     .aep__grid > [class*="col-"] {
@@ -1533,9 +1584,43 @@ input[type="number"] {
     z-index: 5;
     padding: 0.75rem 1.5rem 1rem;
     margin-top: 0;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    overflow-x: hidden;
+    box-sizing: border-box;
     background: linear-gradient(180deg, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.94) 24%, #ffffff 100%);
     border-top: 1px solid rgba(17, 17, 17, 0.08);
     box-shadow: 0 -4px 16px rgba(30, 38, 66, 0.06);
+}
+
+.aep__footerToolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem 1.25rem;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+}
+
+.aep__footerActions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 12px;
+    flex: 0 1 auto;
+    margin-left: auto;
+}
+
+.product-dialog .aep__footer .product-type-selector {
+    flex: 1 1 260px;
+    min-width: 0;
+    max-width: 100%;
+    padding: 0;
 }
 
 .aep__footerInner {
@@ -1562,18 +1647,41 @@ input[type="number"] {
     .aep__footer {
         padding: 0.75rem 1rem 1rem;
     }
+
+    .aep__footerToolbar {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .aep__footerActions {
+        margin-left: 0;
+        justify-content: stretch;
+        width: 100%;
+    }
+
+    .product-dialog .aep__footer .product-type-selector {
+        flex: 1 1 100%;
+    }
 }
 
 @media (max-width: 600px) {
-    .aep__footerInner {
+    .aep__footerInner,
+    .aep__footerActions {
         flex-direction: column;
         align-items: stretch;
     }
 
     .aep__footerInner .Cancelbtn,
-    .aep__footerInner .Savebtn {
+    .aep__footerInner .Savebtn,
+    .aep__footerActions .Cancelbtn,
+    .aep__footerActions .Savebtn {
         width: 100% !important;
         margin-right: 0 !important;
+    }
+
+    .product-type-pill {
+        flex: 1 1 auto;
+        justify-content: center;
     }
 }
 .product-type-label {
@@ -1586,6 +1694,9 @@ input[type="number"] {
     display: flex;
     gap    : 8px;
     flex-wrap: wrap;
+    flex: 1 1 auto;
+    min-width: 0;
+    max-width: 100%;
 }
 .product-type-pill {
     display      : inline-flex;

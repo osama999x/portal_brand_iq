@@ -3,7 +3,7 @@ import { Button } from 'primereact/button';
 import { InputText } from 'primereact/inputtext';
 import { useFormik } from 'formik';
 import "./login.css";
-import logo from "../../../src/assets/brandiq-logo.svg";
+import { BRAND_LOGO_URL } from "../../constants/brandLogo";
 import { useHistory } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { LOGIN_SUCCESS } from "../../redux/slices/authenticationSlice";
@@ -83,7 +83,7 @@ const Login = (props) => {
         <div className="bg_body">
             {/* Left brand panel */}
             <div className="login__brand-panel">
-                <img src={logo} alt="BrandIQ" className="login__brand-logo" />
+                <img src={BRAND_LOGO_URL} alt="BrandIQ" className="login__brand-logo" />
                 <h1 className="login__brand-title">BrandIQ</h1>
                 <p className="login__brand-subtitle">
                     Your intelligent brand management platform. Manage products, orders, and customers all in one place.
