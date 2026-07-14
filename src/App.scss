@@ -1479,6 +1479,20 @@ input[type="number"] {
         line-height: 1.45;
     }
 
+    .aep__editor {
+        .p-editor-container {
+            border-radius: 6px;
+        }
+
+        .p-editor-content {
+            min-height: 160px;
+        }
+
+        &.p-invalid .p-editor-container {
+            border-color: #e24c4c;
+        }
+    }
+
     .aep__field--checkboxes {
         justify-content: flex-end;
         min-height: 72px;

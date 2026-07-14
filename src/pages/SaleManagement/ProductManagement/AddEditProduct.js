@@ -7,7 +7,8 @@ import classNames from "classnames";
 import { Dropdown } from "primereact/dropdown";
 import { Button } from "primereact/button";
 // import { RadioButton } from "primereact/radiobutton";
-//import { Editor } from "primereact/editor";
+import { Editor } from "primereact/editor";
+import "quill/dist/quill.snow.css";
 // import { MultiSelect } from "primereact/multiselect";
 import { Checkbox } from "primereact/checkbox";
 import * as Yup from "yup";
@@ -158,8 +159,18 @@ const AddEditProduct = ({ getProductData, onHide, editable, productRowData }) =>
             .required("Meta Data is required"),
         tags: Yup.string().trim().required("Tags are required"),
         metaDescription: Yup.string().trim().required("Meta Description is required"),
-        description: Yup.string().trim().required("Description is required"),
-        longDescription: Yup.string().trim().required("Long Description is required"),
+        description: Yup.string()
+            .test("required-html", "Description is required", (value) => {
+                if (!value) return false;
+                const text = value.replace(/<[^>]*>/g, "").replace(/&nbsp;/g, " ").trim();
+                return text.length > 0;
+            }),
+        longDescription: Yup.string()
+            .test("required-html", "Long Description is required", (value) => {
+                if (!value) return false;
+                const text = value.replace(/<[^>]*>/g, "").replace(/&nbsp;/g, " ").trim();
+                return text.length > 0;
+            }),
         sizeGuide: Yup.string().trim().required("Size Guide is required"),
         sizeFit: Yup.string().trim().required("Size & Fit is required"),
         deliveryReturns: Yup.string().trim().required("Delivery & Returns is required"),
@@ -2028,16 +2039,17 @@ const AddEditProduct = ({ getProductData, onHide, editable, productRowData }) =>
                             <div className="col-12 md:col-6">
                                 <div className="flex flex-column aep__field">
                                     <label className="aep__label">Description</label>
-                                    <InputTextarea
-                                        rows={3}
-                                        autoResize
-                                        placeholder="Enter Description"
+                                    <Editor
                                         id="description"
                                         name="description"
-                                        value={formik?.values?.description?.replace(/\s\s+/g, " ")}
-                                        onChange={formik.handleChange}
-                                        onBlur={formik.handleBlur}
-                                        className={classNames({ "p-invalid": isFormFieldValid("description") }, "w-full inputClass aep__textarea")}
+                                        placeholder="Enter Description"
+                                        value={formik?.values?.description || ""}
+                                        onTextChange={(e) => {
+                                            formik.setFieldValue("description", e.htmlValue || "");
+                                            formik.setFieldTouched("description", true, false);
+                                        }}
+                                        style={{ height: "160px" }}
+                                        className={classNames({ "p-invalid": isFormFieldValid("description") }, "w-full aep__editor")}
                                     />
                                     {getFormErrorMessage("description")}
                                 </div>
@@ -2045,16 +2057,17 @@ const AddEditProduct = ({ getProductData, onHide, editable, productRowData }) =>
                             <div className="col-12 md:col-6">
                                 <div className="flex flex-column aep__field">
                                     <label className="aep__label">Long Description</label>
-                                    <InputTextarea
-                                        rows={3}
-                                        autoResize
-                                        placeholder="Enter Long Description"
+                                    <Editor
                                         id="longDescription"
                                         name="longDescription"
-                                        value={formik?.values?.longDescription?.replace(/\s\s+/g, " ")}
-                                        onChange={formik.handleChange}
-                                        onBlur={formik.handleBlur}
-                                        className={classNames({ "p-invalid": isFormFieldValid("longDescription") }, "w-full inputClass aep__textarea")}
+                                        placeholder="Enter Long Description"
+                                        value={formik?.values?.longDescription || ""}
+                                        onTextChange={(e) => {
+                                            formik.setFieldValue("longDescription", e.htmlValue || "");
+                                            formik.setFieldTouched("longDescription", true, false);
+                                        }}
+                                        style={{ height: "160px" }}
+                                        className={classNames({ "p-invalid": isFormFieldValid("longDescription") }, "w-full aep__editor")}
                                     />
                                     {getFormErrorMessage("longDescription")}
                                 </div>
